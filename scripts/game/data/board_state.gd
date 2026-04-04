@@ -18,13 +18,7 @@ func reset() -> void:
 	cells.clear()
 
 	for row in range(rows):
-		var row_cells: Array[StringName] = []
-		row_cells.resize(columns)
-
-		for column in range(columns):
-			row_cells[column] = EMPTY_CELL
-
-		cells.append(row_cells)
+		cells.append(_create_empty_row())
 
 
 func is_inside_cell(cell: Vector2i) -> bool:
@@ -73,6 +67,24 @@ func are_cells_placeable(cells_to_check: Array[Vector2i]) -> bool:
 	return true
 
 
+func clear_full_rows() -> int:
+	var remaining_rows: Array[Array] = []
+	var cleared_row_count := 0
+
+	for row in range(rows):
+		if _is_row_full(row):
+			cleared_row_count += 1
+			continue
+
+		remaining_rows.append(cells[row].duplicate())
+
+	while remaining_rows.size() < rows:
+		remaining_rows.push_front(_create_empty_row())
+
+	cells = remaining_rows
+	return cleared_row_count
+
+
 func get_spawn_origin(spawn_box_size: int = 4, spawn_row: int = 0) -> Vector2i:
 	var spawn_x := maxi(0, floori(float(columns - spawn_box_size) / 2.0))
 	return Vector2i(spawn_x, spawn_row)
@@ -80,3 +92,21 @@ func get_spawn_origin(spawn_box_size: int = 4, spawn_row: int = 0) -> Vector2i:
 
 func describe() -> String:
 	return "Board %dx%d spawn=%s" % [columns, rows, get_spawn_origin()]
+
+
+func _create_empty_row() -> Array[StringName]:
+	var row_cells: Array[StringName] = []
+	row_cells.resize(columns)
+
+	for column in range(columns):
+		row_cells[column] = EMPTY_CELL
+
+	return row_cells
+
+
+func _is_row_full(row: int) -> bool:
+	for column in range(columns):
+		if cells[row][column] == EMPTY_CELL:
+			return false
+
+	return true

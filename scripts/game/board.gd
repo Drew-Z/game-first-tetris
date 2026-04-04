@@ -113,6 +113,15 @@ func write_piece_cells(cells: Array[Vector2i], piece_id: StringName) -> void:
 	queue_redraw()
 
 
+func clear_full_rows() -> int:
+	if board_state == null:
+		setup_board_state()
+
+	var cleared_row_count: int = board_state.clear_full_rows()
+	queue_redraw()
+	return cleared_row_count
+
+
 func _are_cells_placeable(cells: Array[Vector2i]) -> bool:
 	if board_state == null:
 		setup_board_state()

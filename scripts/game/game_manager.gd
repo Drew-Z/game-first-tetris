@@ -164,6 +164,9 @@ func _lock_active_piece() -> void:
 	if board.has_method("write_piece_cells"):
 		board.call("write_piece_cells", locked_cells, locked_piece_id)
 
+	if board.has_method("clear_full_rows"):
+		board.call("clear_full_rows")
+
 	if active_piece.has_method("clear_piece"):
 		active_piece.call("clear_piece")
 
