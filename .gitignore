@@ -1,0 +1,10 @@
+.godot/
+.import/
+*.import
+export_presets.cfg
+
+.vs/
+.vscode/
+
+Thumbs.db
+desktop.ini
