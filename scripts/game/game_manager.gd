@@ -1,6 +1,7 @@
 extends Node
 
 const PieceStateModel := preload("res://scripts/game/data/piece_state.gd")
+const SevenBagPieceSourceModel := preload("res://scripts/game/data/seven_bag_piece_source.gd")
 const TetrominoData := preload("res://scripts/game/data/tetromino_data.gd")
 
 @onready var board: Node2D = $"../Layout/PlayfieldPanel/PlayfieldMargin/Playfield/Board"
@@ -17,7 +18,6 @@ const TetrominoData := preload("res://scripts/game/data/tetromino_data.gd")
 var active_piece_state = null
 var next_piece_id: StringName = &""
 var hold_piece_id: StringName = &""
-var piece_bag: Array[StringName] = []
 var gravity_timer: float = 0.0
 var is_piece_falling: bool = false
 var is_game_over: bool = false
@@ -26,11 +26,11 @@ var score: int = 0
 var cleared_line_count: int = 0
 var current_level: int = 1
 var can_hold_current_piece: bool = true
-var piece_rng := RandomNumberGenerator.new()
+var piece_source = null
 
 
 func _ready() -> void:
-	piece_rng.randomize()
+	_ensure_piece_source()
 	start_game()
 
 
@@ -96,26 +96,34 @@ func _sync_ui() -> void:
 		game_ui.call("show_structure_mode", board.get("columns"), board.get("rows"))
 
 	if is_game_over:
+		var game_over_result := get_runtime_result()
 		if game_ui.has_method("show_game_over_summary"):
-			game_ui.call("show_game_over_summary", locked_piece_count, score, current_level)
+			game_ui.call(
+				"show_game_over_summary",
+				game_over_result.locked_piece_count,
+				game_over_result.score,
+				game_over_result.current_level
+			)
 		return
 
 	if active_piece_state == null:
 		return
 
+	var runtime_result := get_runtime_result()
+
 	if game_ui.has_method("show_piece_runtime_summary"):
 		game_ui.call(
 			"show_piece_runtime_summary",
 			active_piece_state.piece_id,
-			next_piece_id,
-			hold_piece_id,
-			can_hold_current_piece,
+			runtime_result.next_piece_id,
+			runtime_result.hold_piece_id,
+			runtime_result.can_hold_current_piece,
 			active_piece_state.origin,
 			active_piece_state.rotation_index,
 			is_piece_falling,
-			locked_piece_count,
-			score,
-			current_level
+			runtime_result.locked_piece_count,
+			runtime_result.score,
+			runtime_result.current_level
 		)
 
 
@@ -277,10 +285,11 @@ func _on_restart_requested() -> void:
 
 func _prepare_runtime_for_restart() -> void:
 	_setup_board()
+	_ensure_piece_source()
+	piece_source.reset()
 	active_piece_state = null
 	next_piece_id = &""
 	hold_piece_id = &""
-	piece_bag.clear()
 	is_piece_falling = false
 	gravity_timer = 0.0
 	can_hold_current_piece = true
@@ -300,15 +309,8 @@ func _get_current_drop_step_seconds() -> float:
 
 
 func _draw_next_piece_id() -> StringName:
-	if piece_bag.is_empty():
-		_refill_piece_bag()
-
-	if piece_bag.is_empty():
-		return initial_piece_id
-
-	var next_piece: StringName = piece_bag[0]
-	piece_bag.remove_at(0)
-	return next_piece
+	_ensure_piece_source()
+	return piece_source.draw_next_piece_id(initial_piece_id)
 
 
 func _spawn_piece_from_id(
@@ -349,22 +351,44 @@ func _spawn_piece_from_id(
 		active_piece.call("spawn_piece", active_piece_state)
 
 
-func _refill_piece_bag() -> void:
-	var remaining_piece_ids: Array[StringName] = TetrominoData.get_piece_ids()
-	piece_bag.clear()
-
-	while not remaining_piece_ids.is_empty():
-		var next_index := piece_rng.randi_range(0, remaining_piece_ids.size() - 1)
-		piece_bag.append(remaining_piece_ids[next_index])
-		remaining_piece_ids.remove_at(next_index)
-
-
 func _update_level_from_cleared_lines() -> void:
-	var normalized_lines_per_level := maxi(lines_per_level, 1)
+	var rule_config := get_rule_config()
+	var normalized_lines_per_level := maxi(int(rule_config.lines_per_level), 1)
 	current_level = int(floori(float(cleared_line_count) / float(normalized_lines_per_level))) + 1
 
 
 func _get_current_gravity_step_seconds() -> float:
+	var rule_config := get_rule_config()
 	var level_offset := maxi(current_level - 1, 0)
-	var current_gravity := gravity_step_seconds - (gravity_step_decrease_per_level * float(level_offset))
-	return maxf(current_gravity, minimum_gravity_step_seconds)
+	var current_gravity := float(rule_config.gravity_step_seconds) - (
+		float(rule_config.gravity_step_decrease_per_level) * float(level_offset)
+	)
+	return maxf(current_gravity, float(rule_config.minimum_gravity_step_seconds))
+
+
+func get_rule_config() -> Dictionary:
+	return {
+		"gravity_step_seconds": gravity_step_seconds,
+		"soft_drop_step_seconds": soft_drop_step_seconds,
+		"lines_per_level": lines_per_level,
+		"gravity_step_decrease_per_level": gravity_step_decrease_per_level,
+		"minimum_gravity_step_seconds": minimum_gravity_step_seconds,
+	}
+
+
+func get_runtime_result() -> Dictionary:
+	return {
+		"score": score,
+		"cleared_line_count": cleared_line_count,
+		"current_level": current_level,
+		"locked_piece_count": locked_piece_count,
+		"is_game_over": is_game_over,
+		"next_piece_id": next_piece_id,
+		"hold_piece_id": hold_piece_id,
+		"can_hold_current_piece": can_hold_current_piece,
+	}
+
+
+func _ensure_piece_source() -> void:
+	if piece_source == null:
+		piece_source = SevenBagPieceSourceModel.new()
