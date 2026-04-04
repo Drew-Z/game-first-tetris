@@ -12,14 +12,17 @@ const TetrominoData := preload("res://scripts/game/data/tetromino_data.gd")
 @export var soft_drop_step_seconds: float = 0.08
 
 var active_piece_state = null
+var next_piece_id: StringName = &""
 var gravity_timer: float = 0.0
 var is_piece_falling: bool = false
 var is_game_over: bool = false
 var locked_piece_count: int = 0
 var score: int = 0
+var piece_rng := RandomNumberGenerator.new()
 
 
 func _ready() -> void:
+	piece_rng.randomize()
 	start_game()
 
 
@@ -69,6 +72,10 @@ func _setup_board() -> void:
 
 func _spawn_new_active_piece() -> void:
 	var piece_id: StringName = initial_piece_id
+	if next_piece_id != &"":
+		piece_id = next_piece_id
+
+	var queued_next_piece_id: StringName = _draw_next_piece_id()
 	var spawn_box_size := TetrominoData.get_spawn_box_size(piece_id)
 	var spawn_origin := Vector2i(3, 0)
 
@@ -87,6 +94,7 @@ func _spawn_new_active_piece() -> void:
 			return
 
 	active_piece_state = next_piece_state
+	next_piece_id = queued_next_piece_id
 	gravity_timer = 0.0
 	is_piece_falling = true
 
@@ -110,6 +118,7 @@ func _sync_ui() -> void:
 		game_ui.call(
 			"show_piece_runtime_summary",
 			active_piece_state.piece_id,
+			next_piece_id,
 			active_piece_state.origin,
 			active_piece_state.rotation_index,
 			is_piece_falling,
@@ -250,6 +259,7 @@ func _on_restart_requested() -> void:
 func _prepare_runtime_for_restart() -> void:
 	_setup_board()
 	active_piece_state = null
+	next_piece_id = &""
 	is_piece_falling = false
 	gravity_timer = 0.0
 
@@ -265,3 +275,12 @@ func _get_current_drop_step_seconds() -> float:
 		return soft_drop_step_seconds
 
 	return gravity_step_seconds
+
+
+func _draw_next_piece_id() -> StringName:
+	var piece_ids: Array[StringName] = TetrominoData.get_piece_ids()
+	if piece_ids.is_empty():
+		return initial_piece_id
+
+	var next_index := piece_rng.randi_range(0, piece_ids.size() - 1)
+	return piece_ids[next_index]

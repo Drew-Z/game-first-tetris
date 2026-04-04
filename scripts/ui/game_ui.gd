@@ -20,6 +20,7 @@ func show_structure_mode(columns: int, rows: int) -> void:
 
 func show_piece_runtime_summary(
 	piece_id: StringName,
+	next_piece_id: StringName,
 	origin: Vector2i,
 	rotation_index: int,
 	is_falling: bool,
@@ -28,8 +29,9 @@ func show_piece_runtime_summary(
 ) -> void:
 	var fall_status := "下落中" if is_falling else "已到底停止"
 	restart_button.disabled = true
-	data_label.text = "活动方块：%s，位置：%s，旋转：r%d，状态：%s，已锁定数量：%d，分数：%d" % [
+	data_label.text = "活动方块：%s，下一个：%s，位置：%s，旋转：r%d，状态：%s，已锁定数量：%d，分数：%d" % [
 		piece_id,
+		next_piece_id,
 		origin,
 		rotation_index,
 		fall_status,
