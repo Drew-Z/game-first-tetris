@@ -1,25 +1,29 @@
 extends Node2D
 
-@export var cell_size: int = 32
-@export var piece_color: Color = Color("5bc0be")
+const PieceStateModel := preload("res://scripts/game/data/piece_state.gd")
 
-var piece_type: StringName = &"T"
-var rotation_index: int = 0
-var grid_position: Vector2i = Vector2i(3, 1)
-var preview_cells: Array[Vector2i] = [
-	Vector2i(1, 0),
-	Vector2i(0, 1),
-	Vector2i(1, 1),
-	Vector2i(2, 1),
-]
+@export var cell_size: int = 32
+
+var piece_state = null
 
 
 func _ready() -> void:
+	if piece_state == null:
+		piece_state = PieceStateModel.new()
+
 	queue_redraw()
 
 
 func _draw() -> void:
-	for cell in preview_cells:
+	if piece_state == null:
+		return
+
+	for cell in piece_state.get_board_cells():
 		var rect := Rect2(Vector2(cell) * cell_size, Vector2.ONE * cell_size)
-		draw_rect(rect, piece_color, true)
+		draw_rect(rect, piece_state.get_color(), true)
 		draw_rect(rect, Color.WHITE, false, 2.0)
+
+
+func configure_from_state(new_piece_state) -> void:
+	piece_state = new_piece_state
+	queue_redraw()
