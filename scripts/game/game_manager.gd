@@ -7,6 +7,7 @@ const TetrominoData := preload("res://scripts/game/data/tetromino_data.gd")
 @onready var board: Node2D = $"../Layout/PlayfieldPanel/PlayfieldMargin/Playfield/Board"
 @onready var active_piece: Node2D = $"../Layout/PlayfieldPanel/PlayfieldMargin/Playfield/ActivePiece"
 @onready var game_ui: VBoxContainer = $"../Layout/SidebarPanel/GameUI"
+@onready var game_audio: Node = $"../GameAudio"
 
 @export var initial_piece_id: StringName = &"T"
 @export var gravity_step_seconds: float = 0.6
@@ -211,6 +212,7 @@ func _try_hard_drop_active_piece() -> void:
 
 		active_piece_state.move_by(Vector2i.DOWN)
 
+	_play_audio_event("play_hard_drop")
 	_lock_active_piece()
 
 
@@ -255,11 +257,13 @@ func _lock_active_piece() -> void:
 			cleared_line_count += cleared_row_count
 			score += cleared_row_count
 			_update_level_from_cleared_lines()
+			_play_audio_event("play_line_clear", [cleared_row_count])
 
 	if active_piece.has_method("clear_piece"):
 		active_piece.call("clear_piece")
 
 	locked_piece_count += 1
+	_play_audio_event("play_lock")
 	active_piece_state = null
 	is_piece_falling = false
 	gravity_timer = 0.0
@@ -276,11 +280,13 @@ func _enter_game_over() -> void:
 	if active_piece.has_method("clear_piece"):
 		active_piece.call("clear_piece")
 
+	_play_audio_event("play_game_over")
 	_sync_ui()
 
 
 func _on_restart_requested() -> void:
 	start_game()
+	_play_audio_event("play_restart")
 
 
 func _prepare_runtime_for_restart() -> void:
@@ -392,3 +398,10 @@ func get_runtime_result() -> Dictionary:
 func _ensure_piece_source() -> void:
 	if piece_source == null:
 		piece_source = SevenBagPieceSourceModel.new()
+
+
+func _play_audio_event(method_name: String, args: Array = []) -> void:
+	if game_audio == null or not game_audio.has_method(method_name):
+		return
+
+	game_audio.callv(method_name, args)

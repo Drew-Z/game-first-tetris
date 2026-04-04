@@ -86,6 +86,7 @@
 
 - [x] 实现 Next / Hold 图形化预览
 - [x] 整理 HUD 分区
+- [x] 增加最小可用的音效接口层
 
 ## Not In Scope Now
 
