@@ -9,6 +9,7 @@ const TetrominoData := preload("res://scripts/game/data/tetromino_data.gd")
 
 @export var initial_piece_id: StringName = &"T"
 @export var gravity_step_seconds: float = 0.6
+@export var soft_drop_step_seconds: float = 0.08
 
 var active_piece_state = null
 var gravity_timer: float = 0.0
@@ -28,8 +29,10 @@ func _process(delta: float) -> void:
 
 	gravity_timer += delta
 
-	while gravity_timer >= gravity_step_seconds and is_piece_falling:
-		gravity_timer -= gravity_step_seconds
+	var current_drop_step := _get_current_drop_step_seconds()
+
+	while gravity_timer >= current_drop_step and is_piece_falling:
+		gravity_timer -= current_drop_step
 		_try_auto_drop_active_piece()
 
 
@@ -210,3 +213,10 @@ func _prepare_runtime_for_restart() -> void:
 
 	if board.has_method("reset_board_state"):
 		board.call("reset_board_state")
+
+
+func _get_current_drop_step_seconds() -> float:
+	if Input.is_action_pressed("ui_down"):
+		return soft_drop_step_seconds
+
+	return gravity_step_seconds
