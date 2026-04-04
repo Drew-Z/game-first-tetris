@@ -44,6 +44,8 @@ func _unhandled_input(event: InputEvent) -> void:
 		_try_move_active_piece(Vector2i.LEFT)
 	elif event.is_action_pressed("ui_right"):
 		_try_move_active_piece(Vector2i.RIGHT)
+	elif event.is_action_pressed("ui_up"):
+		_try_rotate_active_piece()
 
 
 func start_game() -> void:
@@ -107,6 +109,7 @@ func _sync_ui() -> void:
 			"show_piece_runtime_summary",
 			active_piece_state.piece_id,
 			active_piece_state.origin,
+			active_piece_state.rotation_index,
 			is_piece_falling,
 			locked_piece_count,
 			score
@@ -153,6 +156,25 @@ func _try_auto_drop_active_piece() -> void:
 			return
 
 	active_piece_state.move_by(Vector2i.DOWN)
+
+	if active_piece.has_method("spawn_piece"):
+		active_piece.call("spawn_piece", active_piece_state)
+
+	_sync_ui()
+
+
+func _try_rotate_active_piece() -> void:
+	if active_piece_state == null:
+		return
+
+	var next_rotation_index := posmod(active_piece_state.rotation_index + 1, 4)
+	var target_cells: Array[Vector2i] = active_piece_state.get_board_cells_for_rotation(next_rotation_index)
+
+	if board.has_method("can_place_piece"):
+		if not board.call("can_place_piece", target_cells):
+			return
+
+	active_piece_state.rotate_by(1)
 
 	if active_piece.has_method("spawn_piece"):
 		active_piece.call("spawn_piece", active_piece_state)

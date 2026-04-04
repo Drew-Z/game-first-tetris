@@ -26,12 +26,20 @@ func get_board_cells() -> Array[Vector2i]:
 	return TetrominoData.get_global_cells(piece_id, origin, rotation_index)
 
 
+func get_board_cells_for_rotation(next_rotation_index: int) -> Array[Vector2i]:
+	return TetrominoData.get_global_cells(piece_id, origin, next_rotation_index)
+
+
 func get_color() -> Color:
 	return TetrominoData.get_color(piece_id)
 
 
 func move_by(offset: Vector2i) -> void:
 	origin += offset
+
+
+func rotate_by(step: int = 1) -> void:
+	rotation_index = posmod(rotation_index + step, 4)
 
 
 func describe() -> String:
