@@ -14,7 +14,7 @@ func _ready() -> void:
 
 func show_structure_mode(columns: int, rows: int) -> void:
 	stage_label.text = "标准俄罗斯方块骨架 %d x %d" % [columns, rows]
-	status_label.text = "当前支持静态格子碰撞、左右移动、自动下落、软降、基础旋转、触底锁定、继续生成，以及出生判定失败后的结束状态。"
+	status_label.text = "当前支持静态格子碰撞、左右移动、自动下落、软降、Hard Drop、基础旋转、触底锁定、继续生成，以及出生判定失败后的结束状态。"
 	restart_button.disabled = true
 
 

@@ -46,6 +46,8 @@ func _unhandled_input(event: InputEvent) -> void:
 		_try_move_active_piece(Vector2i.RIGHT)
 	elif event.is_action_pressed("ui_up"):
 		_try_rotate_active_piece()
+	elif event.is_action_pressed("ui_accept"):
+		_try_hard_drop_active_piece()
 
 
 func start_game() -> void:
@@ -180,6 +182,27 @@ func _try_rotate_active_piece() -> void:
 		active_piece.call("spawn_piece", active_piece_state)
 
 	_sync_ui()
+
+
+func _try_hard_drop_active_piece() -> void:
+	if active_piece_state == null:
+		return
+
+	while true:
+		var target_origin: Vector2i = active_piece_state.origin + Vector2i.DOWN
+		var target_cells: Array[Vector2i] = TetrominoData.get_global_cells(
+			active_piece_state.piece_id,
+			target_origin,
+			active_piece_state.rotation_index
+		)
+
+		if board.has_method("can_place_piece_vertically"):
+			if not board.call("can_place_piece_vertically", target_cells):
+				break
+
+		active_piece_state.move_by(Vector2i.DOWN)
+
+	_lock_active_piece()
 
 
 func _lock_active_piece() -> void:
