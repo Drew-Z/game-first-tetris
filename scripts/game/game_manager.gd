@@ -71,6 +71,8 @@ func _sync_ui() -> void:
 		game_ui.call("show_structure_mode", board.get("columns"), board.get("rows"))
 
 	if active_piece_state == null:
+		if game_ui.has_method("show_lock_summary"):
+			game_ui.call("show_lock_summary")
 		return
 
 	if game_ui.has_method("show_piece_runtime_summary"):
@@ -118,9 +120,7 @@ func _try_auto_drop_active_piece() -> void:
 
 	if board.has_method("can_place_piece_vertically"):
 		if not board.call("can_place_piece_vertically", target_cells):
-			is_piece_falling = false
-			gravity_timer = 0.0
-			_sync_ui()
+			_lock_active_piece()
 			return
 
 	active_piece_state.move_by(Vector2i.DOWN)
@@ -128,4 +128,23 @@ func _try_auto_drop_active_piece() -> void:
 	if active_piece.has_method("spawn_piece"):
 		active_piece.call("spawn_piece", active_piece_state)
 
+	_sync_ui()
+
+
+func _lock_active_piece() -> void:
+	if active_piece_state == null:
+		return
+
+	var locked_cells: Array[Vector2i] = active_piece_state.get_board_cells()
+	var locked_piece_id: StringName = active_piece_state.piece_id
+
+	if board.has_method("write_piece_cells"):
+		board.call("write_piece_cells", locked_cells, locked_piece_id)
+
+	if active_piece.has_method("clear_piece"):
+		active_piece.call("clear_piece")
+
+	active_piece_state = null
+	is_piece_falling = false
+	gravity_timer = 0.0
 	_sync_ui()

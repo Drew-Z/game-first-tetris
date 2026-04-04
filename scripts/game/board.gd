@@ -1,6 +1,7 @@
 extends Node2D
 
 const BoardStateModel := preload("res://scripts/game/data/board_state.gd")
+const TetrominoData := preload("res://scripts/game/data/tetromino_data.gd")
 
 @export var columns: int = 10
 @export var rows: int = 20
@@ -42,7 +43,7 @@ func _draw() -> void:
 				continue
 
 			var rect := Rect2(grid_to_local(cell), Vector2.ONE * cell_size)
-			draw_rect(rect, Color("415a77"), true)
+			draw_rect(rect, TetrominoData.get_color(piece_id), true)
 			draw_rect(rect, border_color, false, 1.0)
 
 
@@ -95,3 +96,13 @@ func can_place_piece_vertically(cells: Array[Vector2i]) -> bool:
 			return false
 
 	return true
+
+
+func write_piece_cells(cells: Array[Vector2i], piece_id: StringName) -> void:
+	if board_state == null:
+		setup_board_state()
+
+	for cell in cells:
+		board_state.set_cell(cell, piece_id)
+
+	queue_redraw()

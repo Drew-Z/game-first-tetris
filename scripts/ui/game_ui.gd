@@ -13,3 +13,7 @@ func show_structure_mode(columns: int, rows: int) -> void:
 func show_piece_runtime_summary(piece_id: StringName, origin: Vector2i, is_falling: bool) -> void:
 	var fall_status := "下落中" if is_falling else "已到底停止"
 	data_label.text = "活动方块：%s，位置：%s，状态：%s" % [piece_id, origin, fall_status]
+
+
+func show_lock_summary() -> void:
+	data_label.text = "活动方块已锁定到棋盘静态格子，当前不再存在可移动活动方块。"

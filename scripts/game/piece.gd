@@ -27,3 +27,8 @@ func _draw() -> void:
 func spawn_piece(new_piece_state) -> void:
 	piece_state = new_piece_state
 	queue_redraw()
+
+
+func clear_piece() -> void:
+	piece_state = null
+	queue_redraw()
