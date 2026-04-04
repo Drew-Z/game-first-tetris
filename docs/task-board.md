@@ -101,6 +101,8 @@
 - [x] 区分适合直接叠加在现有俄罗斯方块循环上的系统
 - [x] 区分不适合过早加入、容易破坏当前结构的系统
 - [x] 给出轻量、可执行的 Rogue 扩展候选方案
+- [x] 拆出经典模式与 Rogue 模式的独立入口
+- [x] 为 Rogue 模式增加独立状态壳子，同时保持经典模式规则不变
 
 ## Stage 4 Recommended Line
 
@@ -121,7 +123,7 @@
 ## Not In Scope Now
 
 - [ ] Wall Kick / SRS 高级规则
-- [ ] Rogue 元素
+- [ ] 完整 Rogue 玩法实现
 
 ## Working Rules
 

@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://di2q7blio7k6k"]
 
-[ext_resource type="PackedScene" path="res://scenes/game/game_root.tscn" id="1_l40vb"]
+[ext_resource type="Script" path="res://scripts/main/main.gd" id="1_hq4d1"]
 
 [node name="Main" type="Control"]
 layout_mode = 3
@@ -9,11 +9,58 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+script = ExtResource("1_hq4d1")
 
-[node name="GameRoot" parent="." instance=ExtResource("1_l40vb")]
+[node name="ModeHost" type="Control" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+
+[node name="MenuOverlay" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="MenuPanel" type="PanelContainer" parent="MenuOverlay"]
+custom_minimum_size = Vector2(420, 0)
+layout_mode = 2
+
+[node name="MenuMargin" type="MarginContainer" parent="MenuOverlay/MenuPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 24
+theme_override_constants/margin_right = 24
+theme_override_constants/margin_bottom = 24
+
+[node name="MenuContent" type="VBoxContainer" parent="MenuOverlay/MenuPanel/MenuMargin"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="TitleLabel" type="Label" parent="MenuOverlay/MenuPanel/MenuMargin/MenuContent"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 28
+text = "Game First Tetris"
+
+[node name="SubtitleLabel" type="Label" parent="MenuOverlay/MenuPanel/MenuMargin/MenuContent"]
+layout_mode = 2
+autowrap_mode = 3
+text = "请选择进入方式。经典模式保持当前标准俄罗斯方块体验；Rogue 模式当前只提供独立入口和状态壳子。"
+
+[node name="ClassicButton" type="Button" parent="MenuOverlay/MenuPanel/MenuMargin/MenuContent"]
+layout_mode = 2
+text = "进入经典模式"
+
+[node name="RogueButton" type="Button" parent="MenuOverlay/MenuPanel/MenuMargin/MenuContent"]
+layout_mode = 2
+text = "进入 Rogue 模式"
+
+[node name="NoteLabel" type="Label" parent="MenuOverlay/MenuPanel/MenuMargin/MenuContent"]
+layout_mode = 2
+autowrap_mode = 3
+text = "当前 Rogue 模式不会改写经典模式规则，只为后续强化、选择和局间成长预留清晰边界。"

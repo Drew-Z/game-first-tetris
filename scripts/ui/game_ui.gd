@@ -19,14 +19,19 @@ func _ready() -> void:
 	restart_button.pressed.connect(_on_restart_button_pressed)
 
 
-func show_structure_mode(columns: int, rows: int) -> void:
-	stage_label.text = "标准俄罗斯方块骨架 %d x %d" % [columns, rows]
-	status_label.text = "当前支持静态格子碰撞、左右移动、自动下落、软降、Hard Drop、Hold、基础旋转、触底锁定、继续生成，以及出生判定失败后的结束状态。默认按键：Space=Hard Drop，C=Hold。当前等级按累计消行提升。Next / Hold 已支持最小图形预览。"
+func show_structure_mode(
+	columns: int,
+	rows: int,
+	mode_display_name: String = "经典模式",
+	mode_note: String = ""
+) -> void:
+	stage_label.text = "%s %d x %d" % [mode_display_name, columns, rows]
+	status_label.text = "当前支持静态格子碰撞、左右移动、自动下落、软降、Hard Drop、Hold、基础旋转、触底锁定、继续生成，以及出生判定失败后的结束状态。默认按键：Space=Hard Drop，C=Hold。当前等级按累计消行提升。Next / Hold 已支持最小图形预览。%s" % [mode_note]
 	restart_button.disabled = true
 	current_state_label.text = "活动方块状态将在这里显示。"
 	stats_label.text = "分数与等级将在这里显示。"
 	hint_label.text = "操作提示：左右移动、上旋转、下软降、Space 硬降、C Hold。"
-	system_label.text = "状态提示：当前游戏可正常运行。"
+	system_label.text = "状态提示：当前游戏可正常运行。当前模式：%s。" % [mode_display_name]
 	_set_preview_meta(next_piece_label, &"")
 	_set_preview_meta(hold_piece_label, &"")
 
@@ -41,7 +46,9 @@ func show_piece_runtime_summary(
 	is_falling: bool,
 	locked_count: int,
 	score: int,
-	level: int
+	level: int,
+	mode_display_name: String = "经典模式",
+	mode_note: String = ""
 ) -> void:
 	var fall_status := "下落中" if is_falling else "已到底停止"
 	var hold_status := "可用" if can_hold_current_piece else "本轮已用"
@@ -63,10 +70,16 @@ func show_piece_runtime_summary(
 		locked_count,
 	]
 	hint_label.text = "操作提示：左右移动、上旋转、下软降、Space 硬降、C Hold。"
-	system_label.text = "状态提示：当前游戏进行中。"
+	system_label.text = "状态提示：当前游戏进行中。当前模式：%s。%s" % [mode_display_name, mode_note]
 
 
-func show_game_over_summary(locked_count: int, score: int, level: int) -> void:
+func show_game_over_summary(
+	locked_count: int,
+	score: int,
+	level: int,
+	mode_display_name: String = "经典模式",
+	mode_note: String = ""
+) -> void:
 	restart_button.disabled = false
 	if next_preview.has_method("clear_preview"):
 		next_preview.call("clear_preview")
@@ -77,7 +90,7 @@ func show_game_over_summary(locked_count: int, score: int, level: int) -> void:
 	current_state_label.text = "当前状态：无活动方块。"
 	stats_label.text = "等级：%d，分数：%d，已锁定数量：%d" % [level, score, locked_count]
 	hint_label.text = "操作提示：可点击 Restart 重新开始。"
-	system_label.text = "状态提示：游戏结束，出生位置被静态格子占用。当前已停止输入、下落和继续生成。"
+	system_label.text = "状态提示：游戏结束，出生位置被静态格子占用。当前已停止输入、下落和继续生成。当前模式：%s。%s" % [mode_display_name, mode_note]
 
 
 func _on_restart_button_pressed() -> void:

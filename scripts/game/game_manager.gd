@@ -1,6 +1,7 @@
 extends Node
 
 const PieceStateModel := preload("res://scripts/game/data/piece_state.gd")
+const GameModeState := preload("res://scripts/game/game_mode_state.gd")
 const SevenBagPieceSourceModel := preload("res://scripts/game/data/seven_bag_piece_source.gd")
 const TetrominoData := preload("res://scripts/game/data/tetromino_data.gd")
 
@@ -9,6 +10,7 @@ const TetrominoData := preload("res://scripts/game/data/tetromino_data.gd")
 @onready var game_ui: VBoxContainer = $"../Layout/SidebarPanel/GameUI"
 @onready var game_audio: Node = $"../GameAudio"
 
+@export var entry_mode: StringName = &"classic"
 @export var initial_piece_id: StringName = &"T"
 @export var gravity_step_seconds: float = 0.6
 @export var soft_drop_step_seconds: float = 0.08
@@ -28,9 +30,11 @@ var cleared_line_count: int = 0
 var current_level: int = 1
 var can_hold_current_piece: bool = true
 var piece_source = null
+var mode_state: Dictionary = {}
 
 
 func _ready() -> void:
+	_setup_mode_state()
 	_ensure_piece_source()
 	start_game()
 
@@ -65,6 +69,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func start_game() -> void:
+	_setup_mode_state()
 	_prepare_runtime_for_restart()
 	is_game_over = false
 	locked_piece_count = 0
@@ -93,24 +98,31 @@ func _spawn_new_active_piece() -> void:
 
 
 func _sync_ui() -> void:
+	var runtime_result := get_runtime_result()
+
 	if game_ui.has_method("show_structure_mode"):
-		game_ui.call("show_structure_mode", board.get("columns"), board.get("rows"))
+		game_ui.call(
+			"show_structure_mode",
+			board.get("columns"),
+			board.get("rows"),
+			runtime_result.mode_display_name,
+			runtime_result.mode_note
+		)
 
 	if is_game_over:
-		var game_over_result := get_runtime_result()
 		if game_ui.has_method("show_game_over_summary"):
 			game_ui.call(
 				"show_game_over_summary",
-				game_over_result.locked_piece_count,
-				game_over_result.score,
-				game_over_result.current_level
+				runtime_result.locked_piece_count,
+				runtime_result.score,
+				runtime_result.current_level,
+				runtime_result.mode_display_name,
+				runtime_result.mode_note
 			)
 		return
 
 	if active_piece_state == null:
 		return
-
-	var runtime_result := get_runtime_result()
 
 	if game_ui.has_method("show_piece_runtime_summary"):
 		game_ui.call(
@@ -124,7 +136,9 @@ func _sync_ui() -> void:
 			is_piece_falling,
 			runtime_result.locked_piece_count,
 			runtime_result.score,
-			runtime_result.current_level
+			runtime_result.current_level,
+			runtime_result.mode_display_name,
+			runtime_result.mode_note
 		)
 
 
@@ -383,6 +397,7 @@ func get_rule_config() -> Dictionary:
 
 
 func get_runtime_result() -> Dictionary:
+	_setup_mode_state()
 	return {
 		"score": score,
 		"cleared_line_count": cleared_line_count,
@@ -392,6 +407,9 @@ func get_runtime_result() -> Dictionary:
 		"next_piece_id": next_piece_id,
 		"hold_piece_id": hold_piece_id,
 		"can_hold_current_piece": can_hold_current_piece,
+		"mode_id": mode_state["mode_id"],
+		"mode_display_name": mode_state["display_name"],
+		"mode_note": mode_state["mode_note"],
 	}
 
 
@@ -405,3 +423,12 @@ func _play_audio_event(method_name: String, args: Array = []) -> void:
 		return
 
 	game_audio.callv(method_name, args)
+
+
+func set_entry_mode(mode_id: StringName) -> void:
+	entry_mode = mode_id
+	_setup_mode_state()
+
+
+func _setup_mode_state() -> void:
+	mode_state = GameModeState.create(entry_mode)
