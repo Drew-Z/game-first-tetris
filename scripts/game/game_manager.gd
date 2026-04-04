@@ -15,6 +15,7 @@ var gravity_timer: float = 0.0
 var is_piece_falling: bool = false
 var is_game_over: bool = false
 var locked_piece_count: int = 0
+var score: int = 0
 
 
 func _ready() -> void:
@@ -46,6 +47,7 @@ func start_game() -> void:
 	_prepare_runtime_for_restart()
 	is_game_over = false
 	locked_piece_count = 0
+	score = 0
 	_spawn_new_active_piece()
 	_sync_ui()
 
@@ -91,7 +93,7 @@ func _sync_ui() -> void:
 
 	if is_game_over:
 		if game_ui.has_method("show_game_over_summary"):
-			game_ui.call("show_game_over_summary", locked_piece_count)
+			game_ui.call("show_game_over_summary", locked_piece_count, score)
 		return
 
 	if active_piece_state == null:
@@ -103,7 +105,8 @@ func _sync_ui() -> void:
 			active_piece_state.piece_id,
 			active_piece_state.origin,
 			is_piece_falling,
-			locked_piece_count
+			locked_piece_count,
+			score
 		)
 
 
@@ -165,7 +168,9 @@ func _lock_active_piece() -> void:
 		board.call("write_piece_cells", locked_cells, locked_piece_id)
 
 	if board.has_method("clear_full_rows"):
-		board.call("clear_full_rows")
+		var cleared_row_count: int = board.call("clear_full_rows")
+		if cleared_row_count > 0:
+			score += cleared_row_count
 
 	if active_piece.has_method("clear_piece"):
 		active_piece.call("clear_piece")

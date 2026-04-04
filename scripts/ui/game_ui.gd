@@ -22,21 +22,23 @@ func show_piece_runtime_summary(
 	piece_id: StringName,
 	origin: Vector2i,
 	is_falling: bool,
-	locked_count: int
+	locked_count: int,
+	score: int
 ) -> void:
 	var fall_status := "下落中" if is_falling else "已到底停止"
 	restart_button.disabled = true
-	data_label.text = "活动方块：%s，位置：%s，状态：%s，已锁定数量：%d" % [
+	data_label.text = "活动方块：%s，位置：%s，状态：%s，已锁定数量：%d，分数：%d" % [
 		piece_id,
 		origin,
 		fall_status,
 		locked_count,
+		score,
 	]
 
 
-func show_game_over_summary(locked_count: int) -> void:
+func show_game_over_summary(locked_count: int, score: int) -> void:
 	restart_button.disabled = false
-	data_label.text = "游戏结束：出生位置被静态格子占用。已锁定数量：%d，当前已停止输入、下落和继续生成。" % [locked_count]
+	data_label.text = "游戏结束：出生位置被静态格子占用。已锁定数量：%d，分数：%d，当前已停止输入、下落和继续生成。" % [locked_count, score]
 
 
 func _on_restart_button_pressed() -> void:
