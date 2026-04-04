@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=3 uid="uid://c0w8y74d38xe"]
+[gd_scene load_steps=3 format=3 uid="uid://c0w8y74d38xe"]
 
 [ext_resource type="Script" path="res://scripts/ui/game_ui.gd" id="1_s4j1r"]
+[ext_resource type="Script" path="res://scripts/ui/tetromino_preview.gd" id="2_w6vse"]
 
 [node name="GameUI" type="VBoxContainer"]
 custom_minimum_size = Vector2(280, 672)
@@ -27,6 +28,41 @@ text = "当前只落场景结构与模块边界。"
 layout_mode = 2
 autowrap_mode = 3
 text = "棋盘、活动方块、流程协调和 UI 已拆分为独立模块。"
+
+[node name="PreviewHeader" type="Label" parent="."]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Queue Preview"
+
+[node name="PreviewRow" type="HBoxContainer" parent="."]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="NextPanel" type="VBoxContainer" parent="PreviewRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="NextLabel" type="Label" parent="PreviewRow/NextPanel"]
+layout_mode = 2
+text = "Next"
+
+[node name="NextPreview" type="Control" parent="PreviewRow/NextPanel"]
+custom_minimum_size = Vector2(80, 80)
+layout_mode = 2
+script = ExtResource("2_w6vse")
+
+[node name="HoldPanel" type="VBoxContainer" parent="PreviewRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="HoldLabel" type="Label" parent="PreviewRow/HoldPanel"]
+layout_mode = 2
+text = "Hold"
+
+[node name="HoldPreview" type="Control" parent="PreviewRow/HoldPanel"]
+custom_minimum_size = Vector2(80, 80)
+layout_mode = 2
+script = ExtResource("2_w6vse")
 
 [node name="DataLabel" type="Label" parent="."]
 layout_mode = 2

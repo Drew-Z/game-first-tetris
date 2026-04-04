@@ -82,6 +82,10 @@
 
 - [ ] 待你确认下一阶段方向
 
+## Stage 3 Draft
+
+- [x] 实现 Next / Hold 图形化预览
+
 ## Not In Scope Now
 
 - [ ] Wall Kick / SRS 高级规则
