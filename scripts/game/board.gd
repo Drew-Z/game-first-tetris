@@ -49,6 +49,7 @@ func _draw() -> void:
 
 func setup_board_state() -> void:
 	board_state = BoardStateModel.new(columns, rows)
+	queue_redraw()
 
 
 func grid_to_local(cell: Vector2i) -> Vector2:
@@ -117,3 +118,12 @@ func _are_cells_placeable(cells: Array[Vector2i]) -> bool:
 		setup_board_state()
 
 	return board_state.are_cells_placeable(cells)
+
+
+func reset_board_state() -> void:
+	if board_state == null:
+		setup_board_state()
+		return
+
+	board_state.reset()
+	queue_redraw()

@@ -35,7 +35,8 @@ text = "运行时状态将在这里显示。"
 
 [node name="RestartButton" type="Button" parent="."]
 layout_mode = 2
-text = "Restart (Placeholder)"
+disabled = true
+text = "Restart"
 
 [node name="Spacer" type="Control" parent="."]
 custom_minimum_size = Vector2(0, 16)
@@ -44,4 +45,4 @@ layout_mode = 2
 [node name="NoteLabel" type="Label" parent="."]
 layout_mode = 2
 autowrap_mode = 3
-text = "这里后续再接入重开、结束提示和基础状态信息。"
+text = "游戏结束后可用 Restart 重新开始。"

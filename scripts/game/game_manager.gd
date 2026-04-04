@@ -43,7 +43,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func start_game() -> void:
-	_setup_board()
+	_prepare_runtime_for_restart()
 	is_game_over = false
 	locked_piece_count = 0
 	_spawn_new_active_piece()
@@ -53,6 +53,9 @@ func start_game() -> void:
 func _setup_board() -> void:
 	if board.has_method("setup_board_state"):
 		board.call("setup_board_state")
+
+	if game_ui != null and not game_ui.is_connected("restart_requested", Callable(self, "_on_restart_requested")):
+		game_ui.connect("restart_requested", Callable(self, "_on_restart_requested"))
 
 
 func _spawn_new_active_piece() -> void:
@@ -182,3 +185,20 @@ func _enter_game_over() -> void:
 		active_piece.call("clear_piece")
 
 	_sync_ui()
+
+
+func _on_restart_requested() -> void:
+	start_game()
+
+
+func _prepare_runtime_for_restart() -> void:
+	_setup_board()
+	active_piece_state = null
+	is_piece_falling = false
+	gravity_timer = 0.0
+
+	if active_piece.has_method("clear_piece"):
+		active_piece.call("clear_piece")
+
+	if board.has_method("reset_board_state"):
+		board.call("reset_board_state")
