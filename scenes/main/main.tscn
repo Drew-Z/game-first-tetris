@@ -87,9 +87,9 @@ text = "硬降奖励：每次 Hard Drop 额外 +1 分"
 layout_mode = 2
 text = "消行奖励：每清除 1 行额外 +1 分"
 
-[node name="SteadyStartButton" type="Button" parent="MenuOverlay/MenuPanel/MenuMargin/MenuContent/RogueSelectGroup"]
+[node name="SpawnProtectionButton" type="Button" parent="MenuOverlay/MenuPanel/MenuMargin/MenuContent/RogueSelectGroup"]
 layout_mode = 2
-text = "稳定开局：本局不追加额外强化"
+text = "一次出生保护：出生被占用时可保 1 次"
 
 [node name="BackButton" type="Button" parent="MenuOverlay/MenuPanel/MenuMargin/MenuContent/RogueSelectGroup"]
 layout_mode = 2

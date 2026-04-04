@@ -10,7 +10,7 @@ const GAME_ROOT_SCENE := preload("res://scenes/game/game_root.tscn")
 @onready var rogue_button: Button = $MenuOverlay/MenuPanel/MenuMargin/MenuContent/ModeSelectGroup/RogueButton
 @onready var hard_drop_bonus_button: Button = $MenuOverlay/MenuPanel/MenuMargin/MenuContent/RogueSelectGroup/HardDropBonusButton
 @onready var line_clear_bonus_button: Button = $MenuOverlay/MenuPanel/MenuMargin/MenuContent/RogueSelectGroup/LineClearBonusButton
-@onready var steady_start_button: Button = $MenuOverlay/MenuPanel/MenuMargin/MenuContent/RogueSelectGroup/SteadyStartButton
+@onready var spawn_protection_button: Button = $MenuOverlay/MenuPanel/MenuMargin/MenuContent/RogueSelectGroup/SpawnProtectionButton
 @onready var back_button: Button = $MenuOverlay/MenuPanel/MenuMargin/MenuContent/RogueSelectGroup/BackButton
 
 
@@ -20,7 +20,7 @@ func _ready() -> void:
 	rogue_button.pressed.connect(_on_rogue_button_pressed)
 	hard_drop_bonus_button.pressed.connect(_on_hard_drop_bonus_button_pressed)
 	line_clear_bonus_button.pressed.connect(_on_line_clear_bonus_button_pressed)
-	steady_start_button.pressed.connect(_on_steady_start_button_pressed)
+	spawn_protection_button.pressed.connect(_on_spawn_protection_button_pressed)
 	back_button.pressed.connect(_on_back_button_pressed)
 
 
@@ -40,8 +40,8 @@ func _on_line_clear_bonus_button_pressed() -> void:
 	_launch_mode(&"rogue", &"line_clear_bonus")
 
 
-func _on_steady_start_button_pressed() -> void:
-	_launch_mode(&"rogue", &"steady_start")
+func _on_spawn_protection_button_pressed() -> void:
+	_launch_mode(&"rogue", &"spawn_protection")
 
 
 func _on_back_button_pressed() -> void:

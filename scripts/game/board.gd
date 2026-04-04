@@ -113,6 +113,16 @@ func write_piece_cells(cells: Array[Vector2i], piece_id: StringName) -> void:
 	queue_redraw()
 
 
+func clear_cells(cells: Array[Vector2i]) -> void:
+	if board_state == null:
+		setup_board_state()
+
+	for cell in cells:
+		board_state.clear_cell(cell)
+
+	queue_redraw()
+
+
 func clear_full_rows() -> int:
 	if board_state == null:
 		setup_board_state()

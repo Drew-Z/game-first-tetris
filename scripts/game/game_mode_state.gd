@@ -4,10 +4,11 @@ extends RefCounted
 static func create(selected_mode: StringName, rogue_upgrade_id: StringName = &"") -> Dictionary:
 	match selected_mode:
 		&"rogue":
-			var upgrade_display_name := "稳定开局"
-			var upgrade_note := "本局不追加额外强化，作为 3 选 1 里的安全选项。"
+			var upgrade_display_name := "一次出生保护"
+			var upgrade_note := "本局可在出生位置被占用时触发 1 次出生保护，清掉本次出生格并继续。"
 			var hard_drop_bonus_score := 0
 			var line_clear_bonus_per_row := 0
+			var spawn_protection_uses := 0
 
 			match rogue_upgrade_id:
 				&"hard_drop_bonus":
@@ -18,8 +19,13 @@ static func create(selected_mode: StringName, rogue_upgrade_id: StringName = &""
 					upgrade_display_name = "消行奖励"
 					upgrade_note = "本局每清除 1 行额外 +1 分。"
 					line_clear_bonus_per_row = 1
+				&"spawn_protection":
+					upgrade_display_name = "一次出生保护"
+					upgrade_note = "本局可在出生位置被占用时触发 1 次出生保护，清掉本次出生格并继续。"
+					spawn_protection_uses = 1
 				_:
-					rogue_upgrade_id = &"steady_start"
+					rogue_upgrade_id = &"spawn_protection"
+					spawn_protection_uses = 1
 
 			return {
 				"mode_id": &"rogue",
@@ -33,6 +39,7 @@ static func create(selected_mode: StringName, rogue_upgrade_id: StringName = &""
 				"rogue_upgrade_display_name": upgrade_display_name,
 				"hard_drop_bonus_score": hard_drop_bonus_score,
 				"line_clear_bonus_per_row": line_clear_bonus_per_row,
+				"spawn_protection_uses": spawn_protection_uses,
 			}
 		_:
 			return {
@@ -44,4 +51,5 @@ static func create(selected_mode: StringName, rogue_upgrade_id: StringName = &""
 				"rogue_upgrade_display_name": "",
 				"hard_drop_bonus_score": 0,
 				"line_clear_bonus_per_row": 0,
+				"spawn_protection_uses": 0,
 			}

@@ -32,6 +32,7 @@ var current_level: int = 1
 var can_hold_current_piece: bool = true
 var piece_source = null
 var mode_state: Dictionary = {}
+var remaining_spawn_protection_uses: int = 0
 
 
 func _ready() -> void:
@@ -77,6 +78,7 @@ func start_game() -> void:
 	score = 0
 	cleared_line_count = 0
 	current_level = 1
+	remaining_spawn_protection_uses = int(mode_state.get("spawn_protection_uses", 0))
 	next_piece_id = _draw_next_piece_id()
 	_spawn_new_active_piece()
 	_sync_ui()
@@ -359,6 +361,14 @@ func _spawn_piece_from_id(
 
 	if board.has_method("can_place_piece"):
 		if not board.call("can_place_piece", spawn_cells):
+			if _try_consume_spawn_protection(spawn_cells):
+				spawn_cells = next_piece_state.get_board_cells()
+			else:
+				_enter_game_over()
+				return
+
+	if board.has_method("can_place_piece"):
+		if not board.call("can_place_piece", spawn_cells):
 			_enter_game_over()
 			return
 
@@ -412,9 +422,10 @@ func get_runtime_result() -> Dictionary:
 		"can_hold_current_piece": can_hold_current_piece,
 		"mode_id": mode_state["mode_id"],
 		"mode_display_name": mode_state["display_name"],
-		"mode_note": mode_state["mode_note"],
+		"mode_note": _get_mode_note_for_ui(),
 		"rogue_upgrade_id": mode_state["rogue_upgrade_id"],
 		"rogue_upgrade_display_name": mode_state["rogue_upgrade_display_name"],
+		"remaining_spawn_protection_uses": remaining_spawn_protection_uses,
 	}
 
 
@@ -442,3 +453,27 @@ func set_entry_mode(mode_id: StringName) -> void:
 
 func _setup_mode_state() -> void:
 	mode_state = GameModeState.create(entry_mode, rogue_upgrade_id)
+
+
+func _try_consume_spawn_protection(spawn_cells: Array[Vector2i]) -> bool:
+	if entry_mode != &"rogue":
+		return false
+
+	if remaining_spawn_protection_uses <= 0:
+		return false
+
+	if not board.has_method("clear_cells"):
+		return false
+
+	board.call("clear_cells", spawn_cells)
+	remaining_spawn_protection_uses -= 1
+	return true
+
+
+func _get_mode_note_for_ui() -> String:
+	var note := String(mode_state.get("mode_note", ""))
+
+	if entry_mode == &"rogue" and mode_state.get("rogue_upgrade_id", &"") == &"spawn_protection":
+		return "%s 当前剩余出生保护：%d 次。" % [note, remaining_spawn_protection_uses]
+
+	return note
