@@ -83,7 +83,7 @@ func can_place_piece_horizontally(cells: Array[Vector2i]) -> bool:
 		if not is_inside_horizontal_bounds(cell):
 			return false
 
-	return true
+	return can_place_piece(cells)
 
 
 func is_inside_bottom_bounds(cell: Vector2i) -> bool:
@@ -95,7 +95,11 @@ func can_place_piece_vertically(cells: Array[Vector2i]) -> bool:
 		if not is_inside_bottom_bounds(cell):
 			return false
 
-	return true
+	return can_place_piece(cells)
+
+
+func can_place_piece(cells: Array[Vector2i]) -> bool:
+	return _are_cells_placeable(cells)
 
 
 func write_piece_cells(cells: Array[Vector2i], piece_id: StringName) -> void:
@@ -106,3 +110,10 @@ func write_piece_cells(cells: Array[Vector2i], piece_id: StringName) -> void:
 		board_state.set_cell(cell, piece_id)
 
 	queue_redraw()
+
+
+func _are_cells_placeable(cells: Array[Vector2i]) -> bool:
+	if board_state == null:
+		setup_board_state()
+
+	return board_state.are_cells_placeable(cells)

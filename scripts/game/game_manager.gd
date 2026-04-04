@@ -13,6 +13,7 @@ const TetrominoData := preload("res://scripts/game/data/tetromino_data.gd")
 var active_piece_state = null
 var gravity_timer: float = 0.0
 var is_piece_falling: bool = false
+var is_game_over: bool = false
 var locked_piece_count: int = 0
 
 
@@ -21,7 +22,7 @@ func _ready() -> void:
 
 
 func _process(delta: float) -> void:
-	if active_piece_state == null or not is_piece_falling:
+	if is_game_over or active_piece_state == null or not is_piece_falling:
 		return
 
 	gravity_timer += delta
@@ -32,6 +33,9 @@ func _process(delta: float) -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
+	if is_game_over:
+		return
+
 	if event.is_action_pressed("ui_left"):
 		_try_move_active_piece(Vector2i.LEFT)
 	elif event.is_action_pressed("ui_right"):
@@ -40,6 +44,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func start_game() -> void:
 	_setup_board()
+	is_game_over = false
 	locked_piece_count = 0
 	_spawn_new_active_piece()
 	_sync_ui()
@@ -61,7 +66,15 @@ func _spawn_new_active_piece() -> void:
 	if active_piece.get("cell_size") != null and board.get("cell_size") != null:
 		active_piece.set("cell_size", board.get("cell_size"))
 
-	active_piece_state = PieceStateModel.new(piece_id, spawn_origin, 0)
+	var next_piece_state = PieceStateModel.new(piece_id, spawn_origin, 0)
+	var spawn_cells: Array[Vector2i] = next_piece_state.get_board_cells()
+
+	if board.has_method("can_place_piece"):
+		if not board.call("can_place_piece", spawn_cells):
+			_enter_game_over()
+			return
+
+	active_piece_state = next_piece_state
 	gravity_timer = 0.0
 	is_piece_falling = true
 
@@ -72,6 +85,11 @@ func _spawn_new_active_piece() -> void:
 func _sync_ui() -> void:
 	if game_ui.has_method("show_structure_mode"):
 		game_ui.call("show_structure_mode", board.get("columns"), board.get("rows"))
+
+	if is_game_over:
+		if game_ui.has_method("show_game_over_summary"):
+			game_ui.call("show_game_over_summary", locked_piece_count)
+		return
 
 	if active_piece_state == null:
 		return
@@ -151,4 +169,16 @@ func _lock_active_piece() -> void:
 	is_piece_falling = false
 	gravity_timer = 0.0
 	_spawn_new_active_piece()
+	_sync_ui()
+
+
+func _enter_game_over() -> void:
+	active_piece_state = null
+	is_piece_falling = false
+	is_game_over = true
+	gravity_timer = 0.0
+
+	if active_piece.has_method("clear_piece"):
+		active_piece.call("clear_piece")
+
 	_sync_ui()

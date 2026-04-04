@@ -54,6 +54,25 @@ func is_cell_empty(cell: Vector2i) -> bool:
 	return is_inside_cell(cell) and get_cell(cell) == EMPTY_CELL
 
 
+func are_cells_empty(cells_to_check: Array[Vector2i]) -> bool:
+	for cell in cells_to_check:
+		if not is_cell_empty(cell):
+			return false
+
+	return true
+
+
+func are_cells_placeable(cells_to_check: Array[Vector2i]) -> bool:
+	for cell in cells_to_check:
+		if not is_inside_cell(cell):
+			return false
+
+		if not is_cell_empty(cell):
+			return false
+
+	return true
+
+
 func get_spawn_origin(spawn_box_size: int = 4, spawn_row: int = 0) -> Vector2i:
 	var spawn_x := maxi(0, floori(float(columns - spawn_box_size) / 2.0))
 	return Vector2i(spawn_x, spawn_row)

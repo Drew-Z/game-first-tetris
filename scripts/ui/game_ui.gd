@@ -7,7 +7,7 @@ extends VBoxContainer
 
 func show_structure_mode(columns: int, rows: int) -> void:
 	stage_label.text = "标准俄罗斯方块骨架 %d x %d" % [columns, rows]
-	status_label.text = "当前支持左右移动、自动下落、触底锁定，以及锁定后继续生成。"
+	status_label.text = "当前支持静态格子碰撞、左右移动、自动下落、触底锁定、继续生成，以及出生判定失败后的结束状态。"
 
 
 func show_piece_runtime_summary(
@@ -23,3 +23,7 @@ func show_piece_runtime_summary(
 		fall_status,
 		locked_count,
 	]
+
+
+func show_game_over_summary(locked_count: int) -> void:
+	data_label.text = "游戏结束：出生位置被静态格子占用。已锁定数量：%d，当前已停止输入、下落和继续生成。" % [locked_count]
