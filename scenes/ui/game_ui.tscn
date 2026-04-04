@@ -1,0 +1,42 @@
+[gd_scene load_steps=2 format=3 uid="uid://c0w8y74d38xe"]
+
+[ext_resource type="Script" path="res://scripts/ui/game_ui.gd" id="1_s4j1r"]
+
+[node name="GameUI" type="VBoxContainer"]
+custom_minimum_size = Vector2(280, 672)
+offset_right = 280.0
+offset_bottom = 672.0
+theme_override_constants/separation = 12
+script = ExtResource("1_s4j1r")
+
+[node name="TitleLabel" type="Label" parent="."]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "Stage 1 Foundation"
+
+[node name="StageLabel" type="Label" parent="."]
+layout_mode = 2
+text = "标准俄罗斯方块骨架"
+
+[node name="StatusLabel" type="Label" parent="."]
+layout_mode = 2
+autowrap_mode = 3
+text = "当前只落场景结构与模块边界。"
+
+[node name="InfoLabel" type="Label" parent="."]
+layout_mode = 2
+autowrap_mode = 3
+text = "棋盘、活动方块、流程协调和 UI 已拆分为独立模块。"
+
+[node name="RestartButton" type="Button" parent="."]
+layout_mode = 2
+text = "Restart (Placeholder)"
+
+[node name="Spacer" type="Control" parent="."]
+custom_minimum_size = Vector2(0, 16)
+layout_mode = 2
+
+[node name="NoteLabel" type="Label" parent="."]
+layout_mode = 2
+autowrap_mode = 3
+text = "这里后续再接入重开、结束提示和基础状态信息。"

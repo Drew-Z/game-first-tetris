@@ -29,8 +29,9 @@ Rogue 元素会作为未来方向保留，但不会在本阶段提前实现。
 1. 先看 [`docs/setup.md`](docs/setup.md)，确认本地启动方式
 2. 再看 [`docs/roadmap.md`](docs/roadmap.md)，理解阶段划分
 3. 再看 [`docs/stage-1-rules.md`](docs/stage-1-rules.md)，确认第一阶段规则边界与拆分
-4. 按 [`docs/task-board.md`](docs/task-board.md) 逐步推进任务
-5. 每完成一个小目标就验证并提交
+4. 再看 [`docs/stage-1-architecture.md`](docs/stage-1-architecture.md)，确认节点结构与模块职责
+5. 按 [`docs/task-board.md`](docs/task-board.md) 逐步推进任务
+6. 每完成一个小目标就验证并提交
 
 ## 运行项目
 
