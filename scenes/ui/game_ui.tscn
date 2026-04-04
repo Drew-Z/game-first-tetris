@@ -49,6 +49,18 @@ layout_mode = 2
 autowrap_mode = 3
 text = "分数和等级将在这里显示。"
 
+[node name="RogueHeader" type="Label" parent="."]
+visible = false
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Rogue 状态"
+
+[node name="RogueStatusLabel" type="Label" parent="."]
+visible = false
+layout_mode = 2
+autowrap_mode = 3
+text = "Rogue 强化状态将在这里显示。"
+
 [node name="PreviewHeader" type="Label" parent="."]
 layout_mode = 2
 theme_override_font_sizes/font_size = 18

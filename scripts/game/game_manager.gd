@@ -108,8 +108,11 @@ func _sync_ui() -> void:
 			"show_structure_mode",
 			board.get("columns"),
 			board.get("rows"),
+			runtime_result.mode_id,
 			runtime_result.mode_display_name,
-			runtime_result.mode_note
+			runtime_result.mode_note,
+			runtime_result.rogue_upgrade_display_name,
+			runtime_result.remaining_spawn_protection_uses
 		)
 
 	if is_game_over:
@@ -119,8 +122,11 @@ func _sync_ui() -> void:
 				runtime_result.locked_piece_count,
 				runtime_result.score,
 				runtime_result.current_level,
+				runtime_result.mode_id,
 				runtime_result.mode_display_name,
-				runtime_result.mode_note
+				runtime_result.mode_note,
+				runtime_result.rogue_upgrade_display_name,
+				runtime_result.remaining_spawn_protection_uses
 			)
 		return
 
@@ -140,8 +146,11 @@ func _sync_ui() -> void:
 			runtime_result.locked_piece_count,
 			runtime_result.score,
 			runtime_result.current_level,
+			runtime_result.mode_id,
 			runtime_result.mode_display_name,
-			runtime_result.mode_note
+			runtime_result.mode_note,
+			runtime_result.rogue_upgrade_display_name,
+			runtime_result.remaining_spawn_protection_uses
 		)
 
 
