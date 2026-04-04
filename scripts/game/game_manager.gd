@@ -14,6 +14,7 @@ const TetrominoData := preload("res://scripts/game/data/tetromino_data.gd")
 var active_piece_state = null
 var next_piece_id: StringName = &""
 var hold_piece_id: StringName = &""
+var piece_bag: Array[StringName] = []
 var gravity_timer: float = 0.0
 var is_piece_falling: bool = false
 var is_game_over: bool = false
@@ -62,6 +63,7 @@ func start_game() -> void:
 	is_game_over = false
 	locked_piece_count = 0
 	score = 0
+	next_piece_id = _draw_next_piece_id()
 	_spawn_new_active_piece()
 	_sync_ui()
 
@@ -268,6 +270,7 @@ func _prepare_runtime_for_restart() -> void:
 	active_piece_state = null
 	next_piece_id = &""
 	hold_piece_id = &""
+	piece_bag.clear()
 	is_piece_falling = false
 	gravity_timer = 0.0
 	can_hold_current_piece = true
@@ -287,12 +290,15 @@ func _get_current_drop_step_seconds() -> float:
 
 
 func _draw_next_piece_id() -> StringName:
-	var piece_ids: Array[StringName] = TetrominoData.get_piece_ids()
-	if piece_ids.is_empty():
+	if piece_bag.is_empty():
+		_refill_piece_bag()
+
+	if piece_bag.is_empty():
 		return initial_piece_id
 
-	var next_index := piece_rng.randi_range(0, piece_ids.size() - 1)
-	return piece_ids[next_index]
+	var next_piece: StringName = piece_bag[0]
+	piece_bag.remove_at(0)
+	return next_piece
 
 
 func _spawn_piece_from_id(
@@ -331,3 +337,13 @@ func _spawn_piece_from_id(
 
 	if active_piece.has_method("spawn_piece"):
 		active_piece.call("spawn_piece", active_piece_state)
+
+
+func _refill_piece_bag() -> void:
+	var remaining_piece_ids: Array[StringName] = TetrominoData.get_piece_ids()
+	piece_bag.clear()
+
+	while not remaining_piece_ids.is_empty():
+		var next_index := piece_rng.randi_range(0, remaining_piece_ids.size() - 1)
+		piece_bag.append(remaining_piece_ids[next_index])
+		remaining_piece_ids.remove_at(next_index)
