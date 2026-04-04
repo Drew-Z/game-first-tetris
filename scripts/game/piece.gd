@@ -24,6 +24,6 @@ func _draw() -> void:
 		draw_rect(rect, Color.WHITE, false, 2.0)
 
 
-func configure_from_state(new_piece_state) -> void:
+func spawn_piece(new_piece_state) -> void:
 	piece_state = new_piece_state
 	queue_redraw()
