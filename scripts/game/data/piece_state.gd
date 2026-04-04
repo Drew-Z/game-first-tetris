@@ -30,5 +30,9 @@ func get_color() -> Color:
 	return TetrominoData.get_color(piece_id)
 
 
+func move_by(offset: Vector2i) -> void:
+	origin += offset
+
+
 func describe() -> String:
 	return "%s r%d origin=%s" % [piece_id, rotation_index, origin]

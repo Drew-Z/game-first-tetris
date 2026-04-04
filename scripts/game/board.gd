@@ -71,3 +71,27 @@ func get_spawn_origin(spawn_box_size: int = 4) -> Vector2i:
 
 func get_spawn_preview_position() -> Vector2:
 	return grid_to_local(get_spawn_origin())
+
+
+func is_inside_horizontal_bounds(cell: Vector2i) -> bool:
+	return cell.x >= 0 and cell.x < columns
+
+
+func can_place_piece_horizontally(cells: Array[Vector2i]) -> bool:
+	for cell in cells:
+		if not is_inside_horizontal_bounds(cell):
+			return false
+
+	return true
+
+
+func is_inside_bottom_bounds(cell: Vector2i) -> bool:
+	return cell.y >= 0 and cell.y < rows
+
+
+func can_place_piece_vertically(cells: Array[Vector2i]) -> bool:
+	for cell in cells:
+		if not is_inside_bottom_bounds(cell):
+			return false
+
+	return true

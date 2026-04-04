@@ -31,7 +31,7 @@ text = "棋盘、活动方块、流程协调和 UI 已拆分为独立模块。"
 [node name="DataLabel" type="Label" parent="."]
 layout_mode = 2
 autowrap_mode = 3
-text = "生成与显示摘要将在这里显示。"
+text = "运行时状态将在这里显示。"
 
 [node name="RestartButton" type="Button" parent="."]
 layout_mode = 2

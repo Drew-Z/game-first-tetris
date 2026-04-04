@@ -11,6 +11,7 @@ Rogue 元素会作为未来方向保留，但不会在本阶段提前实现。
 - 已建立 Git 仓库并绑定 GitHub 远程
 - 已创建最小 Godot 4 项目骨架
 - 已补充基础文档与任务看板
+- 当前已支持：开局生成活动方块、左右移动、自动下落与到底停止
 
 ## 开发环境
 
@@ -31,8 +32,9 @@ Rogue 元素会作为未来方向保留，但不会在本阶段提前实现。
 3. 再看 [`docs/stage-1-rules.md`](docs/stage-1-rules.md)，确认第一阶段规则边界与拆分
 4. 再看 [`docs/stage-1-architecture.md`](docs/stage-1-architecture.md)，确认节点结构与模块职责
 5. 再看 [`docs/stage-1-data-model.md`](docs/stage-1-data-model.md)，确认棋盘与方块的数据结构
-6. 按 [`docs/task-board.md`](docs/task-board.md) 逐步推进任务
-7. 每完成一个小目标就验证并提交
+6. 再看 [`docs/test-checklist.md`](docs/test-checklist.md)，按当前能力做最小验证
+7. 按 [`docs/task-board.md`](docs/task-board.md) 逐步推进任务
+8. 每完成一个小目标就验证并提交
 
 ## 运行项目
 
