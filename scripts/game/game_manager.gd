@@ -13,11 +13,13 @@ const TetrominoData := preload("res://scripts/game/data/tetromino_data.gd")
 
 var active_piece_state = null
 var next_piece_id: StringName = &""
+var hold_piece_id: StringName = &""
 var gravity_timer: float = 0.0
 var is_piece_falling: bool = false
 var is_game_over: bool = false
 var locked_piece_count: int = 0
 var score: int = 0
+var can_hold_current_piece: bool = true
 var piece_rng := RandomNumberGenerator.new()
 
 
@@ -51,6 +53,8 @@ func _unhandled_input(event: InputEvent) -> void:
 		_try_rotate_active_piece()
 	elif event.is_action_pressed("ui_accept"):
 		_try_hard_drop_active_piece()
+	elif _is_hold_input(event):
+		_try_hold_active_piece()
 
 
 func start_game() -> void:
@@ -75,31 +79,7 @@ func _spawn_new_active_piece() -> void:
 	if next_piece_id != &"":
 		piece_id = next_piece_id
 
-	var queued_next_piece_id: StringName = _draw_next_piece_id()
-	var spawn_box_size := TetrominoData.get_spawn_box_size(piece_id)
-	var spawn_origin := Vector2i(3, 0)
-
-	if board.has_method("get_spawn_origin"):
-		spawn_origin = board.call("get_spawn_origin", spawn_box_size)
-
-	if active_piece.get("cell_size") != null and board.get("cell_size") != null:
-		active_piece.set("cell_size", board.get("cell_size"))
-
-	var next_piece_state = PieceStateModel.new(piece_id, spawn_origin, 0)
-	var spawn_cells: Array[Vector2i] = next_piece_state.get_board_cells()
-
-	if board.has_method("can_place_piece"):
-		if not board.call("can_place_piece", spawn_cells):
-			_enter_game_over()
-			return
-
-	active_piece_state = next_piece_state
-	next_piece_id = queued_next_piece_id
-	gravity_timer = 0.0
-	is_piece_falling = true
-
-	if active_piece.has_method("spawn_piece"):
-		active_piece.call("spawn_piece", active_piece_state)
+	_spawn_piece_from_id(piece_id, true, true)
 
 
 func _sync_ui() -> void:
@@ -119,6 +99,8 @@ func _sync_ui() -> void:
 			"show_piece_runtime_summary",
 			active_piece_state.piece_id,
 			next_piece_id,
+			hold_piece_id,
+			can_hold_current_piece,
 			active_piece_state.origin,
 			active_piece_state.rotation_index,
 			is_piece_falling,
@@ -214,6 +196,31 @@ func _try_hard_drop_active_piece() -> void:
 	_lock_active_piece()
 
 
+func _try_hold_active_piece() -> void:
+	if active_piece_state == null or not can_hold_current_piece:
+		return
+
+	var current_piece_id: StringName = active_piece_state.piece_id
+	var swapped_piece_id: StringName = hold_piece_id
+
+	hold_piece_id = current_piece_id
+	active_piece_state = null
+	is_piece_falling = false
+	gravity_timer = 0.0
+	can_hold_current_piece = false
+
+	if active_piece.has_method("clear_piece"):
+		active_piece.call("clear_piece")
+
+	if swapped_piece_id == &"":
+		_spawn_new_active_piece()
+		can_hold_current_piece = false
+	else:
+		_spawn_piece_from_id(swapped_piece_id, false, false)
+
+	_sync_ui()
+
+
 func _lock_active_piece() -> void:
 	if active_piece_state == null:
 		return
@@ -260,8 +267,10 @@ func _prepare_runtime_for_restart() -> void:
 	_setup_board()
 	active_piece_state = null
 	next_piece_id = &""
+	hold_piece_id = &""
 	is_piece_falling = false
 	gravity_timer = 0.0
+	can_hold_current_piece = true
 
 	if active_piece.has_method("clear_piece"):
 		active_piece.call("clear_piece")
@@ -284,3 +293,45 @@ func _draw_next_piece_id() -> StringName:
 
 	var next_index := piece_rng.randi_range(0, piece_ids.size() - 1)
 	return piece_ids[next_index]
+
+
+func _spawn_piece_from_id(
+	piece_id: StringName,
+	should_refresh_next_queue: bool,
+	allow_hold_after_spawn: bool
+) -> void:
+	var queued_next_piece_id: StringName = next_piece_id
+	if should_refresh_next_queue:
+		queued_next_piece_id = _draw_next_piece_id()
+
+	var spawn_box_size := TetrominoData.get_spawn_box_size(piece_id)
+	var spawn_origin := Vector2i(3, 0)
+
+	if board.has_method("get_spawn_origin"):
+		spawn_origin = board.call("get_spawn_origin", spawn_box_size)
+
+	if active_piece.get("cell_size") != null and board.get("cell_size") != null:
+		active_piece.set("cell_size", board.get("cell_size"))
+
+	var next_piece_state = PieceStateModel.new(piece_id, spawn_origin, 0)
+	var spawn_cells: Array[Vector2i] = next_piece_state.get_board_cells()
+
+	if board.has_method("can_place_piece"):
+		if not board.call("can_place_piece", spawn_cells):
+			_enter_game_over()
+			return
+
+	active_piece_state = next_piece_state
+	if should_refresh_next_queue:
+		next_piece_id = queued_next_piece_id
+
+	gravity_timer = 0.0
+	is_piece_falling = true
+	can_hold_current_piece = allow_hold_after_spawn
+
+	if active_piece.has_method("spawn_piece"):
+		active_piece.call("spawn_piece", active_piece_state)
+
+
+func _is_hold_input(event: InputEvent) -> bool:
+	return event is InputEventKey and event.is_pressed() and not event.is_echo() and event.keycode == KEY_C

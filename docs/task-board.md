@@ -17,7 +17,7 @@
 
 - [x] 实现 Hard Drop
 - [x] 实现 Next Queue
-- [ ] 实现 Hold
+- [x] 实现 Hold
 - [ ] 实现等级与下落速度提升
 
 ### B. 为后续 Rogue 扩展做准备的增强项（建议后做）
