@@ -51,9 +51,9 @@ func _unhandled_input(event: InputEvent) -> void:
 		_try_move_active_piece(Vector2i.RIGHT)
 	elif event.is_action_pressed("ui_up"):
 		_try_rotate_active_piece()
-	elif event.is_action_pressed("ui_accept"):
+	elif event.is_action_pressed("hard_drop"):
 		_try_hard_drop_active_piece()
-	elif _is_hold_input(event):
+	elif event.is_action_pressed("hold"):
 		_try_hold_active_piece()
 
 
@@ -331,7 +331,3 @@ func _spawn_piece_from_id(
 
 	if active_piece.has_method("spawn_piece"):
 		active_piece.call("spawn_piece", active_piece_state)
-
-
-func _is_hold_input(event: InputEvent) -> bool:
-	return event is InputEventKey and event.is_pressed() and not event.is_echo() and event.keycode == KEY_C
