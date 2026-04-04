@@ -7,13 +7,19 @@ extends VBoxContainer
 
 func show_structure_mode(columns: int, rows: int) -> void:
 	stage_label.text = "标准俄罗斯方块骨架 %d x %d" % [columns, rows]
-	status_label.text = "当前支持左右移动、自动下落，以及到底停止。"
+	status_label.text = "当前支持左右移动、自动下落、触底锁定，以及锁定后继续生成。"
 
 
-func show_piece_runtime_summary(piece_id: StringName, origin: Vector2i, is_falling: bool) -> void:
+func show_piece_runtime_summary(
+	piece_id: StringName,
+	origin: Vector2i,
+	is_falling: bool,
+	locked_count: int
+) -> void:
 	var fall_status := "下落中" if is_falling else "已到底停止"
-	data_label.text = "活动方块：%s，位置：%s，状态：%s" % [piece_id, origin, fall_status]
-
-
-func show_lock_summary() -> void:
-	data_label.text = "活动方块已锁定到棋盘静态格子，当前不再存在可移动活动方块。"
+	data_label.text = "活动方块：%s，位置：%s，状态：%s，已锁定数量：%d" % [
+		piece_id,
+		origin,
+		fall_status,
+		locked_count,
+	]

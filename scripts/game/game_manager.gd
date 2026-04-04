@@ -13,6 +13,7 @@ const TetrominoData := preload("res://scripts/game/data/tetromino_data.gd")
 var active_piece_state = null
 var gravity_timer: float = 0.0
 var is_piece_falling: bool = false
+var locked_piece_count: int = 0
 
 
 func _ready() -> void:
@@ -39,7 +40,8 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func start_game() -> void:
 	_setup_board()
-	_spawn_initial_piece()
+	locked_piece_count = 0
+	_spawn_new_active_piece()
 	_sync_ui()
 
 
@@ -48,8 +50,9 @@ func _setup_board() -> void:
 		board.call("setup_board_state")
 
 
-func _spawn_initial_piece() -> void:
-	var spawn_box_size := TetrominoData.get_spawn_box_size(initial_piece_id)
+func _spawn_new_active_piece() -> void:
+	var piece_id: StringName = initial_piece_id
+	var spawn_box_size := TetrominoData.get_spawn_box_size(piece_id)
 	var spawn_origin := Vector2i(3, 0)
 
 	if board.has_method("get_spawn_origin"):
@@ -58,7 +61,7 @@ func _spawn_initial_piece() -> void:
 	if active_piece.get("cell_size") != null and board.get("cell_size") != null:
 		active_piece.set("cell_size", board.get("cell_size"))
 
-	active_piece_state = PieceStateModel.new(initial_piece_id, spawn_origin, 0)
+	active_piece_state = PieceStateModel.new(piece_id, spawn_origin, 0)
 	gravity_timer = 0.0
 	is_piece_falling = true
 
@@ -71,8 +74,6 @@ func _sync_ui() -> void:
 		game_ui.call("show_structure_mode", board.get("columns"), board.get("rows"))
 
 	if active_piece_state == null:
-		if game_ui.has_method("show_lock_summary"):
-			game_ui.call("show_lock_summary")
 		return
 
 	if game_ui.has_method("show_piece_runtime_summary"):
@@ -80,7 +81,8 @@ func _sync_ui() -> void:
 			"show_piece_runtime_summary",
 			active_piece_state.piece_id,
 			active_piece_state.origin,
-			is_piece_falling
+			is_piece_falling,
+			locked_piece_count
 		)
 
 
@@ -144,7 +146,9 @@ func _lock_active_piece() -> void:
 	if active_piece.has_method("clear_piece"):
 		active_piece.call("clear_piece")
 
+	locked_piece_count += 1
 	active_piece_state = null
 	is_piece_falling = false
 	gravity_timer = 0.0
+	_spawn_new_active_piece()
 	_sync_ui()
