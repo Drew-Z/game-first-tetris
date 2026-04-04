@@ -29,10 +29,30 @@ layout_mode = 2
 autowrap_mode = 3
 text = "棋盘、活动方块、流程协调和 UI 已拆分为独立模块。"
 
+[node name="CurrentHeader" type="Label" parent="."]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "当前状态"
+
+[node name="CurrentStateLabel" type="Label" parent="."]
+layout_mode = 2
+autowrap_mode = 3
+text = "当前状态将在这里显示。"
+
+[node name="StatsHeader" type="Label" parent="."]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "分数 / 等级"
+
+[node name="StatsLabel" type="Label" parent="."]
+layout_mode = 2
+autowrap_mode = 3
+text = "分数和等级将在这里显示。"
+
 [node name="PreviewHeader" type="Label" parent="."]
 layout_mode = 2
 theme_override_font_sizes/font_size = 18
-text = "Queue Preview"
+text = "Next / Hold"
 
 [node name="PreviewRow" type="HBoxContainer" parent="."]
 layout_mode = 2
@@ -51,6 +71,10 @@ custom_minimum_size = Vector2(80, 80)
 layout_mode = 2
 script = ExtResource("2_w6vse")
 
+[node name="NextPieceLabel" type="Label" parent="PreviewRow/NextPanel"]
+layout_mode = 2
+text = "形状：-"
+
 [node name="HoldPanel" type="VBoxContainer" parent="PreviewRow"]
 layout_mode = 2
 size_flags_horizontal = 3
@@ -64,19 +88,29 @@ custom_minimum_size = Vector2(80, 80)
 layout_mode = 2
 script = ExtResource("2_w6vse")
 
-[node name="DataLabel" type="Label" parent="."]
+[node name="HoldPieceLabel" type="Label" parent="PreviewRow/HoldPanel"]
+layout_mode = 2
+text = "形状：-"
+
+[node name="HintHeader" type="Label" parent="."]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "操作 / 状态提示"
+
+[node name="HintLabel" type="Label" parent="."]
 layout_mode = 2
 autowrap_mode = 3
-text = "运行时状态将在这里显示。"
+text = "操作提示将在这里显示。"
+
+[node name="SystemLabel" type="Label" parent="."]
+layout_mode = 2
+autowrap_mode = 3
+text = "系统状态将在这里显示。"
 
 [node name="RestartButton" type="Button" parent="."]
 layout_mode = 2
 disabled = true
 text = "Restart"
-
-[node name="Spacer" type="Control" parent="."]
-custom_minimum_size = Vector2(0, 16)
-layout_mode = 2
 
 [node name="NoteLabel" type="Label" parent="."]
 layout_mode = 2

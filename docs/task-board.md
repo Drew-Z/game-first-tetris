@@ -85,6 +85,7 @@
 ## Stage 3 Draft
 
 - [x] 实现 Next / Hold 图形化预览
+- [x] 整理 HUD 分区
 
 ## Not In Scope Now
 
