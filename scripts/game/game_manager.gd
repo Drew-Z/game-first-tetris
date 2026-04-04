@@ -11,6 +11,7 @@ const TetrominoData := preload("res://scripts/game/data/tetromino_data.gd")
 @onready var game_audio: Node = $"../GameAudio"
 
 @export var entry_mode: StringName = &"classic"
+@export var rogue_upgrade_id: StringName = &""
 @export var initial_piece_id: StringName = &"T"
 @export var gravity_step_seconds: float = 0.6
 @export var soft_drop_step_seconds: float = 0.08
@@ -226,6 +227,7 @@ func _try_hard_drop_active_piece() -> void:
 
 		active_piece_state.move_by(Vector2i.DOWN)
 
+	score += int(mode_state.get("hard_drop_bonus_score", 0))
 	_play_audio_event("play_hard_drop")
 	_lock_active_piece()
 
@@ -270,6 +272,7 @@ func _lock_active_piece() -> void:
 		if cleared_row_count > 0:
 			cleared_line_count += cleared_row_count
 			score += cleared_row_count
+			score += cleared_row_count * int(mode_state.get("line_clear_bonus_per_row", 0))
 			_update_level_from_cleared_lines()
 			_play_audio_event("play_line_clear", [cleared_row_count])
 
@@ -410,6 +413,8 @@ func get_runtime_result() -> Dictionary:
 		"mode_id": mode_state["mode_id"],
 		"mode_display_name": mode_state["display_name"],
 		"mode_note": mode_state["mode_note"],
+		"rogue_upgrade_id": mode_state["rogue_upgrade_id"],
+		"rogue_upgrade_display_name": mode_state["rogue_upgrade_display_name"],
 	}
 
 
@@ -425,10 +430,15 @@ func _play_audio_event(method_name: String, args: Array = []) -> void:
 	game_audio.callv(method_name, args)
 
 
-func set_entry_mode(mode_id: StringName) -> void:
+func set_mode_setup(mode_id: StringName, selected_rogue_upgrade_id: StringName = &"") -> void:
 	entry_mode = mode_id
+	rogue_upgrade_id = selected_rogue_upgrade_id
 	_setup_mode_state()
 
 
+func set_entry_mode(mode_id: StringName) -> void:
+	set_mode_setup(mode_id, &"")
+
+
 func _setup_mode_state() -> void:
-	mode_state = GameModeState.create(entry_mode)
+	mode_state = GameModeState.create(entry_mode, rogue_upgrade_id)
