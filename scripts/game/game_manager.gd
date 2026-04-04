@@ -10,6 +10,9 @@ const TetrominoData := preload("res://scripts/game/data/tetromino_data.gd")
 @export var initial_piece_id: StringName = &"T"
 @export var gravity_step_seconds: float = 0.6
 @export var soft_drop_step_seconds: float = 0.08
+@export var lines_per_level: int = 5
+@export var gravity_step_decrease_per_level: float = 0.08
+@export var minimum_gravity_step_seconds: float = 0.12
 
 var active_piece_state = null
 var next_piece_id: StringName = &""
@@ -20,6 +23,8 @@ var is_piece_falling: bool = false
 var is_game_over: bool = false
 var locked_piece_count: int = 0
 var score: int = 0
+var cleared_line_count: int = 0
+var current_level: int = 1
 var can_hold_current_piece: bool = true
 var piece_rng := RandomNumberGenerator.new()
 
@@ -63,6 +68,8 @@ func start_game() -> void:
 	is_game_over = false
 	locked_piece_count = 0
 	score = 0
+	cleared_line_count = 0
+	current_level = 1
 	next_piece_id = _draw_next_piece_id()
 	_spawn_new_active_piece()
 	_sync_ui()
@@ -90,7 +97,7 @@ func _sync_ui() -> void:
 
 	if is_game_over:
 		if game_ui.has_method("show_game_over_summary"):
-			game_ui.call("show_game_over_summary", locked_piece_count, score)
+			game_ui.call("show_game_over_summary", locked_piece_count, score, current_level)
 		return
 
 	if active_piece_state == null:
@@ -107,7 +114,8 @@ func _sync_ui() -> void:
 			active_piece_state.rotation_index,
 			is_piece_falling,
 			locked_piece_count,
-			score
+			score,
+			current_level
 		)
 
 
@@ -236,7 +244,9 @@ func _lock_active_piece() -> void:
 	if board.has_method("clear_full_rows"):
 		var cleared_row_count: int = board.call("clear_full_rows")
 		if cleared_row_count > 0:
+			cleared_line_count += cleared_row_count
 			score += cleared_row_count
+			_update_level_from_cleared_lines()
 
 	if active_piece.has_method("clear_piece"):
 		active_piece.call("clear_piece")
@@ -286,7 +296,7 @@ func _get_current_drop_step_seconds() -> float:
 	if Input.is_action_pressed("ui_down"):
 		return soft_drop_step_seconds
 
-	return gravity_step_seconds
+	return _get_current_gravity_step_seconds()
 
 
 func _draw_next_piece_id() -> StringName:
@@ -347,3 +357,14 @@ func _refill_piece_bag() -> void:
 		var next_index := piece_rng.randi_range(0, remaining_piece_ids.size() - 1)
 		piece_bag.append(remaining_piece_ids[next_index])
 		remaining_piece_ids.remove_at(next_index)
+
+
+func _update_level_from_cleared_lines() -> void:
+	var normalized_lines_per_level := maxi(lines_per_level, 1)
+	current_level = int(floori(float(cleared_line_count) / float(normalized_lines_per_level))) + 1
+
+
+func _get_current_gravity_step_seconds() -> float:
+	var level_offset := maxi(current_level - 1, 0)
+	var current_gravity := gravity_step_seconds - (gravity_step_decrease_per_level * float(level_offset))
+	return maxf(current_gravity, minimum_gravity_step_seconds)
