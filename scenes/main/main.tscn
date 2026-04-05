@@ -1,4 +1,6 @@
-[gd_scene format=3]
+[gd_scene load_steps=2 format=3 uid="uid://di2q7blio7k6k"]
+
+[ext_resource type="PackedScene" path="res://scenes/game/game_root.tscn" id="1_l40vb"]
 
 [node name="Main" type="Control"]
 layout_mode = 3
@@ -8,16 +10,10 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="CenterContainer" type="CenterContainer" parent="."]
+[node name="GameRoot" parent="." instance=ExtResource("1_l40vb")]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-
-[node name="Label" type="Label" parent="CenterContainer"]
-layout_mode = 2
-text = "Game First Tetris\nProject Initialized"
-horizontal_alignment = 1
-vertical_alignment = 1
