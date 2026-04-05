@@ -60,7 +60,7 @@ text = "Game First Tetris"
 [node name="SubtitleLabel" type="Label" parent="MenuOverlay/MenuScroll/MenuCenter/MenuPanel/MenuMargin/MenuContent"]
 layout_mode = 2
 autowrap_mode = 3
-text = "ÇëÑ¡Ôñ½øÈë·½Ê½¡£¾­µäÄ£Ê½±£³Öµ±Ç°±ê×¼¶íÂŞË¹·½¿éÌåÑé£¬Rogue Ä£Ê½µ±Ç°ÏÈÌá¹©¶ÀÁ¢Èë¿ÚºÍÊµÑé¿Ç²ã¡£"
+text = "è¯·é€‰æ‹©è¿›å…¥æ–¹å¼ã€‚ç»å…¸æ¨¡å¼ä¿æŒå½“å‰æ ‡å‡†ä¿„ç½—æ–¯æ–¹å—ä½“éªŒï¼ŒRogue æ¨¡å¼å½“å‰å…ˆæä¾›ç‹¬ç«‹å…¥å£å’Œå®éªŒå£³å±‚ã€‚"
 
 [node name="ModeSelectGroup" type="VBoxContainer" parent="MenuOverlay/MenuScroll/MenuCenter/MenuPanel/MenuMargin/MenuContent"]
 layout_mode = 2
@@ -68,11 +68,11 @@ theme_override_constants/separation = 12
 
 [node name="ClassicButton" type="Button" parent="MenuOverlay/MenuScroll/MenuCenter/MenuPanel/MenuMargin/MenuContent/ModeSelectGroup"]
 layout_mode = 2
-text = "½øÈë¾­µäÄ£Ê½"
+text = "è¿›å…¥ç»å…¸æ¨¡å¼"
 
 [node name="RogueButton" type="Button" parent="MenuOverlay/MenuScroll/MenuCenter/MenuPanel/MenuMargin/MenuContent/ModeSelectGroup"]
 layout_mode = 2
-text = "½øÈë Rogue Ä£Ê½"
+text = "è¿›å…¥ Rogue æ¨¡å¼"
 
 [node name="RogueSelectGroup" type="VBoxContainer" parent="MenuOverlay/MenuScroll/MenuCenter/MenuPanel/MenuMargin/MenuContent"]
 visible = false
@@ -82,30 +82,30 @@ theme_override_constants/separation = 12
 [node name="RogueSelectTitle" type="Label" parent="MenuOverlay/MenuScroll/MenuCenter/MenuPanel/MenuMargin/MenuContent/RogueSelectGroup"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 20
-text = "Rogue Ä£Ê½£º¿ª¾ÖÇ¿»¯ 3 Ñ¡ 1"
+text = "Rogue æ¨¡å¼ï¼šå¼€å±€å¼ºåŒ– 3 é€‰ 1"
 
 [node name="RogueSelectHint" type="Label" parent="MenuOverlay/MenuScroll/MenuCenter/MenuPanel/MenuMargin/MenuContent/RogueSelectGroup"]
 layout_mode = 2
 autowrap_mode = 3
-text = "µ±Ç°ÏÈÂäµÚÒ»Åú×îĞ¡Ç¿»¯Èë¿Ú¡£¾­µäÄ£Ê½²»ÊÜÓ°Ïì£¬Rogue Ä£Ê½±¾¾Ö¿ªÊ¼Ç°Ö»ÄÜÑ¡ÔñÒ»¸öÑ¡Ïî¡£"
+text = "å½“å‰å…ˆè½ç¬¬ä¸€æ‰¹æœ€å°å¼ºåŒ–å…¥å£ã€‚ç»å…¸æ¨¡å¼ä¸å—å½±å“ï¼ŒRogue æ¨¡å¼æœ¬å±€å¼€å§‹å‰åªèƒ½é€‰æ‹©ä¸€ä¸ªé€‰é¡¹ã€‚"
 
 [node name="HardDropBonusButton" type="Button" parent="MenuOverlay/MenuScroll/MenuCenter/MenuPanel/MenuMargin/MenuContent/RogueSelectGroup"]
 layout_mode = 2
-text = "Ó²½µ½±Àø£ºÃ¿´Î Hard Drop ¶îÍâ +1 ·Ö"
+text = "ç¡¬é™å¥–åŠ±ï¼šæ¯æ¬¡ Hard Drop é¢å¤– +1 åˆ†"
 
 [node name="LineClearBonusButton" type="Button" parent="MenuOverlay/MenuScroll/MenuCenter/MenuPanel/MenuMargin/MenuContent/RogueSelectGroup"]
 layout_mode = 2
-text = "ÏûĞĞ½±Àø£ºÃ¿Çå³ı 1 ĞĞ¶îÍâ +1 ·Ö"
+text = "æ¶ˆè¡Œå¥–åŠ±ï¼šæ¯æ¸…é™¤ 1 è¡Œé¢å¤– +1 åˆ†"
 
 [node name="SpawnProtectionButton" type="Button" parent="MenuOverlay/MenuScroll/MenuCenter/MenuPanel/MenuMargin/MenuContent/RogueSelectGroup"]
 layout_mode = 2
-text = "Ò»´Î³öÉú±£»¤£º³öÉú±»Õ¼ÓÃÊ±¿É±£ 1 ´Î"
+text = "ä¸€æ¬¡å‡ºç”Ÿä¿æŠ¤ï¼šå‡ºç”Ÿè¢«å ç”¨æ—¶å¯ä¿ 1 æ¬¡"
 
 [node name="BackButton" type="Button" parent="MenuOverlay/MenuScroll/MenuCenter/MenuPanel/MenuMargin/MenuContent/RogueSelectGroup"]
 layout_mode = 2
-text = "·µ»ØÄ£Ê½Ñ¡Ôñ"
+text = "è¿”å›æ¨¡å¼é€‰æ‹©"
 
 [node name="NoteLabel" type="Label" parent="MenuOverlay/MenuScroll/MenuCenter/MenuPanel/MenuMargin/MenuContent"]
 layout_mode = 2
 autowrap_mode = 3
-text = "µ±Ç° Rogue Ä£Ê½²»»á¸ÄĞ´¾­µäÄ£Ê½Ö÷Ñ­»·£¬Ö»ÏÈÂä×îĞ¡¿ÉÓÃÇ¿»¯Èë¿Ú¡£"
+text = "å½“å‰ Rogue æ¨¡å¼ä¸ä¼šæ”¹å†™ç»å…¸æ¨¡å¼ä¸»å¾ªç¯ï¼Œåªå…ˆè½æœ€å°å¯ç”¨å¼ºåŒ–å…¥å£ã€‚"

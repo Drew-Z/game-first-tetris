@@ -1,4 +1,4 @@
-extends Node
+﻿extends Node
 
 signal return_to_menu_requested
 
@@ -976,3 +976,4 @@ func _is_rogue_choice_trigger_ready(choice_config: Dictionary) -> bool:
 			return cleared_line_count >= int(choice_config.get("required_cleared_lines", 0))
 		_:
 			return false
+

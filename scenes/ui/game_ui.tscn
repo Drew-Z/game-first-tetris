@@ -18,19 +18,19 @@ text = "Tetris"
 
 [node name="StageLabel" type="Label" parent="."]
 layout_mode = 2
-text = "Classic / Rogue Board"
+text = "经典 / Rogue 模式"
 
 [node name="StatusLabel" type="Label" parent="."]
 custom_minimum_size = Vector2(0, 36)
 layout_mode = 2
 autowrap_mode = 3
-text = "Current gameplay summary will appear here."
+text = "这里会显示当前模式摘要。"
 
 [node name="InfoLabel" type="Label" parent="."]
 visible = false
 layout_mode = 2
 autowrap_mode = 3
-text = "Board, active piece, gameplay flow and HUD stay separated for learning and maintenance."
+text = "隐藏的开发说明占位。"
 
 [node name="CurrentHeader" type="Label" parent="."]
 layout_mode = 2
@@ -41,7 +41,7 @@ text = "当前状态"
 custom_minimum_size = Vector2(0, 44)
 layout_mode = 2
 autowrap_mode = 3
-text = "Current active piece state will appear here."
+text = "这里会显示当前方块状态。"
 
 [node name="StatsHeader" type="Label" parent="."]
 layout_mode = 2
@@ -52,7 +52,7 @@ text = "分数 / 等级"
 custom_minimum_size = Vector2(0, 44)
 layout_mode = 2
 autowrap_mode = 3
-text = "Score and level will appear here."
+text = "这里会显示分数和等级。"
 
 [node name="RogueHeader" type="Label" parent="."]
 visible = false
@@ -65,14 +65,14 @@ visible = false
 custom_minimum_size = Vector2(0, 64)
 layout_mode = 2
 autowrap_mode = 3
-text = "Rogue upgrade state will appear here."
+text = "这里会显示 Rogue 摘要。"
 
 [node name="RogueEffectsLabel" type="Label" parent="."]
 visible = false
 custom_minimum_size = Vector2(0, 72)
 layout_mode = 2
 autowrap_mode = 3
-text = "Rogue upgrade details will appear here."
+text = "这里会显示 Rogue 强化效果。"
 
 [node name="RogueChoicePanel" type="VBoxContainer" parent="."]
 visible = false
@@ -83,13 +83,13 @@ theme_override_constants/separation = 8
 [node name="RogueChoiceTitle" type="Label" parent="RogueChoicePanel"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 18
-text = "Rogue: second in-run 3-choice"
+text = "Rogue 选择"
 
 [node name="RogueChoiceHint" type="Label" parent="RogueChoicePanel"]
 custom_minimum_size = Vector2(0, 44)
 layout_mode = 2
 autowrap_mode = 3
-text = "Choose one more low-risk upgrade for this run."
+text = "这里会显示当前待选强化。"
 
 [node name="RogueChoiceButtons" type="VBoxContainer" parent="RogueChoicePanel"]
 layout_mode = 2
@@ -97,15 +97,15 @@ theme_override_constants/separation = 8
 
 [node name="HardDropBonusButton" type="Button" parent="RogueChoicePanel/RogueChoiceButtons"]
 layout_mode = 2
-text = "Hard Drop bonus: +1 score"
+text = "硬降奖励：+1 分"
 
 [node name="LineClearBonusButton" type="Button" parent="RogueChoicePanel/RogueChoiceButtons"]
 layout_mode = 2
-text = "Line clear bonus: +1 score per row"
+text = "消行奖励：每行 +1 分"
 
 [node name="SpawnProtectionButton" type="Button" parent="RogueChoicePanel/RogueChoiceButtons"]
 layout_mode = 2
-text = "Spawn protection: +1 use"
+text = "出生保护：+1 次"
 
 [node name="PreviewHeader" type="Label" parent="."]
 layout_mode = 2
@@ -133,7 +133,7 @@ script = ExtResource("2_w6vse")
 [node name="NextPieceLabel" type="Label" parent="PreviewRow/NextPanel"]
 custom_minimum_size = Vector2(96, 0)
 layout_mode = 2
-text = "Shape: none"
+text = "形状：--"
 
 [node name="HoldPanel" type="VBoxContainer" parent="PreviewRow"]
 custom_minimum_size = Vector2(112, 0)
@@ -152,7 +152,7 @@ script = ExtResource("2_w6vse")
 [node name="HoldPieceLabel" type="Label" parent="PreviewRow/HoldPanel"]
 custom_minimum_size = Vector2(96, 0)
 layout_mode = 2
-text = "Shape: none"
+text = "形状：--"
 
 [node name="HintHeader" type="Label" parent="."]
 visible = false
@@ -165,13 +165,13 @@ visible = false
 custom_minimum_size = Vector2(0, 36)
 layout_mode = 2
 autowrap_mode = 3
-text = "Control hints will appear here."
+text = "这里会显示操作提示。"
 
 [node name="SystemLabel" type="Label" parent="."]
 custom_minimum_size = Vector2(0, 40)
 layout_mode = 2
 autowrap_mode = 3
-text = "System status will appear here."
+text = "这里会显示系统状态。"
 
 [node name="SessionButtons" type="BoxContainer" parent="."]
 layout_mode = 2
@@ -207,7 +207,7 @@ text = "帮助"
 [node name="HelpText" type="Label" parent="HelpPanel"]
 layout_mode = 2
 autowrap_mode = 3
-text = "详细帮助将在这里显示。"
+text = "详细帮助会显示在这里。"
 
 [node name="NoteLabel" type="Label" parent="."]
 visible = false
