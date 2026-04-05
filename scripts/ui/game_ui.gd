@@ -4,6 +4,7 @@ signal restart_requested
 signal pause_requested
 signal menu_requested
 signal rogue_upgrade_selected(rogue_upgrade_id: StringName)
+signal help_visibility_changed(is_visible: bool)
 
 @onready var stage_label: Label = $StageLabel
 @onready var status_label: Label = $StatusLabel
@@ -184,6 +185,9 @@ func _on_menu_button_pressed() -> void:
 
 
 func _on_help_button_pressed() -> void:
+	if is_choice_prompt_open:
+		return
+
 	_set_help_panel_visible(not help_panel.visible)
 
 
@@ -250,6 +254,10 @@ func set_session_controls(is_paused: bool, can_pause: bool, is_game_over: bool) 
 	elif is_paused:
 		_set_help_visibility(true, "Resume 继续\nRestart 重开\nMain Menu 返回菜单")
 		system_label.text = "已暂停"
+
+
+func set_help_panel_open(is_visible: bool) -> void:
+	_set_help_panel_visible(is_visible)
 
 
 func _show_preview(preview_node: Control, piece_id: StringName) -> void:
@@ -391,14 +399,20 @@ func _set_help_visibility(is_visible: bool, text: String = "") -> void:
 
 
 func _set_help_panel_visible(is_visible: bool) -> void:
+	var did_change := help_panel.visible != is_visible
 	help_panel.visible = is_visible
 	if not is_visible:
 		help_text.text = ""
+		if did_change:
+			help_visibility_changed.emit(false)
 		_update_focus_behavior(is_session_paused, is_session_game_over, is_choice_prompt_open)
 		return
 
 	help_text.text = _get_help_panel_text()
-	help_button.grab_focus()
+	if did_change:
+		help_visibility_changed.emit(true)
+	if help_button.focus_mode != Control.FOCUS_NONE:
+		help_button.grab_focus()
 	_update_focus_behavior(is_session_paused, is_session_game_over, is_choice_prompt_open)
 
 

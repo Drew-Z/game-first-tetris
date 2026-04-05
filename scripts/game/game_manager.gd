@@ -52,6 +52,8 @@ var rogue_active_run_carry_over_upgrade_id: StringName = &""
 var rogue_next_run_carry_over_upgrade_id: StringName = &""
 var held_horizontal_direction: int = 0
 var horizontal_repeat_timer: float = 0.0
+var is_help_overlay_open: bool = false
+var was_paused_before_help: bool = false
 
 
 func _ready() -> void:
@@ -63,7 +65,7 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	_update_horizontal_repeat(delta)
 
-	if is_game_over or is_paused or is_rogue_choice_pending or active_piece_state == null or not is_piece_falling:
+	if is_game_over or is_paused or is_help_overlay_open or is_rogue_choice_pending or active_piece_state == null or not is_piece_falling:
 		return
 
 	gravity_timer += delta
@@ -80,10 +82,13 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 
 	if event.is_action_pressed("ui_cancel"):
+		if is_help_overlay_open:
+			_set_help_overlay_open(false)
+			return
 		_toggle_pause()
 		return
 
-	if is_game_over or is_paused or is_rogue_choice_pending:
+	if is_game_over or is_paused or is_help_overlay_open or is_rogue_choice_pending:
 		return
 
 	if event.is_action_pressed("ui_left"):
@@ -126,6 +131,9 @@ func _setup_board() -> void:
 	if game_ui != null and game_ui.has_signal("rogue_upgrade_selected"):
 		if not game_ui.is_connected("rogue_upgrade_selected", Callable(self, "_on_rogue_upgrade_selected")):
 			game_ui.connect("rogue_upgrade_selected", Callable(self, "_on_rogue_upgrade_selected"))
+	if game_ui != null and game_ui.has_signal("help_visibility_changed"):
+		if not game_ui.is_connected("help_visibility_changed", Callable(self, "_on_help_visibility_changed")):
+			game_ui.connect("help_visibility_changed", Callable(self, "_on_help_visibility_changed"))
 	if game_ui != null and game_ui.has_signal("pause_requested"):
 		if not game_ui.is_connected("pause_requested", Callable(self, "_on_pause_requested")):
 			game_ui.connect("pause_requested", Callable(self, "_on_pause_requested"))
@@ -405,6 +413,7 @@ func _enter_game_over() -> void:
 
 
 func _on_restart_requested() -> void:
+	_set_help_overlay_open(false)
 	_clear_runtime_pause()
 	start_game()
 	_play_audio_event("play_restart")
@@ -415,6 +424,7 @@ func _on_pause_requested() -> void:
 
 
 func _on_menu_requested() -> void:
+	_set_help_overlay_open(false)
 	_clear_runtime_pause()
 	_stop_horizontal_repeat()
 	emit_signal("return_to_menu_requested")
@@ -436,6 +446,8 @@ func _prepare_runtime_for_restart() -> void:
 	pending_rogue_choice_round = 0
 	rogue_active_run_carry_over_upgrade_id = &""
 	_stop_horizontal_repeat()
+	is_help_overlay_open = false
+	was_paused_before_help = false
 
 	if active_piece.has_method("clear_piece"):
 		active_piece.call("clear_piece")
@@ -763,6 +775,31 @@ func _toggle_pause() -> void:
 
 func _clear_runtime_pause() -> void:
 	is_paused = false
+
+
+func _on_help_visibility_changed(is_visible: bool) -> void:
+	is_help_overlay_open = is_visible
+
+	if is_visible:
+		was_paused_before_help = is_paused
+		is_paused = true
+		_stop_horizontal_repeat()
+	else:
+		if is_game_over or is_rogue_choice_pending:
+			is_paused = false
+		else:
+			is_paused = was_paused_before_help
+		was_paused_before_help = false
+
+	_sync_ui()
+
+
+func _set_help_overlay_open(is_visible: bool) -> void:
+	if game_ui == null or not game_ui.has_method("set_help_panel_open"):
+		is_help_overlay_open = is_visible
+		return
+
+	game_ui.call("set_help_panel_open", is_visible)
 
 
 func _begin_horizontal_repeat(direction: int) -> void:
