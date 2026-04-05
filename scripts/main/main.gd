@@ -55,6 +55,8 @@ func _launch_mode(mode_id: StringName, rogue_upgrade_id: StringName) -> void:
 	var game_root := GAME_ROOT_SCENE.instantiate()
 	var game_manager: Node = game_root.get_node("GameManager")
 	if game_manager != null:
+		if game_manager.has_signal("return_to_menu_requested") and not game_manager.is_connected("return_to_menu_requested", Callable(self, "_on_return_to_menu_requested")):
+			game_manager.connect("return_to_menu_requested", Callable(self, "_on_return_to_menu_requested"))
 		if game_manager.has_method("set_mode_setup"):
 			game_manager.call("set_mode_setup", mode_id, rogue_upgrade_id)
 		elif game_manager.has_method("set_entry_mode"):
@@ -71,6 +73,13 @@ func _launch_mode(mode_id: StringName, rogue_upgrade_id: StringName) -> void:
 
 	mode_host.add_child(game_root)
 	menu_overlay.visible = false
+
+
+func _on_return_to_menu_requested() -> void:
+	for child in mode_host.get_children():
+		child.queue_free()
+
+	_show_mode_select()
 
 
 func _show_mode_select() -> void:

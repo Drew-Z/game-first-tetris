@@ -1,6 +1,8 @@
 ﻿extends VBoxContainer
 
 signal restart_requested
+signal pause_requested
+signal menu_requested
 signal rogue_upgrade_selected(rogue_upgrade_id: StringName)
 
 @onready var stage_label: Label = $StageLabel
@@ -15,7 +17,9 @@ signal rogue_upgrade_selected(rogue_upgrade_id: StringName)
 @onready var rogue_hard_drop_button: Button = $RogueChoicePanel/RogueChoiceButtons/HardDropBonusButton
 @onready var rogue_line_clear_button: Button = $RogueChoicePanel/RogueChoiceButtons/LineClearBonusButton
 @onready var rogue_spawn_protection_button: Button = $RogueChoicePanel/RogueChoiceButtons/SpawnProtectionButton
+@onready var pause_button: Button = $SessionButtons/PauseButton
 @onready var restart_button: Button = $RestartButton
+@onready var menu_button: Button = $SessionButtons/MenuButton
 @onready var next_preview: Control = $PreviewRow/NextPanel/NextPreview
 @onready var hold_preview: Control = $PreviewRow/HoldPanel/HoldPreview
 @onready var next_piece_label: Label = $PreviewRow/NextPanel/NextPieceLabel
@@ -25,7 +29,9 @@ signal rogue_upgrade_selected(rogue_upgrade_id: StringName)
 
 
 func _ready() -> void:
+	pause_button.pressed.connect(_on_pause_button_pressed)
 	restart_button.pressed.connect(_on_restart_button_pressed)
+	menu_button.pressed.connect(_on_menu_button_pressed)
 	rogue_hard_drop_button.pressed.connect(_on_rogue_hard_drop_pressed)
 	rogue_line_clear_button.pressed.connect(_on_rogue_line_clear_pressed)
 	rogue_spawn_protection_button.pressed.connect(_on_rogue_spawn_protection_pressed)
@@ -46,7 +52,6 @@ func show_structure_mode(
 ) -> void:
 	stage_label.text = "%s %d x %d" % [mode_display_name, columns, rows]
 	status_label.text = "当前支持静态格子碰撞、左右移动、自动下落、软降、Hard Drop、Hold、基础旋转、触底锁定、继续生成，以及出生判定失败后的结束状态。默认按键：Space=Hard Drop，C=Hold。%s" % [mode_note]
-	restart_button.disabled = true
 	current_state_label.text = "活动方块状态将在这里显示。"
 	stats_label.text = "分数与等级将在这里显示。"
 	_update_rogue_status(
@@ -85,7 +90,6 @@ func show_piece_runtime_summary(
 ) -> void:
 	var fall_status := "下落中" if is_falling else "已到底停止"
 	var hold_status := "可用" if can_hold_current_piece else "本轮已用"
-	restart_button.disabled = true
 	_show_preview(next_preview, next_piece_id)
 	_show_preview(hold_preview, hold_piece_id)
 	_set_preview_meta(next_piece_label, next_piece_id)
@@ -127,7 +131,6 @@ func show_game_over_summary(
 	rogue_active_carry_over_upgrade_display_name: String = "",
 	rogue_next_run_carry_over_upgrade_display_name: String = ""
 ) -> void:
-	restart_button.disabled = false
 	if next_preview.has_method("clear_preview"):
 		next_preview.call("clear_preview")
 	if hold_preview.has_method("clear_preview"):
@@ -152,6 +155,14 @@ func _on_restart_button_pressed() -> void:
 	restart_requested.emit()
 
 
+func _on_pause_button_pressed() -> void:
+	pause_requested.emit()
+
+
+func _on_menu_button_pressed() -> void:
+	menu_requested.emit()
+
+
 func _on_rogue_hard_drop_pressed() -> void:
 	rogue_upgrade_selected.emit(&"hard_drop_bonus")
 
@@ -174,6 +185,19 @@ func set_rogue_choice_prompt(is_visible: bool, title: String = "", hint: String 
 
 	rogue_choice_title.text = title
 	rogue_choice_hint.text = hint
+
+
+func set_session_controls(is_paused: bool, can_pause: bool, is_game_over: bool) -> void:
+	pause_button.text = "Resume" if is_paused else "Pause"
+	pause_button.disabled = not can_pause
+	restart_button.disabled = false
+	menu_button.disabled = false
+
+	if is_game_over:
+		pause_button.text = "Pause"
+		pause_button.disabled = true
+	elif is_paused:
+		system_label.text = "状态提示：当前游戏已暂停。可点击 Resume、Restart 或返回主菜单。"
 
 
 func _show_preview(preview_node: Control, piece_id: StringName) -> void:

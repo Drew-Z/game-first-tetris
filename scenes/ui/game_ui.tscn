@@ -150,9 +150,20 @@ layout_mode = 2
 autowrap_mode = 3
 text = "System status will appear here."
 
+[node name="SessionButtons" type="HBoxContainer" parent="."]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="PauseButton" type="Button" parent="SessionButtons"]
+layout_mode = 2
+text = "Pause"
+
+[node name="MenuButton" type="Button" parent="SessionButtons"]
+layout_mode = 2
+text = "Main Menu"
+
 [node name="RestartButton" type="Button" parent="."]
 layout_mode = 2
-disabled = true
 text = "Restart"
 
 [node name="NoteLabel" type="Label" parent="."]

@@ -1,5 +1,7 @@
 extends Node
 
+signal return_to_menu_requested
+
 const PieceStateModel := preload("res://scripts/game/data/piece_state.gd")
 const GameModeState := preload("res://scripts/game/game_mode_state.gd")
 const SevenBagPieceSourceModel := preload("res://scripts/game/data/seven_bag_piece_source.gd")
@@ -28,6 +30,7 @@ var hold_piece_id: StringName = &""
 var gravity_timer: float = 0.0
 var is_piece_falling: bool = false
 var is_game_over: bool = false
+var is_paused: bool = false
 var locked_piece_count: int = 0
 var score: int = 0
 var cleared_line_count: int = 0
@@ -54,7 +57,7 @@ func _ready() -> void:
 
 
 func _process(delta: float) -> void:
-	if is_game_over or is_rogue_choice_pending or active_piece_state == null or not is_piece_falling:
+	if is_game_over or is_paused or is_rogue_choice_pending or active_piece_state == null or not is_piece_falling:
 		return
 
 	gravity_timer += delta
@@ -67,7 +70,11 @@ func _process(delta: float) -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if is_game_over or is_rogue_choice_pending:
+	if event.is_action_pressed("ui_cancel"):
+		_toggle_pause()
+		return
+
+	if is_game_over or is_paused or is_rogue_choice_pending:
 		return
 
 	if event.is_action_pressed("ui_left"):
@@ -86,6 +93,7 @@ func start_game() -> void:
 	_setup_mode_state()
 	_prepare_runtime_for_restart()
 	is_game_over = false
+	is_paused = false
 	locked_piece_count = 0
 	score = 0
 	cleared_line_count = 0
@@ -105,6 +113,12 @@ func _setup_board() -> void:
 	if game_ui != null and game_ui.has_signal("rogue_upgrade_selected"):
 		if not game_ui.is_connected("rogue_upgrade_selected", Callable(self, "_on_rogue_upgrade_selected")):
 			game_ui.connect("rogue_upgrade_selected", Callable(self, "_on_rogue_upgrade_selected"))
+	if game_ui != null and game_ui.has_signal("pause_requested"):
+		if not game_ui.is_connected("pause_requested", Callable(self, "_on_pause_requested")):
+			game_ui.connect("pause_requested", Callable(self, "_on_pause_requested"))
+	if game_ui != null and game_ui.has_signal("menu_requested"):
+		if not game_ui.is_connected("menu_requested", Callable(self, "_on_menu_requested")):
+			game_ui.connect("menu_requested", Callable(self, "_on_menu_requested"))
 
 
 func _spawn_new_active_piece() -> void:
@@ -156,9 +170,23 @@ func _sync_ui() -> void:
 			runtime_result.rogue_active_carry_over_upgrade_display_name,
 			runtime_result.rogue_next_run_carry_over_upgrade_display_name
 			)
+		if game_ui.has_method("set_session_controls"):
+			game_ui.call(
+				"set_session_controls",
+				runtime_result.is_paused,
+				not runtime_result.is_rogue_choice_pending and not runtime_result.is_game_over,
+				runtime_result.is_game_over
+			)
 		return
 
 	if active_piece_state == null:
+		if game_ui.has_method("set_session_controls"):
+			game_ui.call(
+				"set_session_controls",
+				runtime_result.is_paused,
+				not runtime_result.is_rogue_choice_pending and not runtime_result.is_game_over,
+				runtime_result.is_game_over
+			)
 		return
 
 	if game_ui.has_method("show_piece_runtime_summary"):
@@ -182,6 +210,13 @@ func _sync_ui() -> void:
 			runtime_result.rogue_upgrade_effects_text,
 			runtime_result.rogue_active_carry_over_upgrade_display_name,
 			runtime_result.rogue_next_run_carry_over_upgrade_display_name
+		)
+	if game_ui.has_method("set_session_controls"):
+		game_ui.call(
+			"set_session_controls",
+			runtime_result.is_paused,
+			not runtime_result.is_rogue_choice_pending and not runtime_result.is_game_over,
+			runtime_result.is_game_over
 		)
 
 
@@ -326,8 +361,12 @@ func _lock_active_piece() -> void:
 	active_piece_state = null
 	is_piece_falling = false
 	gravity_timer = 0.0
+
+	if _try_trigger_next_rogue_choice():
+		_sync_ui()
+		return
+
 	_spawn_new_active_piece()
-	_try_trigger_next_rogue_choice()
 	_sync_ui()
 
 
@@ -346,8 +385,18 @@ func _enter_game_over() -> void:
 
 
 func _on_restart_requested() -> void:
+	_clear_runtime_pause()
 	start_game()
 	_play_audio_event("play_restart")
+
+
+func _on_pause_requested() -> void:
+	_toggle_pause()
+
+
+func _on_menu_requested() -> void:
+	_clear_runtime_pause()
+	emit_signal("return_to_menu_requested")
 
 
 func _prepare_runtime_for_restart() -> void:
@@ -360,6 +409,7 @@ func _prepare_runtime_for_restart() -> void:
 	is_piece_falling = false
 	gravity_timer = 0.0
 	can_hold_current_piece = true
+	is_paused = false
 	is_rogue_choice_pending = false
 	triggered_rogue_choice_rounds.clear()
 	pending_rogue_choice_round = 0
@@ -407,7 +457,7 @@ func _spawn_piece_from_id(
 
 	if board.has_method("can_place_piece"):
 		if not board.call("can_place_piece", spawn_cells):
-			if _try_consume_spawn_protection(spawn_cells):
+			if _try_consume_spawn_protection(spawn_cells, spawn_origin, spawn_box_size):
 				spawn_cells = next_piece_state.get_board_cells()
 			else:
 				_enter_game_over()
@@ -483,6 +533,7 @@ func get_runtime_result() -> Dictionary:
 		"current_level": current_level,
 		"locked_piece_count": locked_piece_count,
 		"is_game_over": is_game_over,
+		"is_paused": is_paused,
 		"next_piece_id": next_piece_id,
 		"hold_piece_id": hold_piece_id,
 		"can_hold_current_piece": can_hold_current_piece,
@@ -604,13 +655,13 @@ func _get_rogue_upgrade_display_name(rogue_upgrade_id: StringName) -> String:
 	return String(upgrade_definition["display_name"])
 
 
-func _try_trigger_next_rogue_choice() -> void:
+func _try_trigger_next_rogue_choice() -> bool:
 	if entry_mode != &"rogue":
-		return
-	if is_game_over or active_piece_state == null:
-		return
+		return false
+	if is_game_over:
+		return false
 	if is_rogue_choice_pending:
-		return
+		return true
 
 	for choice_config in _get_rogue_choice_round_configs():
 		var choice_round := int(choice_config["round"])
@@ -620,13 +671,16 @@ func _try_trigger_next_rogue_choice() -> void:
 			continue
 
 		_begin_rogue_choice(choice_round)
-		return
+		return true
+
+	return false
 
 
 func _begin_rogue_choice(choice_round: int) -> void:
 	triggered_rogue_choice_rounds.append(choice_round)
 	pending_rogue_choice_round = choice_round
 	is_rogue_choice_pending = true
+	is_paused = false
 	is_piece_falling = false
 	gravity_timer = 0.0
 
@@ -638,12 +692,14 @@ func _on_rogue_upgrade_selected(selected_upgrade_id: StringName) -> void:
 	_apply_rogue_upgrade_effect(selected_upgrade_id)
 	is_rogue_choice_pending = false
 	pending_rogue_choice_round = 0
+	if active_piece_state == null:
+		_spawn_new_active_piece()
 	is_piece_falling = active_piece_state != null
 	gravity_timer = 0.0
 	_sync_ui()
 
 
-func _try_consume_spawn_protection(spawn_cells: Array[Vector2i]) -> bool:
+func _try_consume_spawn_protection(spawn_cells: Array[Vector2i], spawn_origin: Vector2i = Vector2i.ZERO, spawn_box_size: int = 4) -> bool:
 	if entry_mode != &"rogue":
 		return false
 
@@ -653,9 +709,35 @@ func _try_consume_spawn_protection(spawn_cells: Array[Vector2i]) -> bool:
 	if not board.has_method("clear_cells"):
 		return false
 
-	board.call("clear_cells", spawn_cells)
+	var protected_cells := _get_spawn_protection_cells(spawn_origin, spawn_box_size)
+	if protected_cells.is_empty():
+		protected_cells = spawn_cells
+
+	board.call("clear_cells", protected_cells)
 	remaining_spawn_protection_uses -= 1
 	return true
+
+
+func _get_spawn_protection_cells(spawn_origin: Vector2i, spawn_box_size: int) -> Array[Vector2i]:
+	var cells_to_clear: Array[Vector2i] = []
+
+	for local_y in range(spawn_box_size):
+		for local_x in range(spawn_box_size):
+			cells_to_clear.append(spawn_origin + Vector2i(local_x, local_y))
+
+	return cells_to_clear
+
+
+func _toggle_pause() -> void:
+	if is_game_over or is_rogue_choice_pending:
+		return
+
+	is_paused = not is_paused
+	_sync_ui()
+
+
+func _clear_runtime_pause() -> void:
+	is_paused = false
 
 
 func _get_mode_note_for_ui() -> String:
