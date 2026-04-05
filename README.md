@@ -62,3 +62,10 @@ D:\Development\Godot\godot.cmd --path D:\workspace4Codex\game-first-tetris
 - 当前 Rogue 模式已补上第三次固定触发的 3 选 1。
 - 当前 Rogue 原型已具备“开局前第一次选择 + 局内第二次选择 + 局内第三次选择”的最小固定实验链路。
 - 第三次选择仍复用现有三种低侵入强化，不扩新的强化池。
+
+## Rogue Choice Config Addendum
+
+- 当前 Rogue 模式已把选择轮次与触发阈值集中整理到统一配置位置。
+- 第一轮选择：开局前固定触发。
+- 第二轮选择：累计消除 2 行后固定触发。
+- 第三轮选择：累计消除 4 行后固定触发。

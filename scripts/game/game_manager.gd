@@ -4,6 +4,7 @@ const PieceStateModel := preload("res://scripts/game/data/piece_state.gd")
 const GameModeState := preload("res://scripts/game/game_mode_state.gd")
 const SevenBagPieceSourceModel := preload("res://scripts/game/data/seven_bag_piece_source.gd")
 const TetrominoData := preload("res://scripts/game/data/tetromino_data.gd")
+const ROGUE_PRE_RUN_CHOICE_ROUND := 1
 
 @onready var board: Node2D = $"../Layout/PlayfieldPanel/PlayfieldMargin/Playfield/Board"
 @onready var active_piece: Node2D = $"../Layout/PlayfieldPanel/PlayfieldMargin/Playfield/ActivePiece"
@@ -40,8 +41,7 @@ var rogue_line_clear_bonus_per_row: int = 0
 var rogue_selected_upgrade_ids: Array[StringName] = []
 var rogue_selected_upgrade_display_names: Array[String] = []
 var is_rogue_choice_pending: bool = false
-var has_triggered_second_rogue_choice: bool = false
-var has_triggered_third_rogue_choice: bool = false
+var triggered_rogue_choice_rounds: Array[int] = []
 var pending_rogue_choice_round: int = 0
 
 
@@ -352,6 +352,7 @@ func _prepare_runtime_for_restart() -> void:
 	gravity_timer = 0.0
 	can_hold_current_piece = true
 	is_rogue_choice_pending = false
+	triggered_rogue_choice_rounds.clear()
 	pending_rogue_choice_round = 0
 
 	if active_piece.has_method("clear_piece"):
@@ -434,6 +435,26 @@ func _get_current_gravity_step_seconds() -> float:
 	return maxf(current_gravity, float(rule_config.minimum_gravity_step_seconds))
 
 
+func _get_rogue_choice_round_configs() -> Array[Dictionary]:
+	return [
+		{
+			"round": ROGUE_PRE_RUN_CHOICE_ROUND,
+			"trigger_type": "pre_run",
+			"required_cleared_lines": 0,
+		},
+		{
+			"round": 2,
+			"trigger_type": "cleared_lines",
+			"required_cleared_lines": rogue_second_choice_clear_lines,
+		},
+		{
+			"round": 3,
+			"trigger_type": "cleared_lines",
+			"required_cleared_lines": rogue_third_choice_clear_lines,
+		},
+	]
+
+
 func get_rule_config() -> Dictionary:
 	return {
 		"gravity_step_seconds": gravity_step_seconds,
@@ -501,14 +522,14 @@ func _prepare_rogue_run_state() -> void:
 	rogue_selected_upgrade_ids.clear()
 	rogue_selected_upgrade_display_names.clear()
 	is_rogue_choice_pending = false
-	has_triggered_second_rogue_choice = false
-	has_triggered_third_rogue_choice = false
+	triggered_rogue_choice_rounds.clear()
 	pending_rogue_choice_round = 0
 
 	if entry_mode != &"rogue":
 		return
 
 	_apply_rogue_upgrade_effect(StringName(mode_state.get("rogue_upgrade_id", &"")))
+	triggered_rogue_choice_rounds.append(ROGUE_PRE_RUN_CHOICE_ROUND)
 
 
 func _apply_rogue_upgrade_effect(selected_upgrade_id: StringName) -> void:
@@ -532,17 +553,19 @@ func _try_trigger_next_rogue_choice() -> void:
 	if is_rogue_choice_pending:
 		return
 
-	if not has_triggered_second_rogue_choice and cleared_line_count >= rogue_second_choice_clear_lines:
-		has_triggered_second_rogue_choice = true
-		_begin_rogue_choice(2)
-		return
+	for choice_config in _get_rogue_choice_round_configs():
+		var choice_round := int(choice_config["round"])
+		if _has_triggered_rogue_choice_round(choice_round):
+			continue
+		if not _is_rogue_choice_trigger_ready(choice_config):
+			continue
 
-	if not has_triggered_third_rogue_choice and cleared_line_count >= rogue_third_choice_clear_lines:
-		has_triggered_third_rogue_choice = true
-		_begin_rogue_choice(3)
+		_begin_rogue_choice(choice_round)
+		return
 
 
 func _begin_rogue_choice(choice_round: int) -> void:
+	triggered_rogue_choice_rounds.append(choice_round)
 	pending_rogue_choice_round = choice_round
 	is_rogue_choice_pending = true
 	is_piece_falling = false
@@ -672,10 +695,25 @@ func _get_rogue_choice_prompt_hint() -> String:
 
 
 func _get_rogue_choice_threshold_for_round(choice_round: int) -> int:
-	match choice_round:
-		2:
-			return rogue_second_choice_clear_lines
-		3:
-			return rogue_third_choice_clear_lines
+	for choice_config in _get_rogue_choice_round_configs():
+		if int(choice_config["round"]) != choice_round:
+			continue
+		return int(choice_config["required_cleared_lines"])
+
+	return 0
+
+
+func _has_triggered_rogue_choice_round(choice_round: int) -> bool:
+	return triggered_rogue_choice_rounds.has(choice_round)
+
+
+func _is_rogue_choice_trigger_ready(choice_config: Dictionary) -> bool:
+	var trigger_type := String(choice_config.get("trigger_type", ""))
+
+	match trigger_type:
+		"pre_run":
+			return false
+		"cleared_lines":
+			return cleared_line_count >= int(choice_config.get("required_cleared_lines", 0))
 		_:
-			return rogue_second_choice_clear_lines
+			return false
