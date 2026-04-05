@@ -36,6 +36,7 @@ func _ready() -> void:
 	rogue_line_clear_button.pressed.connect(_on_rogue_line_clear_pressed)
 	rogue_spawn_protection_button.pressed.connect(_on_rogue_spawn_protection_pressed)
 	set_rogue_choice_prompt(false)
+	_update_focus_behavior(false, false, false)
 
 
 func show_structure_mode(
@@ -181,10 +182,12 @@ func set_rogue_choice_prompt(is_visible: bool, title: String = "", hint: String 
 	if not is_visible:
 		rogue_choice_title.text = "Rogue 模式：局内强化 3 选 1"
 		rogue_choice_hint.text = ""
+		_update_focus_behavior(false, false, false)
 		return
 
 	rogue_choice_title.text = title
 	rogue_choice_hint.text = hint
+	_update_focus_behavior(false, false, true)
 
 
 func set_session_controls(is_paused: bool, can_pause: bool, is_game_over: bool) -> void:
@@ -192,6 +195,7 @@ func set_session_controls(is_paused: bool, can_pause: bool, is_game_over: bool) 
 	pause_button.disabled = not can_pause
 	restart_button.disabled = false
 	menu_button.disabled = false
+	_update_focus_behavior(is_paused, is_game_over, rogue_choice_panel.visible)
 
 	if is_game_over:
 		pause_button.text = "Pause"
@@ -261,3 +265,51 @@ func _update_rogue_status(
 		protection_text,
 		effects_text,
 	]
+
+
+func _update_focus_behavior(is_paused: bool, is_game_over: bool, is_choice_prompt_visible: bool) -> void:
+	var allow_session_button_focus := is_paused or is_game_over
+	_set_button_focus_enabled(pause_button, allow_session_button_focus and not pause_button.disabled)
+	_set_button_focus_enabled(restart_button, allow_session_button_focus and not restart_button.disabled)
+	_set_button_focus_enabled(menu_button, allow_session_button_focus and not menu_button.disabled)
+
+	_set_button_focus_enabled(rogue_hard_drop_button, is_choice_prompt_visible)
+	_set_button_focus_enabled(rogue_line_clear_button, is_choice_prompt_visible)
+	_set_button_focus_enabled(rogue_spawn_protection_button, is_choice_prompt_visible)
+
+	if is_choice_prompt_visible:
+		rogue_hard_drop_button.grab_focus()
+		return
+
+	if allow_session_button_focus:
+		if not pause_button.disabled:
+			pause_button.grab_focus()
+		elif not restart_button.disabled:
+			restart_button.grab_focus()
+		elif not menu_button.disabled:
+			menu_button.grab_focus()
+		return
+
+	_release_hud_button_focus()
+
+
+func _set_button_focus_enabled(button: Button, is_enabled: bool) -> void:
+	if button == null:
+		return
+
+	button.focus_mode = Control.FOCUS_ALL if is_enabled else Control.FOCUS_NONE
+	if not is_enabled and button.has_focus():
+		button.release_focus()
+
+
+func _release_hud_button_focus() -> void:
+	for button in [
+		pause_button,
+		restart_button,
+		menu_button,
+		rogue_hard_drop_button,
+		rogue_line_clear_button,
+		rogue_spawn_protection_button,
+	]:
+		if button != null and button.has_focus():
+			button.release_focus()

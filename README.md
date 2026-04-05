@@ -125,3 +125,7 @@ D:\Development\Godot\godot.cmd --path D:\workspace4Codex\game-first-tetris
 - 当前已补上最小可用的声音反馈：锁定、消行、Hard Drop、游戏结束、重新开始在没有正式音频资源时也会使用内置短提示音。
 - 当前已补上最小可用的消行视觉反馈：清行后会短暂闪烁被清掉的整行位置。
 - 这批反馈增强只解决试玩中的可感知反馈问题，不改变经典模式与 Rogue 模式的核心规则结果。
+## HUD Focus Conflict Fix Addendum
+
+- 当前已修复游戏进行中的 HUD 焦点误响应：方向键只控制方块移动，Space 只触发 Hard Drop，C 只触发 Hold。
+- 当前只有在暂停、游戏结束或 Rogue 选择面板真正需要操作按钮时，HUD 按钮才会重新参与键盘焦点与确认输入。
