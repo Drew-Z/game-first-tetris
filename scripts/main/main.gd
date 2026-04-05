@@ -2,16 +2,16 @@ extends Control
 
 const GAME_ROOT_SCENE := preload("res://scenes/game/game_root.tscn")
 
-@onready var menu_overlay: CenterContainer = $MenuOverlay
+@onready var menu_overlay: Control = $MenuOverlay
 @onready var mode_host: Control = $ModeHost
-@onready var mode_select_group: VBoxContainer = $MenuOverlay/MenuPanel/MenuMargin/MenuContent/ModeSelectGroup
-@onready var rogue_select_group: VBoxContainer = $MenuOverlay/MenuPanel/MenuMargin/MenuContent/RogueSelectGroup
-@onready var classic_button: Button = $MenuOverlay/MenuPanel/MenuMargin/MenuContent/ModeSelectGroup/ClassicButton
-@onready var rogue_button: Button = $MenuOverlay/MenuPanel/MenuMargin/MenuContent/ModeSelectGroup/RogueButton
-@onready var hard_drop_bonus_button: Button = $MenuOverlay/MenuPanel/MenuMargin/MenuContent/RogueSelectGroup/HardDropBonusButton
-@onready var line_clear_bonus_button: Button = $MenuOverlay/MenuPanel/MenuMargin/MenuContent/RogueSelectGroup/LineClearBonusButton
-@onready var spawn_protection_button: Button = $MenuOverlay/MenuPanel/MenuMargin/MenuContent/RogueSelectGroup/SpawnProtectionButton
-@onready var back_button: Button = $MenuOverlay/MenuPanel/MenuMargin/MenuContent/RogueSelectGroup/BackButton
+@onready var mode_select_group: VBoxContainer = $MenuOverlay/MenuScroll/MenuCenter/MenuPanel/MenuMargin/MenuContent/ModeSelectGroup
+@onready var rogue_select_group: VBoxContainer = $MenuOverlay/MenuScroll/MenuCenter/MenuPanel/MenuMargin/MenuContent/RogueSelectGroup
+@onready var classic_button: Button = $MenuOverlay/MenuScroll/MenuCenter/MenuPanel/MenuMargin/MenuContent/ModeSelectGroup/ClassicButton
+@onready var rogue_button: Button = $MenuOverlay/MenuScroll/MenuCenter/MenuPanel/MenuMargin/MenuContent/ModeSelectGroup/RogueButton
+@onready var hard_drop_bonus_button: Button = $MenuOverlay/MenuScroll/MenuCenter/MenuPanel/MenuMargin/MenuContent/RogueSelectGroup/HardDropBonusButton
+@onready var line_clear_bonus_button: Button = $MenuOverlay/MenuScroll/MenuCenter/MenuPanel/MenuMargin/MenuContent/RogueSelectGroup/LineClearBonusButton
+@onready var spawn_protection_button: Button = $MenuOverlay/MenuScroll/MenuCenter/MenuPanel/MenuMargin/MenuContent/RogueSelectGroup/SpawnProtectionButton
+@onready var back_button: Button = $MenuOverlay/MenuScroll/MenuCenter/MenuPanel/MenuMargin/MenuContent/RogueSelectGroup/BackButton
 
 
 func _ready() -> void:

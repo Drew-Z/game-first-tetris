@@ -4,7 +4,7 @@
 [ext_resource type="Script" path="res://scripts/ui/tetromino_preview.gd" id="2_w6vse"]
 
 [node name="GameUI" type="VBoxContainer"]
-custom_minimum_size = Vector2(280, 672)
+custom_minimum_size = Vector2(280, 0)
 offset_right = 280.0
 offset_bottom = 672.0
 theme_override_constants/separation = 12
@@ -112,7 +112,7 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 18
 text = "预览"
 
-[node name="PreviewRow" type="HBoxContainer" parent="."]
+[node name="PreviewRow" type="BoxContainer" parent="."]
 layout_mode = 2
 theme_override_constants/separation = 12
 
@@ -173,7 +173,7 @@ layout_mode = 2
 autowrap_mode = 3
 text = "System status will appear here."
 
-[node name="SessionButtons" type="HBoxContainer" parent="."]
+[node name="SessionButtons" type="BoxContainer" parent="."]
 layout_mode = 2
 theme_override_constants/separation = 8
 

@@ -19,83 +19,93 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="MenuOverlay" type="CenterContainer" parent="."]
+[node name="MenuOverlay" type="MarginContainer" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
 
-[node name="MenuPanel" type="PanelContainer" parent="MenuOverlay"]
-custom_minimum_size = Vector2(420, 0)
+[node name="MenuScroll" type="ScrollContainer" parent="MenuOverlay"]
 layout_mode = 2
 
-[node name="MenuMargin" type="MarginContainer" parent="MenuOverlay/MenuPanel"]
+[node name="MenuCenter" type="CenterContainer" parent="MenuOverlay/MenuScroll"]
+layout_mode = 2
+
+[node name="MenuPanel" type="PanelContainer" parent="MenuOverlay/MenuScroll/MenuCenter"]
+custom_minimum_size = Vector2(320, 0)
+layout_mode = 2
+
+[node name="MenuMargin" type="MarginContainer" parent="MenuOverlay/MenuScroll/MenuCenter/MenuPanel"]
 layout_mode = 2
 theme_override_constants/margin_left = 24
 theme_override_constants/margin_top = 24
 theme_override_constants/margin_right = 24
 theme_override_constants/margin_bottom = 24
 
-[node name="MenuContent" type="VBoxContainer" parent="MenuOverlay/MenuPanel/MenuMargin"]
+[node name="MenuContent" type="VBoxContainer" parent="MenuOverlay/MenuScroll/MenuCenter/MenuPanel/MenuMargin"]
 layout_mode = 2
 theme_override_constants/separation = 16
 
-[node name="TitleLabel" type="Label" parent="MenuOverlay/MenuPanel/MenuMargin/MenuContent"]
+[node name="TitleLabel" type="Label" parent="MenuOverlay/MenuScroll/MenuCenter/MenuPanel/MenuMargin/MenuContent"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 28
 text = "Game First Tetris"
 
-[node name="SubtitleLabel" type="Label" parent="MenuOverlay/MenuPanel/MenuMargin/MenuContent"]
+[node name="SubtitleLabel" type="Label" parent="MenuOverlay/MenuScroll/MenuCenter/MenuPanel/MenuMargin/MenuContent"]
 layout_mode = 2
 autowrap_mode = 3
-text = "è¯·é€‰æ‹©è¿›å…¥æ–¹å¼ã€‚ç»å…¸æ¨¡å¼ä¿æŒå½“å‰æ ‡å‡†ä¿„ç½—æ–¯æ–¹å—ä½“éªŒï¼›Rogue æ¨¡å¼å½“å‰åªæä¾›ç‹¬ç«‹å…¥å£å’ŒçŠ¶æ€å£³å­ã€‚"
+text = "ÇëÑ¡Ôñ½øÈë·½Ê½¡£¾­µäÄ£Ê½±£³Öµ±Ç°±ê×¼¶íÂŞË¹·½¿éÌåÑé£¬Rogue Ä£Ê½µ±Ç°ÏÈÌá¹©¶ÀÁ¢Èë¿ÚºÍÊµÑé¿Ç²ã¡£"
 
-[node name="ModeSelectGroup" type="VBoxContainer" parent="MenuOverlay/MenuPanel/MenuMargin/MenuContent"]
+[node name="ModeSelectGroup" type="VBoxContainer" parent="MenuOverlay/MenuScroll/MenuCenter/MenuPanel/MenuMargin/MenuContent"]
 layout_mode = 2
 theme_override_constants/separation = 12
 
-[node name="ClassicButton" type="Button" parent="MenuOverlay/MenuPanel/MenuMargin/MenuContent/ModeSelectGroup"]
+[node name="ClassicButton" type="Button" parent="MenuOverlay/MenuScroll/MenuCenter/MenuPanel/MenuMargin/MenuContent/ModeSelectGroup"]
 layout_mode = 2
-text = "è¿›å…¥ç»å…¸æ¨¡å¼"
+text = "½øÈë¾­µäÄ£Ê½"
 
-[node name="RogueButton" type="Button" parent="MenuOverlay/MenuPanel/MenuMargin/MenuContent/ModeSelectGroup"]
+[node name="RogueButton" type="Button" parent="MenuOverlay/MenuScroll/MenuCenter/MenuPanel/MenuMargin/MenuContent/ModeSelectGroup"]
 layout_mode = 2
-text = "è¿›å…¥ Rogue æ¨¡å¼"
+text = "½øÈë Rogue Ä£Ê½"
 
-[node name="RogueSelectGroup" type="VBoxContainer" parent="MenuOverlay/MenuPanel/MenuMargin/MenuContent"]
+[node name="RogueSelectGroup" type="VBoxContainer" parent="MenuOverlay/MenuScroll/MenuCenter/MenuPanel/MenuMargin/MenuContent"]
 visible = false
 layout_mode = 2
 theme_override_constants/separation = 12
 
-[node name="RogueSelectTitle" type="Label" parent="MenuOverlay/MenuPanel/MenuMargin/MenuContent/RogueSelectGroup"]
+[node name="RogueSelectTitle" type="Label" parent="MenuOverlay/MenuScroll/MenuCenter/MenuPanel/MenuMargin/MenuContent/RogueSelectGroup"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 20
-text = "Rogue æ¨¡å¼ï¼šå¼€å±€å¼ºåŒ– 3 é€‰ 1"
+text = "Rogue Ä£Ê½£º¿ª¾ÖÇ¿»¯ 3 Ñ¡ 1"
 
-[node name="RogueSelectHint" type="Label" parent="MenuOverlay/MenuPanel/MenuMargin/MenuContent/RogueSelectGroup"]
+[node name="RogueSelectHint" type="Label" parent="MenuOverlay/MenuScroll/MenuCenter/MenuPanel/MenuMargin/MenuContent/RogueSelectGroup"]
 layout_mode = 2
 autowrap_mode = 3
-text = "å½“å‰åªè½ç¬¬ä¸€æ‰¹æœ€å°å¼ºåŒ–å…¥å£ã€‚ç»å…¸æ¨¡å¼ä¸å—å½±å“ï¼ŒRogue æ¨¡å¼æœ¬å±€å¼€å§‹å‰åªèƒ½é€‰æ‹©ä¸€ä¸ªé€‰é¡¹ã€‚"
+text = "µ±Ç°ÏÈÂäµÚÒ»Åú×îĞ¡Ç¿»¯Èë¿Ú¡£¾­µäÄ£Ê½²»ÊÜÓ°Ïì£¬Rogue Ä£Ê½±¾¾Ö¿ªÊ¼Ç°Ö»ÄÜÑ¡ÔñÒ»¸öÑ¡Ïî¡£"
 
-[node name="HardDropBonusButton" type="Button" parent="MenuOverlay/MenuPanel/MenuMargin/MenuContent/RogueSelectGroup"]
+[node name="HardDropBonusButton" type="Button" parent="MenuOverlay/MenuScroll/MenuCenter/MenuPanel/MenuMargin/MenuContent/RogueSelectGroup"]
 layout_mode = 2
-text = "ç¡¬é™å¥–åŠ±ï¼šæ¯æ¬¡ Hard Drop é¢å¤– +1 åˆ†"
+text = "Ó²½µ½±Àø£ºÃ¿´Î Hard Drop ¶îÍâ +1 ·Ö"
 
-[node name="LineClearBonusButton" type="Button" parent="MenuOverlay/MenuPanel/MenuMargin/MenuContent/RogueSelectGroup"]
+[node name="LineClearBonusButton" type="Button" parent="MenuOverlay/MenuScroll/MenuCenter/MenuPanel/MenuMargin/MenuContent/RogueSelectGroup"]
 layout_mode = 2
-text = "æ¶ˆè¡Œå¥–åŠ±ï¼šæ¯æ¸…é™¤ 1 è¡Œé¢å¤– +1 åˆ†"
+text = "ÏûĞĞ½±Àø£ºÃ¿Çå³ı 1 ĞĞ¶îÍâ +1 ·Ö"
 
-[node name="SpawnProtectionButton" type="Button" parent="MenuOverlay/MenuPanel/MenuMargin/MenuContent/RogueSelectGroup"]
+[node name="SpawnProtectionButton" type="Button" parent="MenuOverlay/MenuScroll/MenuCenter/MenuPanel/MenuMargin/MenuContent/RogueSelectGroup"]
 layout_mode = 2
-text = "ä¸€æ¬¡å‡ºç”Ÿä¿æŠ¤ï¼šå‡ºç”Ÿè¢«å ç”¨æ—¶å¯ä¿ 1 æ¬¡"
+text = "Ò»´Î³öÉú±£»¤£º³öÉú±»Õ¼ÓÃÊ±¿É±£ 1 ´Î"
 
-[node name="BackButton" type="Button" parent="MenuOverlay/MenuPanel/MenuMargin/MenuContent/RogueSelectGroup"]
+[node name="BackButton" type="Button" parent="MenuOverlay/MenuScroll/MenuCenter/MenuPanel/MenuMargin/MenuContent/RogueSelectGroup"]
 layout_mode = 2
-text = "è¿”å›æ¨¡å¼é€‰æ‹©"
+text = "·µ»ØÄ£Ê½Ñ¡Ôñ"
 
-[node name="NoteLabel" type="Label" parent="MenuOverlay/MenuPanel/MenuMargin/MenuContent"]
+[node name="NoteLabel" type="Label" parent="MenuOverlay/MenuScroll/MenuCenter/MenuPanel/MenuMargin/MenuContent"]
 layout_mode = 2
 autowrap_mode = 3
-text = "å½“å‰ Rogue æ¨¡å¼ä¸ä¼šæ”¹å†™ç»å…¸æ¨¡å¼ä¸»å¾ªç¯ï¼Œåªå…ˆè½æœ€å°å¯ç”¨å¼ºåŒ–å…¥å£ã€‚"
+text = "µ±Ç° Rogue Ä£Ê½²»»á¸ÄĞ´¾­µäÄ£Ê½Ö÷Ñ­»·£¬Ö»ÏÈÂä×îĞ¡¿ÉÓÃÇ¿»¯Èë¿Ú¡£"

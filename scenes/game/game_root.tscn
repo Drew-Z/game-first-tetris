@@ -1,5 +1,6 @@
-[gd_scene load_steps=6 format=3 uid="uid://3avk0h3xihvc"]
+[gd_scene load_steps=7 format=3 uid="uid://3avk0h3xihvc"]
 
+[ext_resource type="Script" path="res://scripts/game/game_root.gd" id="1_3g7is"]
 [ext_resource type="Script" path="res://scripts/game/game_manager.gd" id="1_6g2us"]
 [ext_resource type="Script" path="res://scripts/game/board.gd" id="2_0e3k2"]
 [ext_resource type="Script" path="res://scripts/game/piece.gd" id="3_fcc0d"]
@@ -13,6 +14,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+script = ExtResource("1_3g7is")
 
 [node name="Background" type="ColorRect" parent="."]
 layout_mode = 1
@@ -31,7 +33,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Layout" type="HBoxContainer" parent="ViewportScroll"]
+[node name="Layout" type="BoxContainer" parent="ViewportScroll"]
 custom_minimum_size = Vector2(704, 672)
 layout_mode = 2
 theme_override_constants/separation = 24
@@ -58,7 +60,7 @@ script = ExtResource("2_0e3k2")
 script = ExtResource("3_fcc0d")
 
 [node name="SidebarPanel" type="PanelContainer" parent="Layout"]
-custom_minimum_size = Vector2(280, 672)
+custom_minimum_size = Vector2(280, 0)
 layout_mode = 2
 
 [node name="GameUI" parent="Layout/SidebarPanel" instance=ExtResource("4_8djlb")]

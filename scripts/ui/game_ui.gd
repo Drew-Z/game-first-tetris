@@ -32,6 +32,8 @@ signal help_visibility_changed(is_visible: bool)
 @onready var hint_header: Label = $HintHeader
 @onready var hint_label: Label = $HintLabel
 @onready var system_label: Label = $SystemLabel
+@onready var preview_row: BoxContainer = $PreviewRow
+@onready var session_buttons: BoxContainer = $SessionButtons
 
 var current_mode_id: StringName = &"classic"
 var current_mode_display_name: String = "经典模式"
@@ -50,6 +52,7 @@ func _ready() -> void:
 	rogue_spawn_protection_button.pressed.connect(_on_rogue_spawn_protection_pressed)
 	_set_help_panel_visible(false)
 	set_rogue_choice_prompt(false)
+	set_compact_layout(false)
 	_update_focus_behavior(false, false, false)
 
 
@@ -258,6 +261,14 @@ func set_session_controls(is_paused: bool, can_pause: bool, is_game_over: bool) 
 
 func set_help_panel_open(is_visible: bool) -> void:
 	_set_help_panel_visible(is_visible)
+
+
+func set_compact_layout(is_compact: bool) -> void:
+	if preview_row != null:
+		preview_row.vertical = is_compact
+
+	if session_buttons != null:
+		session_buttons.vertical = is_compact
 
 
 func _show_preview(preview_node: Control, piece_id: StringName) -> void:
