@@ -516,6 +516,8 @@ func _play_audio_event(method_name: String, args: Array = []) -> void:
 func set_mode_setup(mode_id: StringName, selected_rogue_upgrade_id: StringName = &"") -> void:
 	entry_mode = mode_id
 	rogue_upgrade_id = selected_rogue_upgrade_id
+	if mode_id != &"rogue":
+		_clear_rogue_restart_loop_carry_over()
 	_setup_mode_state()
 
 
@@ -539,11 +541,10 @@ func _prepare_rogue_run_state() -> void:
 	rogue_active_run_carry_over_upgrade_id = &""
 
 	if entry_mode != &"rogue":
-		rogue_next_run_carry_over_upgrade_id = &""
+		_clear_rogue_restart_loop_carry_over()
 		return
 
-	rogue_active_run_carry_over_upgrade_id = rogue_next_run_carry_over_upgrade_id
-	rogue_next_run_carry_over_upgrade_id = &""
+	rogue_active_run_carry_over_upgrade_id = _consume_rogue_restart_loop_carry_over_for_new_run()
 	if rogue_active_run_carry_over_upgrade_id != &"":
 		_apply_rogue_upgrade_effect(rogue_active_run_carry_over_upgrade_id)
 
@@ -568,7 +569,7 @@ func _capture_rogue_meta_progression_on_game_over() -> void:
 	if entry_mode != &"rogue":
 		return
 
-	rogue_next_run_carry_over_upgrade_id = _get_next_run_carry_over_upgrade_id()
+	_store_rogue_restart_loop_carry_over_from_run()
 
 
 func _get_next_run_carry_over_upgrade_id() -> StringName:
@@ -576,6 +577,23 @@ func _get_next_run_carry_over_upgrade_id() -> StringName:
 		return &""
 
 	return rogue_selected_upgrade_ids[rogue_selected_upgrade_ids.size() - 1]
+
+
+func _store_rogue_restart_loop_carry_over_from_run() -> void:
+	# The meta shell intentionally keeps only one carry-over result for the next
+	# Rogue restart loop. It is not a persistent save or a classic-mode feature.
+	rogue_next_run_carry_over_upgrade_id = _get_next_run_carry_over_upgrade_id()
+
+
+func _consume_rogue_restart_loop_carry_over_for_new_run() -> StringName:
+	var carry_over_upgrade_id := rogue_next_run_carry_over_upgrade_id
+	rogue_next_run_carry_over_upgrade_id = &""
+	return carry_over_upgrade_id
+
+
+func _clear_rogue_restart_loop_carry_over() -> void:
+	rogue_active_run_carry_over_upgrade_id = &""
+	rogue_next_run_carry_over_upgrade_id = &""
 
 
 func _get_rogue_upgrade_display_name(rogue_upgrade_id: StringName) -> String:
