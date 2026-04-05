@@ -212,7 +212,7 @@ func _set_preview_meta(label_node: Label, piece_id: StringName) -> void:
 		return
 
 	if piece_id == &"":
-		label_node.text = "形状：空"
+		label_node.text = "形状：--"
 		return
 
 	label_node.text = "形状：%s" % [piece_id]

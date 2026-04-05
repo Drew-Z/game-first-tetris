@@ -18,6 +18,8 @@ const ROGUE_PRE_RUN_CHOICE_ROUND := 1
 @export var initial_piece_id: StringName = &"T"
 @export var gravity_step_seconds: float = 0.6
 @export var soft_drop_step_seconds: float = 0.08
+@export var horizontal_repeat_initial_delay: float = 0.16
+@export var horizontal_repeat_step_seconds: float = 0.06
 @export var lines_per_level: int = 5
 @export var gravity_step_decrease_per_level: float = 0.08
 @export var minimum_gravity_step_seconds: float = 0.12
@@ -48,6 +50,8 @@ var triggered_rogue_choice_rounds: Array[int] = []
 var pending_rogue_choice_round: int = 0
 var rogue_active_run_carry_over_upgrade_id: StringName = &""
 var rogue_next_run_carry_over_upgrade_id: StringName = &""
+var held_horizontal_direction: int = 0
+var horizontal_repeat_timer: float = 0.0
 
 
 func _ready() -> void:
@@ -57,6 +61,8 @@ func _ready() -> void:
 
 
 func _process(delta: float) -> void:
+	_update_horizontal_repeat(delta)
+
 	if is_game_over or is_paused or is_rogue_choice_pending or active_piece_state == null or not is_piece_falling:
 		return
 
@@ -70,6 +76,9 @@ func _process(delta: float) -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventKey and event.echo:
+		return
+
 	if event.is_action_pressed("ui_cancel"):
 		_toggle_pause()
 		return
@@ -78,15 +87,19 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 
 	if event.is_action_pressed("ui_left"):
-		_try_move_active_piece(Vector2i.LEFT)
+		_begin_horizontal_repeat(-1)
 	elif event.is_action_pressed("ui_right"):
-		_try_move_active_piece(Vector2i.RIGHT)
+		_begin_horizontal_repeat(1)
 	elif event.is_action_pressed("ui_up"):
 		_try_rotate_active_piece()
 	elif event.is_action_pressed("hard_drop"):
 		_try_hard_drop_active_piece()
 	elif event.is_action_pressed("hold"):
 		_try_hold_active_piece()
+	elif event.is_action_released("ui_left"):
+		_handle_horizontal_release(-1)
+	elif event.is_action_released("ui_right"):
+		_handle_horizontal_release(1)
 
 
 func start_game() -> void:
@@ -375,6 +388,7 @@ func _enter_game_over() -> void:
 	is_piece_falling = false
 	is_game_over = true
 	gravity_timer = 0.0
+	_stop_horizontal_repeat()
 	_capture_rogue_meta_progression_on_game_over()
 
 	if active_piece.has_method("clear_piece"):
@@ -414,6 +428,7 @@ func _prepare_runtime_for_restart() -> void:
 	triggered_rogue_choice_rounds.clear()
 	pending_rogue_choice_round = 0
 	rogue_active_run_carry_over_upgrade_id = &""
+	_stop_horizontal_repeat()
 
 	if active_piece.has_method("clear_piece"):
 		active_piece.call("clear_piece")
@@ -683,6 +698,7 @@ func _begin_rogue_choice(choice_round: int) -> void:
 	is_paused = false
 	is_piece_falling = false
 	gravity_timer = 0.0
+	_stop_horizontal_repeat()
 
 
 func _on_rogue_upgrade_selected(selected_upgrade_id: StringName) -> void:
@@ -733,11 +749,69 @@ func _toggle_pause() -> void:
 		return
 
 	is_paused = not is_paused
+	if is_paused:
+		_stop_horizontal_repeat()
 	_sync_ui()
 
 
 func _clear_runtime_pause() -> void:
 	is_paused = false
+
+
+func _begin_horizontal_repeat(direction: int) -> void:
+	if direction == 0:
+		return
+
+	held_horizontal_direction = direction
+	horizontal_repeat_timer = horizontal_repeat_initial_delay
+
+	_try_move_active_piece(_get_horizontal_offset(direction))
+
+
+func _handle_horizontal_release(released_direction: int) -> void:
+	if held_horizontal_direction != released_direction:
+		return
+
+	var opposite_direction := -released_direction
+	var opposite_action := _get_horizontal_action_name(opposite_direction)
+	if Input.is_action_pressed(opposite_action):
+		_begin_horizontal_repeat(opposite_direction)
+		return
+
+	_stop_horizontal_repeat()
+
+
+func _update_horizontal_repeat(delta: float) -> void:
+	if held_horizontal_direction == 0:
+		return
+
+	if is_game_over or is_paused or is_rogue_choice_pending or active_piece_state == null or not is_piece_falling:
+		return
+
+	var expected_action := _get_horizontal_action_name(held_horizontal_direction)
+	if not Input.is_action_pressed(expected_action):
+		_stop_horizontal_repeat()
+		return
+
+	horizontal_repeat_timer -= delta
+	if horizontal_repeat_timer > 0.0:
+		return
+
+	_try_move_active_piece(_get_horizontal_offset(held_horizontal_direction))
+	horizontal_repeat_timer = horizontal_repeat_step_seconds
+
+
+func _stop_horizontal_repeat() -> void:
+	held_horizontal_direction = 0
+	horizontal_repeat_timer = 0.0
+
+
+func _get_horizontal_offset(direction: int) -> Vector2i:
+	return Vector2i.LEFT if direction < 0 else Vector2i.RIGHT
+
+
+func _get_horizontal_action_name(direction: int) -> StringName:
+	return &"ui_left" if direction < 0 else &"ui_right"
 
 
 func _get_mode_note_for_ui() -> String:

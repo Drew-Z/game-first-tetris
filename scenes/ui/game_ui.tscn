@@ -102,6 +102,7 @@ layout_mode = 2
 theme_override_constants/separation = 12
 
 [node name="NextPanel" type="VBoxContainer" parent="PreviewRow"]
+custom_minimum_size = Vector2(112, 0)
 layout_mode = 2
 size_flags_horizontal = 3
 
@@ -115,10 +116,12 @@ layout_mode = 2
 script = ExtResource("2_w6vse")
 
 [node name="NextPieceLabel" type="Label" parent="PreviewRow/NextPanel"]
+custom_minimum_size = Vector2(96, 0)
 layout_mode = 2
 text = "Shape: none"
 
 [node name="HoldPanel" type="VBoxContainer" parent="PreviewRow"]
+custom_minimum_size = Vector2(112, 0)
 layout_mode = 2
 size_flags_horizontal = 3
 
@@ -132,6 +135,7 @@ layout_mode = 2
 script = ExtResource("2_w6vse")
 
 [node name="HoldPieceLabel" type="Label" parent="PreviewRow/HoldPanel"]
+custom_minimum_size = Vector2(96, 0)
 layout_mode = 2
 text = "Shape: none"
 
