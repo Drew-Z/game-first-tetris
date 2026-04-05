@@ -20,6 +20,7 @@ layout_mode = 2
 text = "Classic / Rogue Board"
 
 [node name="StatusLabel" type="Label" parent="."]
+custom_minimum_size = Vector2(0, 72)
 layout_mode = 2
 autowrap_mode = 3
 text = "Current gameplay summary will appear here."
@@ -35,6 +36,7 @@ theme_override_font_sizes/font_size = 18
 text = "Current State"
 
 [node name="CurrentStateLabel" type="Label" parent="."]
+custom_minimum_size = Vector2(0, 64)
 layout_mode = 2
 autowrap_mode = 3
 text = "Current active piece state will appear here."
@@ -45,6 +47,7 @@ theme_override_font_sizes/font_size = 18
 text = "Score / Level"
 
 [node name="StatsLabel" type="Label" parent="."]
+custom_minimum_size = Vector2(0, 44)
 layout_mode = 2
 autowrap_mode = 3
 text = "Score and level will appear here."
@@ -57,12 +60,21 @@ text = "Rogue Status"
 
 [node name="RogueStatusLabel" type="Label" parent="."]
 visible = false
+custom_minimum_size = Vector2(0, 84)
 layout_mode = 2
 autowrap_mode = 3
 text = "Rogue upgrade state will appear here."
 
+[node name="RogueEffectsLabel" type="Label" parent="."]
+visible = false
+custom_minimum_size = Vector2(0, 92)
+layout_mode = 2
+autowrap_mode = 3
+text = "Rogue upgrade details will appear here."
+
 [node name="RogueChoicePanel" type="VBoxContainer" parent="."]
 visible = false
+custom_minimum_size = Vector2(0, 176)
 layout_mode = 2
 theme_override_constants/separation = 8
 
@@ -72,6 +84,7 @@ theme_override_font_sizes/font_size = 18
 text = "Rogue: second in-run 3-choice"
 
 [node name="RogueChoiceHint" type="Label" parent="RogueChoicePanel"]
+custom_minimum_size = Vector2(0, 44)
 layout_mode = 2
 autowrap_mode = 3
 text = "Choose one more low-risk upgrade for this run."
@@ -145,11 +158,13 @@ theme_override_font_sizes/font_size = 18
 text = "Hints / Status"
 
 [node name="HintLabel" type="Label" parent="."]
+custom_minimum_size = Vector2(0, 64)
 layout_mode = 2
 autowrap_mode = 3
 text = "Control hints will appear here."
 
 [node name="SystemLabel" type="Label" parent="."]
+custom_minimum_size = Vector2(0, 64)
 layout_mode = 2
 autowrap_mode = 3
 text = "System status will appear here."

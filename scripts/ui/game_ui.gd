@@ -11,6 +11,7 @@ signal rogue_upgrade_selected(rogue_upgrade_id: StringName)
 @onready var stats_label: Label = $StatsLabel
 @onready var rogue_header: Label = $RogueHeader
 @onready var rogue_status_label: Label = $RogueStatusLabel
+@onready var rogue_effects_label: Label = $RogueEffectsLabel
 @onready var rogue_choice_panel: VBoxContainer = $RogueChoicePanel
 @onready var rogue_choice_title: Label = $RogueChoicePanel/RogueChoiceTitle
 @onready var rogue_choice_hint: Label = $RogueChoicePanel/RogueChoiceHint
@@ -26,6 +27,9 @@ signal rogue_upgrade_selected(rogue_upgrade_id: StringName)
 @onready var hold_piece_label: Label = $PreviewRow/HoldPanel/HoldPieceLabel
 @onready var hint_label: Label = $HintLabel
 @onready var system_label: Label = $SystemLabel
+
+var current_mode_id: StringName = &"classic"
+var current_mode_display_name: String = "经典模式"
 
 
 func _ready() -> void:
@@ -51,10 +55,12 @@ func show_structure_mode(
 	rogue_active_carry_over_upgrade_display_name: String = "",
 	rogue_next_run_carry_over_upgrade_display_name: String = ""
 ) -> void:
+	current_mode_id = mode_id
+	current_mode_display_name = mode_display_name
 	stage_label.text = "%s %d x %d" % [mode_display_name, columns, rows]
-	status_label.text = "当前支持静态格子碰撞、左右移动、自动下落、软降、Hard Drop、Hold、基础旋转、触底锁定、继续生成，以及出生判定失败后的结束状态。默认按键：Space=Hard Drop，C=Hold。%s" % [mode_note]
-	current_state_label.text = "活动方块状态将在这里显示。"
-	stats_label.text = "分数与等级将在这里显示。"
+	status_label.text = "模式：%s\n棋盘：%d x %d\n规则：标准主循环已就绪。%s" % [mode_display_name, columns, rows, mode_note]
+	current_state_label.text = "活动方块：--\n位置 / 旋转：--\n状态 / Hold：等待开始"
+	stats_label.text = "等级：1  分数：0\n已锁定：0"
 	_update_rogue_status(
 		mode_id,
 		rogue_upgrade_display_name,
@@ -63,10 +69,11 @@ func show_structure_mode(
 		rogue_active_carry_over_upgrade_display_name,
 		rogue_next_run_carry_over_upgrade_display_name
 	)
-	hint_label.text = "操作提示：左右移动、上旋转、下软降、Space 硬降、C Hold。"
-	system_label.text = "状态提示：当前游戏可正常运行。当前模式：%s。" % [mode_display_name]
+	hint_label.text = "移动：← →\n旋转 / 软降：↑ ↓\nHard Drop / Hold：Space / C"
+	system_label.text = "当前状态：可开始游玩\n当前模式：%s\n菜单：Pause / Restart / Main Menu 可用" % [mode_display_name]
 	_set_preview_meta(next_piece_label, &"")
 	_set_preview_meta(hold_piece_label, &"")
+	set_rogue_choice_prompt(false)
 
 
 func show_piece_runtime_summary(
@@ -89,20 +96,22 @@ func show_piece_runtime_summary(
 	rogue_active_carry_over_upgrade_display_name: String = "",
 	rogue_next_run_carry_over_upgrade_display_name: String = ""
 ) -> void:
+	current_mode_id = mode_id
+	current_mode_display_name = mode_display_name
 	var fall_status := "下落中" if is_falling else "已到底停止"
 	var hold_status := "可用" if can_hold_current_piece else "本轮已用"
 	_show_preview(next_preview, next_piece_id)
 	_show_preview(hold_preview, hold_piece_id)
 	_set_preview_meta(next_piece_label, next_piece_id)
 	_set_preview_meta(hold_piece_label, hold_piece_id)
-	current_state_label.text = "活动方块：%s，位置：%s，旋转：r%d，状态：%s，Hold 状态：%s" % [
+	current_state_label.text = "活动方块：%s\n位置：%s，旋转：r%d\n状态：%s，Hold：%s" % [
 		piece_id,
 		origin,
 		rotation_index,
 		fall_status,
 		hold_status,
 	]
-	stats_label.text = "等级：%d，分数：%d，已锁定数量：%d" % [
+	stats_label.text = "等级：%d  分数：%d\n已锁定：%d" % [
 		level,
 		score,
 		locked_count,
@@ -115,8 +124,8 @@ func show_piece_runtime_summary(
 		rogue_active_carry_over_upgrade_display_name,
 		rogue_next_run_carry_over_upgrade_display_name
 	)
-	hint_label.text = "操作提示：左右移动、上旋转、下软降、Space 硬降、C Hold。"
-	system_label.text = "状态提示：当前游戏进行中。当前模式：%s。%s" % [mode_display_name, mode_note]
+	hint_label.text = "移动：← →\n旋转 / 软降：↑ ↓\nHard Drop / Hold：Space / C"
+	system_label.text = "当前状态：游戏进行中\n当前模式：%s\n系统提示：%s" % [mode_display_name, mode_note]
 
 
 func show_game_over_summary(
@@ -132,14 +141,16 @@ func show_game_over_summary(
 	rogue_active_carry_over_upgrade_display_name: String = "",
 	rogue_next_run_carry_over_upgrade_display_name: String = ""
 ) -> void:
+	current_mode_id = mode_id
+	current_mode_display_name = mode_display_name
 	if next_preview.has_method("clear_preview"):
 		next_preview.call("clear_preview")
 	if hold_preview.has_method("clear_preview"):
 		hold_preview.call("clear_preview")
 	_set_preview_meta(next_piece_label, &"")
 	_set_preview_meta(hold_piece_label, &"")
-	current_state_label.text = "当前状态：无活动方块。"
-	stats_label.text = "等级：%d，分数：%d，已锁定数量：%d" % [level, score, locked_count]
+	current_state_label.text = "活动方块：--\n位置 / 旋转：--\n状态 / Hold：游戏结束"
+	stats_label.text = "等级：%d  分数：%d\n已锁定：%d" % [level, score, locked_count]
 	_update_rogue_status(
 		mode_id,
 		rogue_upgrade_display_name,
@@ -148,8 +159,8 @@ func show_game_over_summary(
 		rogue_active_carry_over_upgrade_display_name,
 		rogue_next_run_carry_over_upgrade_display_name
 	)
-	hint_label.text = "操作提示：可点击 Restart 重新开始。"
-	system_label.text = "状态提示：游戏结束，出生位置被静态格子占用。当前已停止输入、下落和继续生成。当前模式：%s。%s" % [mode_display_name, mode_note]
+	hint_label.text = "当前可用：Restart\n当前可用：Main Menu\n继续试玩：重新开局即可"
+	system_label.text = "当前状态：游戏结束\n当前模式：%s\n原因：出生位置已被占用。%s" % [mode_display_name, mode_note]
 
 
 func _on_restart_button_pressed() -> void:
@@ -177,16 +188,26 @@ func _on_rogue_spawn_protection_pressed() -> void:
 
 
 func set_rogue_choice_prompt(is_visible: bool, title: String = "", hint: String = "") -> void:
-	rogue_choice_panel.visible = is_visible
+	var is_rogue_mode := current_mode_id == &"rogue"
+	rogue_choice_panel.visible = is_rogue_mode
+
+	if not is_rogue_mode:
+		rogue_choice_title.text = "Rogue 选择"
+		rogue_choice_hint.text = ""
+		_set_rogue_choice_buttons_visible(false)
+		_update_focus_behavior(false, false, false)
+		return
 
 	if not is_visible:
-		rogue_choice_title.text = "Rogue 模式：局内强化 3 选 1"
-		rogue_choice_hint.text = ""
+		rogue_choice_title.text = "Rogue 选择进度"
+		rogue_choice_hint.text = "当前无待选强化。\n达到下一轮条件后，会在这里进入 3 选 1。"
+		_set_rogue_choice_buttons_visible(false)
 		_update_focus_behavior(false, false, false)
 		return
 
 	rogue_choice_title.text = title
 	rogue_choice_hint.text = hint
+	_set_rogue_choice_buttons_visible(true)
 	_update_focus_behavior(false, false, true)
 
 
@@ -201,7 +222,7 @@ func set_session_controls(is_paused: bool, can_pause: bool, is_game_over: bool) 
 		pause_button.text = "Pause"
 		pause_button.disabled = true
 	elif is_paused:
-		system_label.text = "状态提示：当前游戏已暂停。可点击 Resume、Restart 或返回主菜单。"
+		system_label.text = "当前状态：游戏已暂停\n当前模式：%s\n可用操作：Resume / Restart / Main Menu" % [current_mode_display_name]
 
 
 func _show_preview(preview_node: Control, piece_id: StringName) -> void:
@@ -233,9 +254,11 @@ func _update_rogue_status(
 	var is_rogue_mode := mode_id == &"rogue"
 	rogue_header.visible = is_rogue_mode
 	rogue_status_label.visible = is_rogue_mode
+	rogue_effects_label.visible = is_rogue_mode
 
 	if not is_rogue_mode:
 		rogue_status_label.text = ""
+		rogue_effects_label.text = ""
 		return
 
 	var upgrade_summary := rogue_upgrade_display_name
@@ -258,13 +281,13 @@ func _update_rogue_status(
 	if rogue_next_run_carry_over_upgrade_display_name != "":
 		next_carry_text = rogue_next_run_carry_over_upgrade_display_name
 
-	rogue_status_label.text = "当前模式：Rogue 模式\n已选强化：%s\n本局带入：%s\n下一局带入：%s\n出生保护剩余：%s\n强化结果：\n%s" % [
+	rogue_status_label.text = "模式：Rogue\n已选强化：%s\n本局带入：%s\n下一局带入：%s\n出生保护：%s" % [
 		upgrade_summary,
 		active_carry_text,
 		next_carry_text,
 		protection_text,
-		effects_text,
 	]
+	rogue_effects_label.text = "强化效果：\n%s" % [effects_text]
 
 
 func _update_focus_behavior(is_paused: bool, is_game_over: bool, is_choice_prompt_visible: bool) -> void:
@@ -313,3 +336,9 @@ func _release_hud_button_focus() -> void:
 	]:
 		if button != null and button.has_focus():
 			button.release_focus()
+
+
+func _set_rogue_choice_buttons_visible(is_visible: bool) -> void:
+	rogue_hard_drop_button.visible = is_visible
+	rogue_line_clear_button.visible = is_visible
+	rogue_spawn_protection_button.visible = is_visible

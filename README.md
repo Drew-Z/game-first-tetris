@@ -129,3 +129,8 @@ D:\Development\Godot\godot.cmd --path D:\workspace4Codex\game-first-tetris
 
 - 当前已修复游戏进行中的 HUD 焦点误响应：方向键只控制方块移动，Space 只触发 Hard Drop，C 只触发 Hold。
 - 当前只有在暂停、游戏结束或 Rogue 选择面板真正需要操作按钮时，HUD 按钮才会重新参与键盘焦点与确认输入。
+## HUD Layout Stability Addendum
+
+- 当前已对右侧 HUD 做一轮信息架构整理：把模式摘要、当前状态、分数 / 等级、Rogue 状态、Rogue 选择区、Next / Hold、操作提示、系统状态分得更清楚。
+- 当前已通过固定关键动态区块的最小高度，优先减少 Hold / Next、Rogue 状态和说明文字引发的布局抖动。
+- 当前 Rogue 选择区在 Rogue 模式下会固定占位，未触发时显示等待说明，触发时切换为更明确的 3 选 1 提示。
