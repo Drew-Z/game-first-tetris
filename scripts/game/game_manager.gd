@@ -18,6 +18,7 @@ const TetrominoData := preload("res://scripts/game/data/tetromino_data.gd")
 @export var lines_per_level: int = 5
 @export var gravity_step_decrease_per_level: float = 0.08
 @export var minimum_gravity_step_seconds: float = 0.12
+@export var rogue_second_choice_clear_lines: int = 2
 
 var active_piece_state = null
 var next_piece_id: StringName = &""
@@ -33,6 +34,12 @@ var can_hold_current_piece: bool = true
 var piece_source = null
 var mode_state: Dictionary = {}
 var remaining_spawn_protection_uses: int = 0
+var rogue_hard_drop_bonus_score: int = 0
+var rogue_line_clear_bonus_per_row: int = 0
+var rogue_selected_upgrade_ids: Array[StringName] = []
+var rogue_selected_upgrade_display_names: Array[String] = []
+var is_rogue_choice_pending: bool = false
+var has_triggered_second_rogue_choice: bool = false
 
 
 func _ready() -> void:
@@ -42,7 +49,7 @@ func _ready() -> void:
 
 
 func _process(delta: float) -> void:
-	if is_game_over or active_piece_state == null or not is_piece_falling:
+	if is_game_over or is_rogue_choice_pending or active_piece_state == null or not is_piece_falling:
 		return
 
 	gravity_timer += delta
@@ -55,7 +62,7 @@ func _process(delta: float) -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if is_game_over:
+	if is_game_over or is_rogue_choice_pending:
 		return
 
 	if event.is_action_pressed("ui_left"):
@@ -78,7 +85,7 @@ func start_game() -> void:
 	score = 0
 	cleared_line_count = 0
 	current_level = 1
-	remaining_spawn_protection_uses = int(mode_state.get("spawn_protection_uses", 0))
+	_prepare_rogue_run_state()
 	next_piece_id = _draw_next_piece_id()
 	_spawn_new_active_piece()
 	_sync_ui()
@@ -90,6 +97,9 @@ func _setup_board() -> void:
 
 	if game_ui != null and not game_ui.is_connected("restart_requested", Callable(self, "_on_restart_requested")):
 		game_ui.connect("restart_requested", Callable(self, "_on_restart_requested"))
+	if game_ui != null and game_ui.has_signal("rogue_upgrade_selected"):
+		if not game_ui.is_connected("rogue_upgrade_selected", Callable(self, "_on_rogue_upgrade_selected")):
+			game_ui.connect("rogue_upgrade_selected", Callable(self, "_on_rogue_upgrade_selected"))
 
 
 func _spawn_new_active_piece() -> void:
@@ -113,6 +123,13 @@ func _sync_ui() -> void:
 			runtime_result.mode_note,
 			runtime_result.rogue_upgrade_display_name,
 			runtime_result.remaining_spawn_protection_uses
+		)
+	if game_ui.has_method("set_rogue_choice_prompt"):
+		game_ui.call(
+			"set_rogue_choice_prompt",
+			runtime_result.is_rogue_choice_pending,
+			runtime_result.rogue_choice_prompt_title,
+			runtime_result.rogue_choice_prompt_hint
 		)
 
 	if is_game_over:
@@ -238,7 +255,7 @@ func _try_hard_drop_active_piece() -> void:
 
 		active_piece_state.move_by(Vector2i.DOWN)
 
-	score += int(mode_state.get("hard_drop_bonus_score", 0))
+	score += rogue_hard_drop_bonus_score
 	_play_audio_event("play_hard_drop")
 	_lock_active_piece()
 
@@ -283,7 +300,7 @@ func _lock_active_piece() -> void:
 		if cleared_row_count > 0:
 			cleared_line_count += cleared_row_count
 			score += cleared_row_count
-			score += cleared_row_count * int(mode_state.get("line_clear_bonus_per_row", 0))
+			score += cleared_row_count * rogue_line_clear_bonus_per_row
 			_update_level_from_cleared_lines()
 			_play_audio_event("play_line_clear", [cleared_row_count])
 
@@ -296,6 +313,7 @@ func _lock_active_piece() -> void:
 	is_piece_falling = false
 	gravity_timer = 0.0
 	_spawn_new_active_piece()
+	_try_trigger_second_rogue_choice()
 	_sync_ui()
 
 
@@ -327,6 +345,7 @@ func _prepare_runtime_for_restart() -> void:
 	is_piece_falling = false
 	gravity_timer = 0.0
 	can_hold_current_piece = true
+	is_rogue_choice_pending = false
 
 	if active_piece.has_method("clear_piece"):
 		active_piece.call("clear_piece")
@@ -433,8 +452,11 @@ func get_runtime_result() -> Dictionary:
 		"mode_display_name": mode_state["display_name"],
 		"mode_note": _get_mode_note_for_ui(),
 		"rogue_upgrade_id": mode_state["rogue_upgrade_id"],
-		"rogue_upgrade_display_name": mode_state["rogue_upgrade_display_name"],
+		"rogue_upgrade_display_name": _get_rogue_upgrade_summary(),
 		"remaining_spawn_protection_uses": remaining_spawn_protection_uses,
+		"is_rogue_choice_pending": is_rogue_choice_pending,
+		"rogue_choice_prompt_title": _get_rogue_choice_prompt_title(),
+		"rogue_choice_prompt_hint": _get_rogue_choice_prompt_hint(),
 	}
 
 
@@ -464,6 +486,61 @@ func _setup_mode_state() -> void:
 	mode_state = GameModeState.create(entry_mode, rogue_upgrade_id)
 
 
+func _prepare_rogue_run_state() -> void:
+	rogue_hard_drop_bonus_score = 0
+	rogue_line_clear_bonus_per_row = 0
+	remaining_spawn_protection_uses = 0
+	rogue_selected_upgrade_ids.clear()
+	rogue_selected_upgrade_display_names.clear()
+	is_rogue_choice_pending = false
+	has_triggered_second_rogue_choice = false
+
+	if entry_mode != &"rogue":
+		return
+
+	_apply_rogue_upgrade_effect(StringName(mode_state.get("rogue_upgrade_id", &"")))
+
+
+func _apply_rogue_upgrade_effect(selected_upgrade_id: StringName) -> void:
+	if entry_mode != &"rogue":
+		return
+
+	var upgrade_definition := GameModeState.get_rogue_upgrade_definition(selected_upgrade_id)
+	var normalized_upgrade_id: StringName = upgrade_definition["id"]
+	rogue_selected_upgrade_ids.append(normalized_upgrade_id)
+	rogue_selected_upgrade_display_names.append(String(upgrade_definition["display_name"]))
+	rogue_hard_drop_bonus_score += int(upgrade_definition["hard_drop_bonus_score"])
+	rogue_line_clear_bonus_per_row += int(upgrade_definition["line_clear_bonus_per_row"])
+	remaining_spawn_protection_uses += int(upgrade_definition["spawn_protection_uses"])
+
+
+func _try_trigger_second_rogue_choice() -> void:
+	if entry_mode != &"rogue":
+		return
+	if has_triggered_second_rogue_choice or is_rogue_choice_pending:
+		return
+	if cleared_line_count < rogue_second_choice_clear_lines:
+		return
+	if is_game_over or active_piece_state == null:
+		return
+
+	has_triggered_second_rogue_choice = true
+	is_rogue_choice_pending = true
+	is_piece_falling = false
+	gravity_timer = 0.0
+
+
+func _on_rogue_upgrade_selected(selected_upgrade_id: StringName) -> void:
+	if entry_mode != &"rogue" or not is_rogue_choice_pending or is_game_over:
+		return
+
+	_apply_rogue_upgrade_effect(selected_upgrade_id)
+	is_rogue_choice_pending = false
+	is_piece_falling = active_piece_state != null
+	gravity_timer = 0.0
+	_sync_ui()
+
+
 func _try_consume_spawn_protection(spawn_cells: Array[Vector2i]) -> bool:
 	if entry_mode != &"rogue":
 		return false
@@ -482,7 +559,39 @@ func _try_consume_spawn_protection(spawn_cells: Array[Vector2i]) -> bool:
 func _get_mode_note_for_ui() -> String:
 	var note := String(mode_state.get("mode_note", ""))
 
+	if entry_mode != &"rogue":
+		return note
+
+	if is_rogue_choice_pending:
+		return "%s 当前已触发第二次 3 选 1，请先完成选择后再继续。" % [note]
+
+	if remaining_spawn_protection_uses > 0:
+		return "%s 当前剩余出生保护：%d 次。" % [note, remaining_spawn_protection_uses]
+
 	if entry_mode == &"rogue" and mode_state.get("rogue_upgrade_id", &"") == &"spawn_protection":
 		return "%s 当前剩余出生保护：%d 次。" % [note, remaining_spawn_protection_uses]
 
 	return note
+
+
+func _get_rogue_upgrade_summary() -> String:
+	if rogue_selected_upgrade_display_names.is_empty():
+		return String(mode_state.get("rogue_upgrade_display_name", ""))
+
+	return " / ".join(rogue_selected_upgrade_display_names)
+
+
+func _get_rogue_choice_prompt_title() -> String:
+	if not is_rogue_choice_pending:
+		return ""
+
+	return "Rogue 模式：局内第二次强化 3 选 1"
+
+
+func _get_rogue_choice_prompt_hint() -> String:
+	if not is_rogue_choice_pending:
+		return ""
+
+	return "当前按累计消除 %d 行触发。请选择一个新的本局强化，经典模式不受影响。" % [
+		rogue_second_choice_clear_lines,
+	]

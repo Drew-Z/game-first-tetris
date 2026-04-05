@@ -13,53 +13,84 @@ script = ExtResource("1_s4j1r")
 [node name="TitleLabel" type="Label" parent="."]
 layout_mode = 2
 theme_override_font_sizes/font_size = 24
-text = "Stage 1 Foundation"
+text = "GameUI"
 
 [node name="StageLabel" type="Label" parent="."]
 layout_mode = 2
-text = "标准俄罗斯方块骨架"
+text = "Classic / Rogue Board"
 
 [node name="StatusLabel" type="Label" parent="."]
 layout_mode = 2
 autowrap_mode = 3
-text = "当前只落场景结构与模块边界。"
+text = "Current gameplay summary will appear here."
 
 [node name="InfoLabel" type="Label" parent="."]
 layout_mode = 2
 autowrap_mode = 3
-text = "棋盘、活动方块、流程协调和 UI 已拆分为独立模块。"
+text = "Board, active piece, gameplay flow and HUD stay separated for learning and maintenance."
 
 [node name="CurrentHeader" type="Label" parent="."]
 layout_mode = 2
 theme_override_font_sizes/font_size = 18
-text = "当前状态"
+text = "Current State"
 
 [node name="CurrentStateLabel" type="Label" parent="."]
 layout_mode = 2
 autowrap_mode = 3
-text = "当前状态将在这里显示。"
+text = "Current active piece state will appear here."
 
 [node name="StatsHeader" type="Label" parent="."]
 layout_mode = 2
 theme_override_font_sizes/font_size = 18
-text = "分数 / 等级"
+text = "Score / Level"
 
 [node name="StatsLabel" type="Label" parent="."]
 layout_mode = 2
 autowrap_mode = 3
-text = "分数和等级将在这里显示。"
+text = "Score and level will appear here."
 
 [node name="RogueHeader" type="Label" parent="."]
 visible = false
 layout_mode = 2
 theme_override_font_sizes/font_size = 18
-text = "Rogue 状态"
+text = "Rogue Status"
 
 [node name="RogueStatusLabel" type="Label" parent="."]
 visible = false
 layout_mode = 2
 autowrap_mode = 3
-text = "Rogue 强化状态将在这里显示。"
+text = "Rogue upgrade state will appear here."
+
+[node name="RogueChoicePanel" type="VBoxContainer" parent="."]
+visible = false
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="RogueChoiceTitle" type="Label" parent="RogueChoicePanel"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Rogue: second in-run 3-choice"
+
+[node name="RogueChoiceHint" type="Label" parent="RogueChoicePanel"]
+layout_mode = 2
+autowrap_mode = 3
+text = "Choose one more low-risk upgrade for this run."
+
+[node name="RogueChoiceButtons" type="VBoxContainer" parent="RogueChoicePanel"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="HardDropBonusButton" type="Button" parent="RogueChoicePanel/RogueChoiceButtons"]
+layout_mode = 2
+text = "Hard Drop bonus: +1 score"
+
+[node name="LineClearBonusButton" type="Button" parent="RogueChoicePanel/RogueChoiceButtons"]
+layout_mode = 2
+text = "Line clear bonus: +1 score per row"
+
+[node name="SpawnProtectionButton" type="Button" parent="RogueChoicePanel/RogueChoiceButtons"]
+layout_mode = 2
+text = "Spawn protection: +1 use"
 
 [node name="PreviewHeader" type="Label" parent="."]
 layout_mode = 2
@@ -85,7 +116,7 @@ script = ExtResource("2_w6vse")
 
 [node name="NextPieceLabel" type="Label" parent="PreviewRow/NextPanel"]
 layout_mode = 2
-text = "形状：-"
+text = "Shape: none"
 
 [node name="HoldPanel" type="VBoxContainer" parent="PreviewRow"]
 layout_mode = 2
@@ -102,22 +133,22 @@ script = ExtResource("2_w6vse")
 
 [node name="HoldPieceLabel" type="Label" parent="PreviewRow/HoldPanel"]
 layout_mode = 2
-text = "形状：-"
+text = "Shape: none"
 
 [node name="HintHeader" type="Label" parent="."]
 layout_mode = 2
 theme_override_font_sizes/font_size = 18
-text = "操作 / 状态提示"
+text = "Hints / Status"
 
 [node name="HintLabel" type="Label" parent="."]
 layout_mode = 2
 autowrap_mode = 3
-text = "操作提示将在这里显示。"
+text = "Control hints will appear here."
 
 [node name="SystemLabel" type="Label" parent="."]
 layout_mode = 2
 autowrap_mode = 3
-text = "系统状态将在这里显示。"
+text = "System status will appear here."
 
 [node name="RestartButton" type="Button" parent="."]
 layout_mode = 2
@@ -127,4 +158,4 @@ text = "Restart"
 [node name="NoteLabel" type="Label" parent="."]
 layout_mode = 2
 autowrap_mode = 3
-text = "游戏结束后可用 Restart 重新开始。"
+text = "Use Restart after game over."

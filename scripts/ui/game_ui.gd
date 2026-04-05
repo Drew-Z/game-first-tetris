@@ -1,6 +1,7 @@
 extends VBoxContainer
 
 signal restart_requested
+signal rogue_upgrade_selected(rogue_upgrade_id: StringName)
 
 @onready var stage_label: Label = $StageLabel
 @onready var status_label: Label = $StatusLabel
@@ -8,6 +9,12 @@ signal restart_requested
 @onready var stats_label: Label = $StatsLabel
 @onready var rogue_header: Label = $RogueHeader
 @onready var rogue_status_label: Label = $RogueStatusLabel
+@onready var rogue_choice_panel: VBoxContainer = $RogueChoicePanel
+@onready var rogue_choice_title: Label = $RogueChoicePanel/RogueChoiceTitle
+@onready var rogue_choice_hint: Label = $RogueChoicePanel/RogueChoiceHint
+@onready var rogue_hard_drop_button: Button = $RogueChoicePanel/RogueChoiceButtons/HardDropBonusButton
+@onready var rogue_line_clear_button: Button = $RogueChoicePanel/RogueChoiceButtons/LineClearBonusButton
+@onready var rogue_spawn_protection_button: Button = $RogueChoicePanel/RogueChoiceButtons/SpawnProtectionButton
 @onready var restart_button: Button = $RestartButton
 @onready var next_preview: Control = $PreviewRow/NextPanel/NextPreview
 @onready var hold_preview: Control = $PreviewRow/HoldPanel/HoldPreview
@@ -19,6 +26,10 @@ signal restart_requested
 
 func _ready() -> void:
 	restart_button.pressed.connect(_on_restart_button_pressed)
+	rogue_hard_drop_button.pressed.connect(_on_rogue_hard_drop_pressed)
+	rogue_line_clear_button.pressed.connect(_on_rogue_line_clear_pressed)
+	rogue_spawn_protection_button.pressed.connect(_on_rogue_spawn_protection_pressed)
+	set_rogue_choice_prompt(false)
 
 
 func show_structure_mode(
@@ -109,6 +120,30 @@ func show_game_over_summary(
 
 func _on_restart_button_pressed() -> void:
 	restart_requested.emit()
+
+
+func _on_rogue_hard_drop_pressed() -> void:
+	rogue_upgrade_selected.emit(&"hard_drop_bonus")
+
+
+func _on_rogue_line_clear_pressed() -> void:
+	rogue_upgrade_selected.emit(&"line_clear_bonus")
+
+
+func _on_rogue_spawn_protection_pressed() -> void:
+	rogue_upgrade_selected.emit(&"spawn_protection")
+
+
+func set_rogue_choice_prompt(is_visible: bool, title: String = "", hint: String = "") -> void:
+	rogue_choice_panel.visible = is_visible
+
+	if not is_visible:
+		rogue_choice_title.text = "Rogue 模式：局内第二次强化 3 选 1"
+		rogue_choice_hint.text = ""
+		return
+
+	rogue_choice_title.text = title
+	rogue_choice_hint.text = hint
 
 
 func _show_preview(preview_node: Control, piece_id: StringName) -> void:
