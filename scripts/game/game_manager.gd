@@ -122,7 +122,8 @@ func _sync_ui() -> void:
 			runtime_result.mode_display_name,
 			runtime_result.mode_note,
 			runtime_result.rogue_upgrade_display_name,
-			runtime_result.remaining_spawn_protection_uses
+			runtime_result.remaining_spawn_protection_uses,
+			runtime_result.rogue_upgrade_effects_text
 		)
 	if game_ui.has_method("set_rogue_choice_prompt"):
 		game_ui.call(
@@ -143,7 +144,8 @@ func _sync_ui() -> void:
 				runtime_result.mode_display_name,
 				runtime_result.mode_note,
 				runtime_result.rogue_upgrade_display_name,
-				runtime_result.remaining_spawn_protection_uses
+				runtime_result.remaining_spawn_protection_uses,
+				runtime_result.rogue_upgrade_effects_text
 			)
 		return
 
@@ -167,7 +169,8 @@ func _sync_ui() -> void:
 			runtime_result.mode_display_name,
 			runtime_result.mode_note,
 			runtime_result.rogue_upgrade_display_name,
-			runtime_result.remaining_spawn_protection_uses
+			runtime_result.remaining_spawn_protection_uses,
+			runtime_result.rogue_upgrade_effects_text
 		)
 
 
@@ -454,6 +457,7 @@ func get_runtime_result() -> Dictionary:
 		"rogue_upgrade_id": mode_state["rogue_upgrade_id"],
 		"rogue_upgrade_display_name": _get_rogue_upgrade_summary(),
 		"remaining_spawn_protection_uses": remaining_spawn_protection_uses,
+		"rogue_upgrade_effects_text": _get_rogue_upgrade_effects_text(),
 		"is_rogue_choice_pending": is_rogue_choice_pending,
 		"rogue_choice_prompt_title": _get_rogue_choice_prompt_title(),
 		"rogue_choice_prompt_hint": _get_rogue_choice_prompt_hint(),
@@ -578,7 +582,58 @@ func _get_rogue_upgrade_summary() -> String:
 	if rogue_selected_upgrade_display_names.is_empty():
 		return String(mode_state.get("rogue_upgrade_display_name", ""))
 
-	return " / ".join(rogue_selected_upgrade_display_names)
+	var segments: Array[String] = []
+	var counts := _get_rogue_upgrade_counts()
+
+	for upgrade_id in GameModeState.get_rogue_upgrade_options():
+		var count := int(counts.get(upgrade_id, 0))
+		if count <= 0:
+			continue
+
+		var upgrade_definition := GameModeState.get_rogue_upgrade_definition(upgrade_id)
+		segments.append("%s x%d" % [String(upgrade_definition["display_name"]), count])
+
+	return " / ".join(segments)
+
+
+func _get_rogue_upgrade_counts() -> Dictionary:
+	var counts: Dictionary = {}
+
+	for upgrade_id in rogue_selected_upgrade_ids:
+		counts[upgrade_id] = int(counts.get(upgrade_id, 0)) + 1
+
+	return counts
+
+
+func _get_rogue_upgrade_effects_text() -> String:
+	if entry_mode != &"rogue":
+		return ""
+
+	var counts := _get_rogue_upgrade_counts()
+	if counts.is_empty():
+		return "本局尚未获得 Rogue 强化。"
+
+	var lines: Array[String] = []
+
+	for upgrade_id in GameModeState.get_rogue_upgrade_options():
+		var count := int(counts.get(upgrade_id, 0))
+		if count <= 0:
+			continue
+
+		var upgrade_definition := GameModeState.get_rogue_upgrade_definition(upgrade_id)
+		var line := "- %s x%d" % [String(upgrade_definition["display_name"]), count]
+
+		match upgrade_id:
+			&"hard_drop_bonus":
+				line += "（当前每次 Hard Drop 额外 +%d 分）" % [rogue_hard_drop_bonus_score]
+			&"line_clear_bonus":
+				line += "（当前每消除 1 行额外 +%d 分）" % [rogue_line_clear_bonus_per_row]
+			&"spawn_protection":
+				line += "（当前剩余 %d 次）" % [remaining_spawn_protection_uses]
+
+		lines.append(line)
+
+	return "\n".join(lines)
 
 
 func _get_rogue_choice_prompt_title() -> String:

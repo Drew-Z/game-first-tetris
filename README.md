@@ -75,3 +75,8 @@ Rogue å…ƒç´ ä¼šä½œä¸ºæœªæ¥æ–¹å‘ä¿ç•™ï¼Œä½†ä¸ä¼šåœ¨æœ¬é˜¶æ®µæå‰å®žçŽ°ã€‚
 ```powershell
 D:\Development\Godot\godot.cmd --path D:\workspace4Codex\game-first-tetris
 ```
+
+## Rogue HUD Addendum
+
+- µ±Ç° Rogue Ä£Ê½ HUD ÒÑÄÜÇåÎúÏÔÊ¾±¾¾ÖÒÑÑ¡Ç¿»¯¡¢ÖØ¸´µþ¼Ó´ÎÊý£¬ÒÔ¼°Ò»´Î³öÉú±£»¤µÄÊ£Óà´ÎÊý¡£
+- ¾­µäÄ£Ê½¼ÌÐø±£³ÖÔ­ÓÐ HUD£¬²»ÏÔÊ¾ Rogue ×¨Êô½á¹ûÇø¡£
