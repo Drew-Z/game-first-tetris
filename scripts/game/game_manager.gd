@@ -19,6 +19,7 @@ const TetrominoData := preload("res://scripts/game/data/tetromino_data.gd")
 @export var gravity_step_decrease_per_level: float = 0.08
 @export var minimum_gravity_step_seconds: float = 0.12
 @export var rogue_second_choice_clear_lines: int = 2
+@export var rogue_third_choice_clear_lines: int = 4
 
 var active_piece_state = null
 var next_piece_id: StringName = &""
@@ -40,6 +41,8 @@ var rogue_selected_upgrade_ids: Array[StringName] = []
 var rogue_selected_upgrade_display_names: Array[String] = []
 var is_rogue_choice_pending: bool = false
 var has_triggered_second_rogue_choice: bool = false
+var has_triggered_third_rogue_choice: bool = false
+var pending_rogue_choice_round: int = 0
 
 
 func _ready() -> void:
@@ -316,7 +319,7 @@ func _lock_active_piece() -> void:
 	is_piece_falling = false
 	gravity_timer = 0.0
 	_spawn_new_active_piece()
-	_try_trigger_second_rogue_choice()
+	_try_trigger_next_rogue_choice()
 	_sync_ui()
 
 
@@ -349,6 +352,7 @@ func _prepare_runtime_for_restart() -> void:
 	gravity_timer = 0.0
 	can_hold_current_piece = true
 	is_rogue_choice_pending = false
+	pending_rogue_choice_round = 0
 
 	if active_piece.has_method("clear_piece"):
 		active_piece.call("clear_piece")
@@ -498,6 +502,8 @@ func _prepare_rogue_run_state() -> void:
 	rogue_selected_upgrade_display_names.clear()
 	is_rogue_choice_pending = false
 	has_triggered_second_rogue_choice = false
+	has_triggered_third_rogue_choice = false
+	pending_rogue_choice_round = 0
 
 	if entry_mode != &"rogue":
 		return
@@ -518,17 +524,26 @@ func _apply_rogue_upgrade_effect(selected_upgrade_id: StringName) -> void:
 	remaining_spawn_protection_uses += int(upgrade_definition["spawn_protection_uses"])
 
 
-func _try_trigger_second_rogue_choice() -> void:
+func _try_trigger_next_rogue_choice() -> void:
 	if entry_mode != &"rogue":
-		return
-	if has_triggered_second_rogue_choice or is_rogue_choice_pending:
-		return
-	if cleared_line_count < rogue_second_choice_clear_lines:
 		return
 	if is_game_over or active_piece_state == null:
 		return
+	if is_rogue_choice_pending:
+		return
 
-	has_triggered_second_rogue_choice = true
+	if not has_triggered_second_rogue_choice and cleared_line_count >= rogue_second_choice_clear_lines:
+		has_triggered_second_rogue_choice = true
+		_begin_rogue_choice(2)
+		return
+
+	if not has_triggered_third_rogue_choice and cleared_line_count >= rogue_third_choice_clear_lines:
+		has_triggered_third_rogue_choice = true
+		_begin_rogue_choice(3)
+
+
+func _begin_rogue_choice(choice_round: int) -> void:
+	pending_rogue_choice_round = choice_round
 	is_rogue_choice_pending = true
 	is_piece_falling = false
 	gravity_timer = 0.0
@@ -540,6 +555,7 @@ func _on_rogue_upgrade_selected(selected_upgrade_id: StringName) -> void:
 
 	_apply_rogue_upgrade_effect(selected_upgrade_id)
 	is_rogue_choice_pending = false
+	pending_rogue_choice_round = 0
 	is_piece_falling = active_piece_state != null
 	gravity_timer = 0.0
 	_sync_ui()
@@ -567,7 +583,10 @@ func _get_mode_note_for_ui() -> String:
 		return note
 
 	if is_rogue_choice_pending:
-		return "%s 当前已触发第二次 3 选 1，请先完成选择后再继续。" % [note]
+		return "%s 当前已触发第 %d 次 3 选 1，请先完成选择后再继续。" % [
+			note,
+			pending_rogue_choice_round,
+		]
 
 	if remaining_spawn_protection_uses > 0:
 		return "%s 当前剩余出生保护：%d 次。" % [note, remaining_spawn_protection_uses]
@@ -640,7 +659,7 @@ func _get_rogue_choice_prompt_title() -> String:
 	if not is_rogue_choice_pending:
 		return ""
 
-	return "Rogue 模式：局内第二次强化 3 选 1"
+	return "Rogue 模式：局内第 %d 次强化 3 选 1" % [pending_rogue_choice_round]
 
 
 func _get_rogue_choice_prompt_hint() -> String:
@@ -648,5 +667,15 @@ func _get_rogue_choice_prompt_hint() -> String:
 		return ""
 
 	return "当前按累计消除 %d 行触发。请选择一个新的本局强化，经典模式不受影响。" % [
-		rogue_second_choice_clear_lines,
+		_get_rogue_choice_threshold_for_round(pending_rogue_choice_round),
 	]
+
+
+func _get_rogue_choice_threshold_for_round(choice_round: int) -> int:
+	match choice_round:
+		2:
+			return rogue_second_choice_clear_lines
+		3:
+			return rogue_third_choice_clear_lines
+		_:
+			return rogue_second_choice_clear_lines

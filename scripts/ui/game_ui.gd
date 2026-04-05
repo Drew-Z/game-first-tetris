@@ -141,7 +141,7 @@ func set_rogue_choice_prompt(is_visible: bool, title: String = "", hint: String 
 	rogue_choice_panel.visible = is_visible
 
 	if not is_visible:
-		rogue_choice_title.text = "Rogue 模式：局内第二次强化 3 选 1"
+		rogue_choice_title.text = "Rogue 模式：局内强化 3 选 1"
 		rogue_choice_hint.text = ""
 		return
 
