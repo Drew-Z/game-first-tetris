@@ -47,6 +47,7 @@ func _ready() -> void:
 	rogue_hard_drop_button.pressed.connect(_on_rogue_hard_drop_pressed)
 	rogue_line_clear_button.pressed.connect(_on_rogue_line_clear_pressed)
 	rogue_spawn_protection_button.pressed.connect(_on_rogue_spawn_protection_pressed)
+	_set_help_panel_visible(false)
 	set_rogue_choice_prompt(false)
 	_update_focus_behavior(false, false, false)
 
@@ -209,7 +210,7 @@ func set_rogue_choice_prompt(is_visible: bool, title: String = "", hint: String 
 		_set_rogue_choice_buttons_visible(false)
 		rogue_choice_panel.visible = false
 		_set_help_visibility(false)
-		_update_focus_behavior(false, false, false)
+		_update_focus_behavior(is_session_paused, is_session_game_over, false)
 		return
 
 	rogue_choice_panel.visible = true
@@ -220,15 +221,18 @@ func set_rogue_choice_prompt(is_visible: bool, title: String = "", hint: String 
 		rogue_choice_hint.text = "当前无待选强化。\n下一轮到达阈值后，会在这里出现 3 选 1。"
 		_set_rogue_choice_buttons_visible(false)
 		_set_help_visibility(false)
-		_update_focus_behavior(false, false, false)
+		_update_focus_behavior(is_session_paused, is_session_game_over, false)
 		return
+
+	if help_panel.visible:
+		_set_help_panel_visible(false)
 
 	rogue_choice_title.text = title
 	rogue_choice_hint.text = hint
 	_set_rogue_choice_buttons_visible(true)
 	_set_help_visibility(true, "↑ ↓ 选择强化\nEnter / Space 确认")
 	is_choice_prompt_open = true
-	_update_focus_behavior(false, false, true)
+	_update_focus_behavior(is_session_paused, is_session_game_over, true)
 
 
 func set_session_controls(is_paused: bool, can_pause: bool, is_game_over: bool) -> void:
@@ -238,7 +242,7 @@ func set_session_controls(is_paused: bool, can_pause: bool, is_game_over: bool) 
 	pause_button.disabled = not can_pause
 	restart_button.disabled = false
 	menu_button.disabled = false
-	_update_focus_behavior(is_paused, is_game_over, rogue_choice_panel.visible)
+	_update_focus_behavior(is_paused, is_game_over, is_choice_prompt_open)
 
 	if is_game_over:
 		pause_button.text = "Pause"
@@ -389,6 +393,7 @@ func _set_help_visibility(is_visible: bool, text: String = "") -> void:
 func _set_help_panel_visible(is_visible: bool) -> void:
 	help_panel.visible = is_visible
 	if not is_visible:
+		help_text.text = ""
 		_update_focus_behavior(is_session_paused, is_session_game_over, is_choice_prompt_open)
 		return
 

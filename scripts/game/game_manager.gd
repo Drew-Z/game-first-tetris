@@ -303,6 +303,8 @@ func _try_hard_drop_active_piece() -> void:
 	if active_piece_state == null:
 		return
 
+	_stop_horizontal_repeat()
+
 	while true:
 		var target_origin: Vector2i = active_piece_state.origin + Vector2i.DOWN
 		var target_cells: Array[Vector2i] = TetrominoData.get_global_cells(
@@ -325,6 +327,8 @@ func _try_hard_drop_active_piece() -> void:
 func _try_hold_active_piece() -> void:
 	if active_piece_state == null or not can_hold_current_piece:
 		return
+
+	_stop_horizontal_repeat()
 
 	var current_piece_id: StringName = active_piece_state.piece_id
 	var swapped_piece_id: StringName = hold_piece_id
@@ -350,6 +354,8 @@ func _try_hold_active_piece() -> void:
 func _lock_active_piece() -> void:
 	if active_piece_state == null:
 		return
+
+	_stop_horizontal_repeat()
 
 	var locked_cells: Array[Vector2i] = active_piece_state.get_board_cells()
 	var locked_piece_id: StringName = active_piece_state.piece_id
@@ -410,6 +416,7 @@ func _on_pause_requested() -> void:
 
 func _on_menu_requested() -> void:
 	_clear_runtime_pause()
+	_stop_horizontal_repeat()
 	emit_signal("return_to_menu_requested")
 
 
