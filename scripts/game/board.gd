@@ -9,12 +9,27 @@ const TetrominoData := preload("res://scripts/game/data/tetromino_data.gd")
 @export var board_color: Color = Color("1b2a41")
 @export var grid_color: Color = Color("3a506b")
 @export var border_color: Color = Color("e0e1dd")
+@export var line_clear_flash_duration: float = 0.18
+@export var line_clear_flash_color: Color = Color(1.0, 1.0, 1.0, 0.72)
 
 var board_state = null
+var flashed_rows: Array[int] = []
+var line_clear_flash_timer: float = 0.0
 
 
 func _ready() -> void:
 	setup_board_state()
+	queue_redraw()
+
+
+func _process(delta: float) -> void:
+	if flashed_rows.is_empty():
+		return
+
+	line_clear_flash_timer = maxf(line_clear_flash_timer - delta, 0.0)
+	if line_clear_flash_timer <= 0.0:
+		flashed_rows.clear()
+
 	queue_redraw()
 
 
@@ -45,6 +60,8 @@ func _draw() -> void:
 			var rect := Rect2(grid_to_local(cell), Vector2.ONE * cell_size)
 			draw_rect(rect, TetrominoData.get_color(piece_id), true)
 			draw_rect(rect, border_color, false, 1.0)
+
+	_draw_line_clear_flash()
 
 
 func setup_board_state() -> void:
@@ -127,7 +144,16 @@ func clear_full_rows() -> int:
 	if board_state == null:
 		setup_board_state()
 
-	var cleared_row_count: int = board_state.clear_full_rows()
+	var clear_result: Dictionary = board_state.clear_full_rows_detailed()
+	var cleared_row_count: int = int(clear_result.get("count", 0))
+	var cleared_rows_variant: Array = clear_result.get("rows", [])
+
+	if cleared_row_count > 0:
+		flashed_rows.clear()
+		for row in cleared_rows_variant:
+			flashed_rows.append(int(row))
+		line_clear_flash_timer = line_clear_flash_duration
+
 	queue_redraw()
 	return cleared_row_count
 
@@ -145,4 +171,22 @@ func reset_board_state() -> void:
 		return
 
 	board_state.reset()
+	flashed_rows.clear()
+	line_clear_flash_timer = 0.0
 	queue_redraw()
+
+
+func _draw_line_clear_flash() -> void:
+	if flashed_rows.is_empty() or line_clear_flash_timer <= 0.0:
+		return
+
+	var alpha_scale := line_clear_flash_timer / line_clear_flash_duration
+	var flash_color := line_clear_flash_color
+	flash_color.a *= alpha_scale
+
+	for row in flashed_rows:
+		var rect := Rect2(
+			Vector2(0.0, float(row * cell_size)),
+			Vector2(float(columns * cell_size), float(cell_size))
+		)
+		draw_rect(rect, flash_color, true)
