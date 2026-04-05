@@ -25,6 +25,7 @@ signal rogue_upgrade_selected(rogue_upgrade_id: StringName)
 @onready var hold_preview: Control = $PreviewRow/HoldPanel/HoldPreview
 @onready var next_piece_label: Label = $PreviewRow/NextPanel/NextPieceLabel
 @onready var hold_piece_label: Label = $PreviewRow/HoldPanel/HoldPieceLabel
+@onready var hint_header: Label = $HintHeader
 @onready var hint_label: Label = $HintLabel
 @onready var system_label: Label = $SystemLabel
 
@@ -58,7 +59,7 @@ func show_structure_mode(
 	current_mode_id = mode_id
 	current_mode_display_name = mode_display_name
 	stage_label.text = mode_display_name
-	status_label.text = "棋盘：%d x %d\n主循环已就绪" % [columns, rows]
+	status_label.text = "%d x %d 棋盘" % [columns, rows]
 	current_state_label.text = "当前方块：--\n状态：等待开始\nHold：可用"
 	stats_label.text = "等级：1  分数：0\n已锁定：0"
 	_update_rogue_status(
@@ -69,8 +70,8 @@ func show_structure_mode(
 		rogue_active_carry_over_upgrade_display_name,
 		rogue_next_run_carry_over_upgrade_display_name
 	)
-	hint_label.text = "← → 移动  ↑ 旋转  ↓ 软降\nSpace 硬降  C Hold  Esc 暂停"
-	system_label.text = "准备开始"
+	_set_help_visibility(false)
+	system_label.text = ""
 	_set_preview_meta(next_piece_label, &"")
 	_set_preview_meta(hold_piece_label, &"")
 	set_rogue_choice_prompt(false)
@@ -122,7 +123,7 @@ func show_piece_runtime_summary(
 		rogue_active_carry_over_upgrade_display_name,
 		rogue_next_run_carry_over_upgrade_display_name
 	)
-	hint_label.text = "← → 移动  ↑ 旋转  ↓ 软降\nSpace 硬降  C Hold  Esc 暂停"
+	_set_help_visibility(false)
 	system_label.text = _get_runtime_system_text(is_falling, mode_note)
 
 
@@ -157,7 +158,7 @@ func show_game_over_summary(
 		rogue_active_carry_over_upgrade_display_name,
 		rogue_next_run_carry_over_upgrade_display_name
 	)
-	hint_label.text = "Restart 重新开局\nMain Menu 返回菜单"
+	_set_help_visibility(true, "Restart 重新开局\nMain Menu 返回菜单")
 	system_label.text = "游戏结束"
 
 
@@ -194,6 +195,7 @@ func set_rogue_choice_prompt(is_visible: bool, title: String = "", hint: String 
 		rogue_choice_hint.text = ""
 		_set_rogue_choice_buttons_visible(false)
 		rogue_choice_panel.visible = false
+		_set_help_visibility(false)
 		_update_focus_behavior(false, false, false)
 		return
 
@@ -201,14 +203,16 @@ func set_rogue_choice_prompt(is_visible: bool, title: String = "", hint: String 
 
 	if not is_visible:
 		rogue_choice_title.text = "Rogue 选择进度"
-		rogue_choice_hint.text = "当前无待选强化。\n达到下一轮条件后，会在这里出现 3 选 1。"
+		rogue_choice_hint.text = "当前无待选强化。\n下一轮到达阈值后，会在这里出现 3 选 1。"
 		_set_rogue_choice_buttons_visible(false)
+		_set_help_visibility(false)
 		_update_focus_behavior(false, false, false)
 		return
 
 	rogue_choice_title.text = title
 	rogue_choice_hint.text = hint
 	_set_rogue_choice_buttons_visible(true)
+	_set_help_visibility(true, "↑ ↓ 选择强化\nEnter / Space 确认")
 	_update_focus_behavior(false, false, true)
 
 
@@ -223,6 +227,7 @@ func set_session_controls(is_paused: bool, can_pause: bool, is_game_over: bool) 
 		pause_button.text = "Pause"
 		pause_button.disabled = true
 	elif is_paused:
+		_set_help_visibility(true, "Resume 继续\nRestart 重开\nMain Menu 返回菜单")
 		system_label.text = "已暂停"
 
 
@@ -282,13 +287,12 @@ func _update_rogue_status(
 	if rogue_next_run_carry_over_upgrade_display_name != "":
 		next_carry_text = rogue_next_run_carry_over_upgrade_display_name
 
-	rogue_status_label.text = "已选强化：%s\n本局带入：%s\n下一局带入：%s\n出生保护：%s" % [
+	rogue_status_label.text = "已选强化：%s\n本局带入：%s\n下一局带入：%s" % [
 		upgrade_summary,
 		active_carry_text,
 		next_carry_text,
-		protection_text,
 	]
-	rogue_effects_label.text = "强化效果：\n%s" % [effects_text]
+	rogue_effects_label.text = "强化效果：\n%s\n出生保护：%s" % [effects_text, protection_text]
 
 
 func _update_focus_behavior(is_paused: bool, is_game_over: bool, is_choice_prompt_visible: bool) -> void:
@@ -352,7 +356,12 @@ func _get_runtime_system_text(is_falling: bool, mode_note: String) -> String:
 	if not is_falling:
 		return "等待锁定结算"
 
-	if mode_note != "":
-		return mode_note
-
 	return "游戏进行中"
+
+
+func _set_help_visibility(is_visible: bool, text: String = "") -> void:
+	hint_header.visible = is_visible
+	hint_label.visible = is_visible
+
+	if is_visible:
+		hint_label.text = text

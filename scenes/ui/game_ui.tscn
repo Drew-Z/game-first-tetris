@@ -11,6 +11,7 @@ theme_override_constants/separation = 12
 script = ExtResource("1_s4j1r")
 
 [node name="TitleLabel" type="Label" parent="."]
+visible = false
 layout_mode = 2
 theme_override_font_sizes/font_size = 24
 text = "Tetris"
@@ -20,7 +21,7 @@ layout_mode = 2
 text = "Classic / Rogue Board"
 
 [node name="StatusLabel" type="Label" parent="."]
-custom_minimum_size = Vector2(0, 72)
+custom_minimum_size = Vector2(0, 36)
 layout_mode = 2
 autowrap_mode = 3
 text = "Current gameplay summary will appear here."
@@ -37,7 +38,7 @@ theme_override_font_sizes/font_size = 18
 text = "当前状态"
 
 [node name="CurrentStateLabel" type="Label" parent="."]
-custom_minimum_size = Vector2(0, 64)
+custom_minimum_size = Vector2(0, 44)
 layout_mode = 2
 autowrap_mode = 3
 text = "Current active piece state will appear here."
@@ -61,14 +62,14 @@ text = "Rogue"
 
 [node name="RogueStatusLabel" type="Label" parent="."]
 visible = false
-custom_minimum_size = Vector2(0, 84)
+custom_minimum_size = Vector2(0, 64)
 layout_mode = 2
 autowrap_mode = 3
 text = "Rogue upgrade state will appear here."
 
 [node name="RogueEffectsLabel" type="Label" parent="."]
 visible = false
-custom_minimum_size = Vector2(0, 92)
+custom_minimum_size = Vector2(0, 72)
 layout_mode = 2
 autowrap_mode = 3
 text = "Rogue upgrade details will appear here."
@@ -154,18 +155,20 @@ layout_mode = 2
 text = "Shape: none"
 
 [node name="HintHeader" type="Label" parent="."]
+visible = false
 layout_mode = 2
 theme_override_font_sizes/font_size = 18
 text = "操作提示"
 
 [node name="HintLabel" type="Label" parent="."]
-custom_minimum_size = Vector2(0, 64)
+visible = false
+custom_minimum_size = Vector2(0, 36)
 layout_mode = 2
 autowrap_mode = 3
 text = "Control hints will appear here."
 
 [node name="SystemLabel" type="Label" parent="."]
-custom_minimum_size = Vector2(0, 64)
+custom_minimum_size = Vector2(0, 40)
 layout_mode = 2
 autowrap_mode = 3
 text = "System status will appear here."

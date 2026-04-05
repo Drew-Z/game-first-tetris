@@ -139,3 +139,8 @@ D:\Development\Godot\godot.cmd --path D:\workspace4Codex\game-first-tetris
 - 当前 HUD 已开始区分“正式玩家信息”和“开发期调试信息”。
 - 正式玩家长期需要的信息现在优先保留为：模式摘要、当前状态、分数 / 等级、Next / Hold、Rogue 摘要、简短操作提示、关键系统状态。
 - 原本偏开发期的长段说明、内部流程提示和维护性描述已做降级或隐藏处理，让界面开始更接近正式产品 HUD。
+## Cross-Platform HUD Structure Addendum
+
+- 当前 HUD 已开始按 Web / 安卓 / Windows 三端共用的最小结构收敛。
+- 主 HUD 常驻信息现在优先保留为：模式摘要、当前状态、分数 / 等级、Next / Hold、Rogue 摘要（仅 Rogue 模式）。
+- Rogue 选择区、暂停 / 结束时的操作提示和关键系统状态改为按需显示；长段说明文字与详细机制解释不再适合作为主界面常驻信息。
