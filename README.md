@@ -94,3 +94,10 @@ D:\Development\Godot\godot.cmd --path D:\workspace4Codex\game-first-tetris
 - 当前 `feature/rogue-prototype` 已在前两轮 Rogue 实验基础上，补上最小局间成长壳层与局间承接规则清晰化。
 - 当前建议先把这条第三轮 Rogue 扩展链路作为一个里程碑收口，再决定下一轮是继续扩选择轮次、扩强化池，还是补更明确的局间成长方向。
 - 暂不建议继续把第四次选择、新的强化效果、永久存档、货币系统或大规模 Rogue HUD 改造塞进这一轮。
+
+## Rogue Prototype Assessment Addendum
+
+- 当前 `feature/rogue-prototype` 已经具备一个可试玩、可评估方向的 Rogue 原型状态。
+- 当前原型已经包含：经典 / Rogue 双入口、三轮固定触发选择、低侵入强化效果、一次出生保护、Rogue HUD 结果可见性，以及最小局间承接壳层。
+- 这些内容已经足够支持一轮认真试玩，用来判断 Rogue 方向是否值得继续扩展。
+- 当前最推荐的下一步不是立刻继续加功能，而是先做试玩 / 复盘整理，再决定下一轮是扩强化池、扩选择轮次，还是深化局间成长规则。
