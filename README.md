@@ -134,3 +134,8 @@ D:\Development\Godot\godot.cmd --path D:\workspace4Codex\game-first-tetris
 - 当前已对右侧 HUD 做一轮信息架构整理：把模式摘要、当前状态、分数 / 等级、Rogue 状态、Rogue 选择区、Next / Hold、操作提示、系统状态分得更清楚。
 - 当前已通过固定关键动态区块的最小高度，优先减少 Hold / Next、Rogue 状态和说明文字引发的布局抖动。
 - 当前 Rogue 选择区在 Rogue 模式下会固定占位，未触发时显示等待说明，触发时切换为更明确的 3 选 1 提示。
+## HUD Product Layer Addendum
+
+- 当前 HUD 已开始区分“正式玩家信息”和“开发期调试信息”。
+- 正式玩家长期需要的信息现在优先保留为：模式摘要、当前状态、分数 / 等级、Next / Hold、Rogue 摘要、简短操作提示、关键系统状态。
+- 原本偏开发期的长段说明、内部流程提示和维护性描述已做降级或隐藏处理，让界面开始更接近正式产品 HUD。

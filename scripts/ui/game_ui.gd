@@ -57,9 +57,9 @@ func show_structure_mode(
 ) -> void:
 	current_mode_id = mode_id
 	current_mode_display_name = mode_display_name
-	stage_label.text = "%s %d x %d" % [mode_display_name, columns, rows]
-	status_label.text = "模式：%s\n棋盘：%d x %d\n规则：标准主循环已就绪。%s" % [mode_display_name, columns, rows, mode_note]
-	current_state_label.text = "活动方块：--\n位置 / 旋转：--\n状态 / Hold：等待开始"
+	stage_label.text = mode_display_name
+	status_label.text = "棋盘：%d x %d\n主循环已就绪" % [columns, rows]
+	current_state_label.text = "当前方块：--\n状态：等待开始\nHold：可用"
 	stats_label.text = "等级：1  分数：0\n已锁定：0"
 	_update_rogue_status(
 		mode_id,
@@ -69,8 +69,8 @@ func show_structure_mode(
 		rogue_active_carry_over_upgrade_display_name,
 		rogue_next_run_carry_over_upgrade_display_name
 	)
-	hint_label.text = "移动：← →\n旋转 / 软降：↑ ↓\nHard Drop / Hold：Space / C"
-	system_label.text = "当前状态：可开始游玩\n当前模式：%s\n菜单：Pause / Restart / Main Menu 可用" % [mode_display_name]
+	hint_label.text = "← → 移动  ↑ 旋转  ↓ 软降\nSpace 硬降  C Hold  Esc 暂停"
+	system_label.text = "准备开始"
 	_set_preview_meta(next_piece_label, &"")
 	_set_preview_meta(hold_piece_label, &"")
 	set_rogue_choice_prompt(false)
@@ -104,10 +104,8 @@ func show_piece_runtime_summary(
 	_show_preview(hold_preview, hold_piece_id)
 	_set_preview_meta(next_piece_label, next_piece_id)
 	_set_preview_meta(hold_piece_label, hold_piece_id)
-	current_state_label.text = "活动方块：%s\n位置：%s，旋转：r%d\n状态：%s，Hold：%s" % [
+	current_state_label.text = "当前方块：%s\n状态：%s\nHold：%s" % [
 		piece_id,
-		origin,
-		rotation_index,
 		fall_status,
 		hold_status,
 	]
@@ -124,8 +122,8 @@ func show_piece_runtime_summary(
 		rogue_active_carry_over_upgrade_display_name,
 		rogue_next_run_carry_over_upgrade_display_name
 	)
-	hint_label.text = "移动：← →\n旋转 / 软降：↑ ↓\nHard Drop / Hold：Space / C"
-	system_label.text = "当前状态：游戏进行中\n当前模式：%s\n系统提示：%s" % [mode_display_name, mode_note]
+	hint_label.text = "← → 移动  ↑ 旋转  ↓ 软降\nSpace 硬降  C Hold  Esc 暂停"
+	system_label.text = _get_runtime_system_text(is_falling, mode_note)
 
 
 func show_game_over_summary(
@@ -149,7 +147,7 @@ func show_game_over_summary(
 		hold_preview.call("clear_preview")
 	_set_preview_meta(next_piece_label, &"")
 	_set_preview_meta(hold_piece_label, &"")
-	current_state_label.text = "活动方块：--\n位置 / 旋转：--\n状态 / Hold：游戏结束"
+	current_state_label.text = "当前方块：--\n状态：游戏结束\nHold：不可用"
 	stats_label.text = "等级：%d  分数：%d\n已锁定：%d" % [level, score, locked_count]
 	_update_rogue_status(
 		mode_id,
@@ -159,8 +157,8 @@ func show_game_over_summary(
 		rogue_active_carry_over_upgrade_display_name,
 		rogue_next_run_carry_over_upgrade_display_name
 	)
-	hint_label.text = "当前可用：Restart\n当前可用：Main Menu\n继续试玩：重新开局即可"
-	system_label.text = "当前状态：游戏结束\n当前模式：%s\n原因：出生位置已被占用。%s" % [mode_display_name, mode_note]
+	hint_label.text = "Restart 重新开局\nMain Menu 返回菜单"
+	system_label.text = "游戏结束"
 
 
 func _on_restart_button_pressed() -> void:
@@ -195,12 +193,15 @@ func set_rogue_choice_prompt(is_visible: bool, title: String = "", hint: String 
 		rogue_choice_title.text = "Rogue 选择"
 		rogue_choice_hint.text = ""
 		_set_rogue_choice_buttons_visible(false)
+		rogue_choice_panel.visible = false
 		_update_focus_behavior(false, false, false)
 		return
 
+	rogue_choice_panel.visible = true
+
 	if not is_visible:
 		rogue_choice_title.text = "Rogue 选择进度"
-		rogue_choice_hint.text = "当前无待选强化。\n达到下一轮条件后，会在这里进入 3 选 1。"
+		rogue_choice_hint.text = "当前无待选强化。\n达到下一轮条件后，会在这里出现 3 选 1。"
 		_set_rogue_choice_buttons_visible(false)
 		_update_focus_behavior(false, false, false)
 		return
@@ -222,7 +223,7 @@ func set_session_controls(is_paused: bool, can_pause: bool, is_game_over: bool) 
 		pause_button.text = "Pause"
 		pause_button.disabled = true
 	elif is_paused:
-		system_label.text = "当前状态：游戏已暂停\n当前模式：%s\n可用操作：Resume / Restart / Main Menu" % [current_mode_display_name]
+		system_label.text = "已暂停"
 
 
 func _show_preview(preview_node: Control, piece_id: StringName) -> void:
@@ -281,7 +282,7 @@ func _update_rogue_status(
 	if rogue_next_run_carry_over_upgrade_display_name != "":
 		next_carry_text = rogue_next_run_carry_over_upgrade_display_name
 
-	rogue_status_label.text = "模式：Rogue\n已选强化：%s\n本局带入：%s\n下一局带入：%s\n出生保护：%s" % [
+	rogue_status_label.text = "已选强化：%s\n本局带入：%s\n下一局带入：%s\n出生保护：%s" % [
 		upgrade_summary,
 		active_carry_text,
 		next_carry_text,
@@ -342,3 +343,16 @@ func _set_rogue_choice_buttons_visible(is_visible: bool) -> void:
 	rogue_hard_drop_button.visible = is_visible
 	rogue_line_clear_button.visible = is_visible
 	rogue_spawn_protection_button.visible = is_visible
+
+
+func _get_runtime_system_text(is_falling: bool, mode_note: String) -> String:
+	if current_mode_id == &"rogue" and rogue_hard_drop_button.visible:
+		return "Rogue 强化进行中"
+
+	if not is_falling:
+		return "等待锁定结算"
+
+	if mode_note != "":
+		return mode_note
+
+	return "游戏进行中"

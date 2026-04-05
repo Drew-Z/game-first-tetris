@@ -13,7 +13,7 @@ script = ExtResource("1_s4j1r")
 [node name="TitleLabel" type="Label" parent="."]
 layout_mode = 2
 theme_override_font_sizes/font_size = 24
-text = "GameUI"
+text = "Tetris"
 
 [node name="StageLabel" type="Label" parent="."]
 layout_mode = 2
@@ -26,6 +26,7 @@ autowrap_mode = 3
 text = "Current gameplay summary will appear here."
 
 [node name="InfoLabel" type="Label" parent="."]
+visible = false
 layout_mode = 2
 autowrap_mode = 3
 text = "Board, active piece, gameplay flow and HUD stay separated for learning and maintenance."
@@ -33,7 +34,7 @@ text = "Board, active piece, gameplay flow and HUD stay separated for learning a
 [node name="CurrentHeader" type="Label" parent="."]
 layout_mode = 2
 theme_override_font_sizes/font_size = 18
-text = "Current State"
+text = "当前状态"
 
 [node name="CurrentStateLabel" type="Label" parent="."]
 custom_minimum_size = Vector2(0, 64)
@@ -44,7 +45,7 @@ text = "Current active piece state will appear here."
 [node name="StatsHeader" type="Label" parent="."]
 layout_mode = 2
 theme_override_font_sizes/font_size = 18
-text = "Score / Level"
+text = "分数 / 等级"
 
 [node name="StatsLabel" type="Label" parent="."]
 custom_minimum_size = Vector2(0, 44)
@@ -56,7 +57,7 @@ text = "Score and level will appear here."
 visible = false
 layout_mode = 2
 theme_override_font_sizes/font_size = 18
-text = "Rogue Status"
+text = "Rogue"
 
 [node name="RogueStatusLabel" type="Label" parent="."]
 visible = false
@@ -108,7 +109,7 @@ text = "Spawn protection: +1 use"
 [node name="PreviewHeader" type="Label" parent="."]
 layout_mode = 2
 theme_override_font_sizes/font_size = 18
-text = "Next / Hold"
+text = "预览"
 
 [node name="PreviewRow" type="HBoxContainer" parent="."]
 layout_mode = 2
@@ -155,7 +156,7 @@ text = "Shape: none"
 [node name="HintHeader" type="Label" parent="."]
 layout_mode = 2
 theme_override_font_sizes/font_size = 18
-text = "Hints / Status"
+text = "操作提示"
 
 [node name="HintLabel" type="Label" parent="."]
 custom_minimum_size = Vector2(0, 64)
@@ -186,6 +187,7 @@ layout_mode = 2
 text = "Restart"
 
 [node name="NoteLabel" type="Label" parent="."]
+visible = false
 layout_mode = 2
 autowrap_mode = 3
 text = "Use Restart after game over."
