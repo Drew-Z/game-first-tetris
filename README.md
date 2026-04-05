@@ -75,3 +75,9 @@ D:\Development\Godot\godot.cmd --path D:\workspace4Codex\game-first-tetris
 - 当前 feature/rogue-prototype 已在第一轮实验链路基础上完成第二轮扩展：局内第二次选择、局内第三次固定触发选择，以及轮次 / 阈值集中配置。
 - 当前建议先把这条 Rogue 扩展链路作为第二轮实验里程碑收口，再决定下一轮扩展方向。
 - 暂不建议继续把第四次选择、更多强化种类、复杂成长系统或大规模 Rogue HUD 改造塞进这一轮。
+
+## Rogue Meta Shell Addendum
+
+- 当前 `feature/rogue-prototype` 已补上一个最小局间成长壳层：上一局最后一次获得的强化，会作为下一局 Rogue 的额外起始奖励。
+- 这层壳子只负责提供最小的跨局延续感，不引入货币、商店或复杂局间成长系统。
+- 经典模式不受这层局间成长影响。

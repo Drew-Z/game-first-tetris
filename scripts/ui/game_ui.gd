@@ -40,14 +40,23 @@ func show_structure_mode(
 	mode_note: String = "",
 	rogue_upgrade_display_name: String = "",
 	remaining_spawn_protection_uses: int = 0,
-	rogue_upgrade_effects_text: String = ""
+	rogue_upgrade_effects_text: String = "",
+	rogue_active_carry_over_upgrade_display_name: String = "",
+	rogue_next_run_carry_over_upgrade_display_name: String = ""
 ) -> void:
 	stage_label.text = "%s %d x %d" % [mode_display_name, columns, rows]
 	status_label.text = "当前支持静态格子碰撞、左右移动、自动下落、软降、Hard Drop、Hold、基础旋转、触底锁定、继续生成，以及出生判定失败后的结束状态。默认按键：Space=Hard Drop，C=Hold。%s" % [mode_note]
 	restart_button.disabled = true
 	current_state_label.text = "活动方块状态将在这里显示。"
 	stats_label.text = "分数与等级将在这里显示。"
-	_update_rogue_status(mode_id, rogue_upgrade_display_name, remaining_spawn_protection_uses, rogue_upgrade_effects_text)
+	_update_rogue_status(
+		mode_id,
+		rogue_upgrade_display_name,
+		remaining_spawn_protection_uses,
+		rogue_upgrade_effects_text,
+		rogue_active_carry_over_upgrade_display_name,
+		rogue_next_run_carry_over_upgrade_display_name
+	)
 	hint_label.text = "操作提示：左右移动、上旋转、下软降、Space 硬降、C Hold。"
 	system_label.text = "状态提示：当前游戏可正常运行。当前模式：%s。" % [mode_display_name]
 	_set_preview_meta(next_piece_label, &"")
@@ -70,7 +79,9 @@ func show_piece_runtime_summary(
 	mode_note: String = "",
 	rogue_upgrade_display_name: String = "",
 	remaining_spawn_protection_uses: int = 0,
-	rogue_upgrade_effects_text: String = ""
+	rogue_upgrade_effects_text: String = "",
+	rogue_active_carry_over_upgrade_display_name: String = "",
+	rogue_next_run_carry_over_upgrade_display_name: String = ""
 ) -> void:
 	var fall_status := "下落中" if is_falling else "已到底停止"
 	var hold_status := "可用" if can_hold_current_piece else "本轮已用"
@@ -91,7 +102,14 @@ func show_piece_runtime_summary(
 		score,
 		locked_count,
 	]
-	_update_rogue_status(mode_id, rogue_upgrade_display_name, remaining_spawn_protection_uses, rogue_upgrade_effects_text)
+	_update_rogue_status(
+		mode_id,
+		rogue_upgrade_display_name,
+		remaining_spawn_protection_uses,
+		rogue_upgrade_effects_text,
+		rogue_active_carry_over_upgrade_display_name,
+		rogue_next_run_carry_over_upgrade_display_name
+	)
 	hint_label.text = "操作提示：左右移动、上旋转、下软降、Space 硬降、C Hold。"
 	system_label.text = "状态提示：当前游戏进行中。当前模式：%s。%s" % [mode_display_name, mode_note]
 
@@ -105,7 +123,9 @@ func show_game_over_summary(
 	mode_note: String = "",
 	rogue_upgrade_display_name: String = "",
 	remaining_spawn_protection_uses: int = 0,
-	rogue_upgrade_effects_text: String = ""
+	rogue_upgrade_effects_text: String = "",
+	rogue_active_carry_over_upgrade_display_name: String = "",
+	rogue_next_run_carry_over_upgrade_display_name: String = ""
 ) -> void:
 	restart_button.disabled = false
 	if next_preview.has_method("clear_preview"):
@@ -116,7 +136,14 @@ func show_game_over_summary(
 	_set_preview_meta(hold_piece_label, &"")
 	current_state_label.text = "当前状态：无活动方块。"
 	stats_label.text = "等级：%d，分数：%d，已锁定数量：%d" % [level, score, locked_count]
-	_update_rogue_status(mode_id, rogue_upgrade_display_name, remaining_spawn_protection_uses, rogue_upgrade_effects_text)
+	_update_rogue_status(
+		mode_id,
+		rogue_upgrade_display_name,
+		remaining_spawn_protection_uses,
+		rogue_upgrade_effects_text,
+		rogue_active_carry_over_upgrade_display_name,
+		rogue_next_run_carry_over_upgrade_display_name
+	)
 	hint_label.text = "操作提示：可点击 Restart 重新开始。"
 	system_label.text = "状态提示：游戏结束，出生位置被静态格子占用。当前已停止输入、下落和继续生成。当前模式：%s。%s" % [mode_display_name, mode_note]
 
@@ -171,7 +198,9 @@ func _update_rogue_status(
 	mode_id: StringName,
 	rogue_upgrade_display_name: String,
 	remaining_spawn_protection_uses: int,
-	rogue_upgrade_effects_text: String = ""
+	rogue_upgrade_effects_text: String = "",
+	rogue_active_carry_over_upgrade_display_name: String = "",
+	rogue_next_run_carry_over_upgrade_display_name: String = ""
 ) -> void:
 	var is_rogue_mode := mode_id == &"rogue"
 	rogue_header.visible = is_rogue_mode
@@ -193,8 +222,18 @@ func _update_rogue_status(
 	if effects_text == "":
 		effects_text = "本局尚未获得 Rogue 强化。"
 
-	rogue_status_label.text = "当前模式：Rogue 模式\n已选强化：%s\n出生保护剩余：%s\n强化结果：\n%s" % [
+	var active_carry_text := "无"
+	if rogue_active_carry_over_upgrade_display_name != "":
+		active_carry_text = rogue_active_carry_over_upgrade_display_name
+
+	var next_carry_text := "本局结束后生成"
+	if rogue_next_run_carry_over_upgrade_display_name != "":
+		next_carry_text = rogue_next_run_carry_over_upgrade_display_name
+
+	rogue_status_label.text = "当前模式：Rogue 模式\n已选强化：%s\n本局带入：%s\n下一局带入：%s\n出生保护剩余：%s\n强化结果：\n%s" % [
 		upgrade_summary,
+		active_carry_text,
+		next_carry_text,
 		protection_text,
 		effects_text,
 	]

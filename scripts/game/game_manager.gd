@@ -43,6 +43,8 @@ var rogue_selected_upgrade_display_names: Array[String] = []
 var is_rogue_choice_pending: bool = false
 var triggered_rogue_choice_rounds: Array[int] = []
 var pending_rogue_choice_round: int = 0
+var rogue_active_run_carry_over_upgrade_id: StringName = &""
+var rogue_next_run_carry_over_upgrade_id: StringName = &""
 
 
 func _ready() -> void:
@@ -126,7 +128,9 @@ func _sync_ui() -> void:
 			runtime_result.mode_note,
 			runtime_result.rogue_upgrade_display_name,
 			runtime_result.remaining_spawn_protection_uses,
-			runtime_result.rogue_upgrade_effects_text
+			runtime_result.rogue_upgrade_effects_text,
+			runtime_result.rogue_active_carry_over_upgrade_display_name,
+			runtime_result.rogue_next_run_carry_over_upgrade_display_name
 		)
 	if game_ui.has_method("set_rogue_choice_prompt"):
 		game_ui.call(
@@ -145,10 +149,12 @@ func _sync_ui() -> void:
 				runtime_result.current_level,
 				runtime_result.mode_id,
 				runtime_result.mode_display_name,
-				runtime_result.mode_note,
-				runtime_result.rogue_upgrade_display_name,
-				runtime_result.remaining_spawn_protection_uses,
-				runtime_result.rogue_upgrade_effects_text
+			runtime_result.mode_note,
+			runtime_result.rogue_upgrade_display_name,
+			runtime_result.remaining_spawn_protection_uses,
+			runtime_result.rogue_upgrade_effects_text,
+			runtime_result.rogue_active_carry_over_upgrade_display_name,
+			runtime_result.rogue_next_run_carry_over_upgrade_display_name
 			)
 		return
 
@@ -173,7 +179,9 @@ func _sync_ui() -> void:
 			runtime_result.mode_note,
 			runtime_result.rogue_upgrade_display_name,
 			runtime_result.remaining_spawn_protection_uses,
-			runtime_result.rogue_upgrade_effects_text
+			runtime_result.rogue_upgrade_effects_text,
+			runtime_result.rogue_active_carry_over_upgrade_display_name,
+			runtime_result.rogue_next_run_carry_over_upgrade_display_name
 		)
 
 
@@ -328,6 +336,7 @@ func _enter_game_over() -> void:
 	is_piece_falling = false
 	is_game_over = true
 	gravity_timer = 0.0
+	_capture_rogue_meta_progression_on_game_over()
 
 	if active_piece.has_method("clear_piece"):
 		active_piece.call("clear_piece")
@@ -354,6 +363,7 @@ func _prepare_runtime_for_restart() -> void:
 	is_rogue_choice_pending = false
 	triggered_rogue_choice_rounds.clear()
 	pending_rogue_choice_round = 0
+	rogue_active_run_carry_over_upgrade_id = &""
 
 	if active_piece.has_method("clear_piece"):
 		active_piece.call("clear_piece")
@@ -483,6 +493,8 @@ func get_runtime_result() -> Dictionary:
 		"rogue_upgrade_display_name": _get_rogue_upgrade_summary(),
 		"remaining_spawn_protection_uses": remaining_spawn_protection_uses,
 		"rogue_upgrade_effects_text": _get_rogue_upgrade_effects_text(),
+		"rogue_active_carry_over_upgrade_display_name": _get_rogue_upgrade_display_name(rogue_active_run_carry_over_upgrade_id),
+		"rogue_next_run_carry_over_upgrade_display_name": _get_rogue_upgrade_display_name(rogue_next_run_carry_over_upgrade_id),
 		"is_rogue_choice_pending": is_rogue_choice_pending,
 		"rogue_choice_prompt_title": _get_rogue_choice_prompt_title(),
 		"rogue_choice_prompt_hint": _get_rogue_choice_prompt_hint(),
@@ -524,9 +536,16 @@ func _prepare_rogue_run_state() -> void:
 	is_rogue_choice_pending = false
 	triggered_rogue_choice_rounds.clear()
 	pending_rogue_choice_round = 0
+	rogue_active_run_carry_over_upgrade_id = &""
 
 	if entry_mode != &"rogue":
+		rogue_next_run_carry_over_upgrade_id = &""
 		return
+
+	rogue_active_run_carry_over_upgrade_id = rogue_next_run_carry_over_upgrade_id
+	rogue_next_run_carry_over_upgrade_id = &""
+	if rogue_active_run_carry_over_upgrade_id != &"":
+		_apply_rogue_upgrade_effect(rogue_active_run_carry_over_upgrade_id)
 
 	_apply_rogue_upgrade_effect(StringName(mode_state.get("rogue_upgrade_id", &"")))
 	triggered_rogue_choice_rounds.append(ROGUE_PRE_RUN_CHOICE_ROUND)
@@ -543,6 +562,28 @@ func _apply_rogue_upgrade_effect(selected_upgrade_id: StringName) -> void:
 	rogue_hard_drop_bonus_score += int(upgrade_definition["hard_drop_bonus_score"])
 	rogue_line_clear_bonus_per_row += int(upgrade_definition["line_clear_bonus_per_row"])
 	remaining_spawn_protection_uses += int(upgrade_definition["spawn_protection_uses"])
+
+
+func _capture_rogue_meta_progression_on_game_over() -> void:
+	if entry_mode != &"rogue":
+		return
+
+	rogue_next_run_carry_over_upgrade_id = _get_next_run_carry_over_upgrade_id()
+
+
+func _get_next_run_carry_over_upgrade_id() -> StringName:
+	if rogue_selected_upgrade_ids.is_empty():
+		return &""
+
+	return rogue_selected_upgrade_ids[rogue_selected_upgrade_ids.size() - 1]
+
+
+func _get_rogue_upgrade_display_name(rogue_upgrade_id: StringName) -> String:
+	if rogue_upgrade_id == &"":
+		return ""
+
+	var upgrade_definition := GameModeState.get_rogue_upgrade_definition(rogue_upgrade_id)
+	return String(upgrade_definition["display_name"])
 
 
 func _try_trigger_next_rogue_choice() -> void:
