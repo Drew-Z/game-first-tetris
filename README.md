@@ -88,3 +88,9 @@ D:\Development\Godot\godot.cmd --path D:\workspace4Codex\game-first-tetris
 - 当前规则明确限定为：它只服务于 Rogue 的 Restart 闭环，不是永久存档，也不会跨到经典模式。
 - 当前只允许保留一个待带入奖励；一局结束时，会记录本局最后一次获得的强化，作为下一局 Rogue 的唯一额外起始奖励。
 - 下一局 Rogue 开始后，这个待带入奖励会被消费并清空待带入位；如果切到经典模式，当前 Rogue 局间带入状态会被清空。
+
+## Rogue Third Milestone Addendum
+
+- 当前 `feature/rogue-prototype` 已在前两轮 Rogue 实验基础上，补上最小局间成长壳层与局间承接规则清晰化。
+- 当前建议先把这条第三轮 Rogue 扩展链路作为一个里程碑收口，再决定下一轮是继续扩选择轮次、扩强化池，还是补更明确的局间成长方向。
+- 暂不建议继续把第四次选择、新的强化效果、永久存档、货币系统或大规模 Rogue HUD 改造塞进这一轮。
