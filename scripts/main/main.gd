@@ -1,9 +1,13 @@
 extends Control
 
 const GAME_ROOT_SCENE := preload("res://scenes/game/game_root.tscn")
+const MENU_PANEL_MIN_WIDTH := 320.0
+const MENU_PANEL_COMFORTABLE_WIDTH := 420.0
+const MENU_OUTER_MARGIN := 16.0
 
 @onready var menu_overlay: Control = $MenuOverlay
 @onready var mode_host: Control = $ModeHost
+@onready var menu_panel: PanelContainer = $MenuOverlay/MenuScroll/MenuCenter/MenuPanel
 @onready var mode_select_group: VBoxContainer = $MenuOverlay/MenuScroll/MenuCenter/MenuPanel/MenuMargin/MenuContent/ModeSelectGroup
 @onready var rogue_select_group: VBoxContainer = $MenuOverlay/MenuScroll/MenuCenter/MenuPanel/MenuMargin/MenuContent/RogueSelectGroup
 @onready var classic_button: Button = $MenuOverlay/MenuScroll/MenuCenter/MenuPanel/MenuMargin/MenuContent/ModeSelectGroup/ClassicButton
@@ -16,12 +20,18 @@ const GAME_ROOT_SCENE := preload("res://scenes/game/game_root.tscn")
 
 func _ready() -> void:
 	_show_mode_select()
+	_apply_menu_layout()
 	classic_button.pressed.connect(_on_classic_button_pressed)
 	rogue_button.pressed.connect(_on_rogue_button_pressed)
 	hard_drop_bonus_button.pressed.connect(_on_hard_drop_bonus_button_pressed)
 	line_clear_bonus_button.pressed.connect(_on_line_clear_bonus_button_pressed)
 	spawn_protection_button.pressed.connect(_on_spawn_protection_button_pressed)
 	back_button.pressed.connect(_on_back_button_pressed)
+
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_RESIZED:
+		_apply_menu_layout()
 
 
 func _on_classic_button_pressed() -> void:
@@ -92,3 +102,16 @@ func _show_rogue_select() -> void:
 	menu_overlay.visible = true
 	mode_select_group.visible = false
 	rogue_select_group.visible = true
+
+
+func _apply_menu_layout() -> void:
+	if menu_panel == null:
+		return
+
+	var available_width := maxf(size.x - MENU_OUTER_MARGIN * 2.0, 0.0)
+	var target_width := clampf(
+		available_width,
+		MENU_PANEL_MIN_WIDTH,
+		MENU_PANEL_COMFORTABLE_WIDTH
+	)
+	menu_panel.custom_minimum_size.x = target_width
