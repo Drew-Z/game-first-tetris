@@ -144,3 +144,8 @@ D:\Development\Godot\godot.cmd --path D:\workspace4Codex\game-first-tetris
 - 当前 HUD 已开始按 Web / 安卓 / Windows 三端共用的最小结构收敛。
 - 主 HUD 常驻信息现在优先保留为：模式摘要、当前状态、分数 / 等级、Next / Hold、Rogue 摘要（仅 Rogue 模式）。
 - Rogue 选择区、暂停 / 结束时的操作提示和关键系统状态改为按需显示；长段说明文字与详细机制解释不再适合作为主界面常驻信息。
+## Responsive HUD And Help Entry Addendum
+
+- 当前已为主布局补上最小可用的响应式兜底：小窗口下整体内容可通过滚动访问。
+- 当前已增加 Help 二级入口，用来承接详细操作说明与模式说明；主 HUD 继续保持精简，不再承载长段说明文字。
+- 当前方向是先让 Web / 安卓 / Windows 三端都能成立同一套最小展示结构，而不是一次做完整设置页或帮助系统。

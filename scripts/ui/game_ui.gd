@@ -21,6 +21,9 @@ signal rogue_upgrade_selected(rogue_upgrade_id: StringName)
 @onready var pause_button: Button = $SessionButtons/PauseButton
 @onready var restart_button: Button = $RestartButton
 @onready var menu_button: Button = $SessionButtons/MenuButton
+@onready var help_button: Button = $SessionButtons/HelpButton
+@onready var help_panel: VBoxContainer = $HelpPanel
+@onready var help_text: Label = $HelpPanel/HelpText
 @onready var next_preview: Control = $PreviewRow/NextPanel/NextPreview
 @onready var hold_preview: Control = $PreviewRow/HoldPanel/HoldPreview
 @onready var next_piece_label: Label = $PreviewRow/NextPanel/NextPieceLabel
@@ -31,12 +34,16 @@ signal rogue_upgrade_selected(rogue_upgrade_id: StringName)
 
 var current_mode_id: StringName = &"classic"
 var current_mode_display_name: String = "经典模式"
+var is_session_paused: bool = false
+var is_session_game_over: bool = false
+var is_choice_prompt_open: bool = false
 
 
 func _ready() -> void:
 	pause_button.pressed.connect(_on_pause_button_pressed)
 	restart_button.pressed.connect(_on_restart_button_pressed)
 	menu_button.pressed.connect(_on_menu_button_pressed)
+	help_button.pressed.connect(_on_help_button_pressed)
 	rogue_hard_drop_button.pressed.connect(_on_rogue_hard_drop_pressed)
 	rogue_line_clear_button.pressed.connect(_on_rogue_line_clear_pressed)
 	rogue_spawn_protection_button.pressed.connect(_on_rogue_spawn_protection_pressed)
@@ -71,6 +78,7 @@ func show_structure_mode(
 		rogue_next_run_carry_over_upgrade_display_name
 	)
 	_set_help_visibility(false)
+	_set_help_panel_visible(false)
 	system_label.text = ""
 	_set_preview_meta(next_piece_label, &"")
 	_set_preview_meta(hold_piece_label, &"")
@@ -174,6 +182,10 @@ func _on_menu_button_pressed() -> void:
 	menu_requested.emit()
 
 
+func _on_help_button_pressed() -> void:
+	_set_help_panel_visible(not help_panel.visible)
+
+
 func _on_rogue_hard_drop_pressed() -> void:
 	rogue_upgrade_selected.emit(&"hard_drop_bonus")
 
@@ -191,6 +203,7 @@ func set_rogue_choice_prompt(is_visible: bool, title: String = "", hint: String 
 	rogue_choice_panel.visible = is_rogue_mode
 
 	if not is_rogue_mode:
+		is_choice_prompt_open = false
 		rogue_choice_title.text = "Rogue 选择"
 		rogue_choice_hint.text = ""
 		_set_rogue_choice_buttons_visible(false)
@@ -202,6 +215,7 @@ func set_rogue_choice_prompt(is_visible: bool, title: String = "", hint: String 
 	rogue_choice_panel.visible = true
 
 	if not is_visible:
+		is_choice_prompt_open = false
 		rogue_choice_title.text = "Rogue 选择进度"
 		rogue_choice_hint.text = "当前无待选强化。\n下一轮到达阈值后，会在这里出现 3 选 1。"
 		_set_rogue_choice_buttons_visible(false)
@@ -213,10 +227,13 @@ func set_rogue_choice_prompt(is_visible: bool, title: String = "", hint: String 
 	rogue_choice_hint.text = hint
 	_set_rogue_choice_buttons_visible(true)
 	_set_help_visibility(true, "↑ ↓ 选择强化\nEnter / Space 确认")
+	is_choice_prompt_open = true
 	_update_focus_behavior(false, false, true)
 
 
 func set_session_controls(is_paused: bool, can_pause: bool, is_game_over: bool) -> void:
+	is_session_paused = is_paused
+	is_session_game_over = is_game_over
 	pause_button.text = "Resume" if is_paused else "Pause"
 	pause_button.disabled = not can_pause
 	restart_button.disabled = false
@@ -300,6 +317,7 @@ func _update_focus_behavior(is_paused: bool, is_game_over: bool, is_choice_promp
 	_set_button_focus_enabled(pause_button, allow_session_button_focus and not pause_button.disabled)
 	_set_button_focus_enabled(restart_button, allow_session_button_focus and not restart_button.disabled)
 	_set_button_focus_enabled(menu_button, allow_session_button_focus and not menu_button.disabled)
+	_set_button_focus_enabled(help_button, allow_session_button_focus or help_panel.visible)
 
 	_set_button_focus_enabled(rogue_hard_drop_button, is_choice_prompt_visible)
 	_set_button_focus_enabled(rogue_line_clear_button, is_choice_prompt_visible)
@@ -335,6 +353,7 @@ func _release_hud_button_focus() -> void:
 		pause_button,
 		restart_button,
 		menu_button,
+		help_button,
 		rogue_hard_drop_button,
 		rogue_line_clear_button,
 		rogue_spawn_protection_button,
@@ -365,3 +384,28 @@ func _set_help_visibility(is_visible: bool, text: String = "") -> void:
 
 	if is_visible:
 		hint_label.text = text
+
+
+func _set_help_panel_visible(is_visible: bool) -> void:
+	help_panel.visible = is_visible
+	if not is_visible:
+		_update_focus_behavior(is_session_paused, is_session_game_over, is_choice_prompt_open)
+		return
+
+	help_text.text = _get_help_panel_text()
+	help_button.grab_focus()
+	_update_focus_behavior(is_session_paused, is_session_game_over, is_choice_prompt_open)
+
+
+func _get_help_panel_text() -> String:
+	var sections: Array[String] = [
+		"操作：← → 移动，↑ 旋转，↓ 软降，Space 硬降，C Hold，Esc 暂停。",
+		"流程：方块下落、锁定、消行、继续生成；游戏结束后可 Restart 或返回主菜单。",
+	]
+
+	if current_mode_id == &"rogue":
+		sections.append("Rogue：开局前与局内会触发 3 选 1；已选强化与带入结果会显示在 Rogue 信息区。")
+	else:
+		sections.append("经典模式：保持标准主循环，不包含 Rogue 强化与局间带入。")
+
+	return "\n\n".join(sections)
