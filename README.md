@@ -69,3 +69,9 @@ D:\Development\Godot\godot.cmd --path D:\workspace4Codex\game-first-tetris
 - 第一轮选择：开局前固定触发。
 - 第二轮选择：累计消除 2 行后固定触发。
 - 第三轮选择：累计消除 4 行后固定触发。
+
+## Rogue Second Milestone Addendum
+
+- 当前 feature/rogue-prototype 已在第一轮实验链路基础上完成第二轮扩展：局内第二次选择、局内第三次固定触发选择，以及轮次 / 阈值集中配置。
+- 当前建议先把这条 Rogue 扩展链路作为第二轮实验里程碑收口，再决定下一轮扩展方向。
+- 暂不建议继续把第四次选择、更多强化种类、复杂成长系统或大规模 Rogue HUD 改造塞进这一轮。
