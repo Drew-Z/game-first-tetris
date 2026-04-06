@@ -4,30 +4,33 @@
 [ext_resource type="Script" path="res://scripts/ui/tetromino_preview.gd" id="2_w6vse"]
 
 [node name="GameUI" type="VBoxContainer"]
-custom_minimum_size = Vector2(280, 672)
+custom_minimum_size = Vector2(280, 0)
 offset_right = 280.0
 offset_bottom = 672.0
 theme_override_constants/separation = 12
 script = ExtResource("1_s4j1r")
 
 [node name="TitleLabel" type="Label" parent="."]
+visible = false
 layout_mode = 2
 theme_override_font_sizes/font_size = 24
-text = "Stage 1 Foundation"
+text = "Tetris"
 
 [node name="StageLabel" type="Label" parent="."]
 layout_mode = 2
-text = "标准俄罗斯方块骨架"
+text = "经典 / Rogue 模式"
 
 [node name="StatusLabel" type="Label" parent="."]
+custom_minimum_size = Vector2(0, 36)
 layout_mode = 2
 autowrap_mode = 3
-text = "当前只落场景结构与模块边界。"
+text = "这里会显示当前模式摘要。"
 
 [node name="InfoLabel" type="Label" parent="."]
+visible = false
 layout_mode = 2
 autowrap_mode = 3
-text = "棋盘、活动方块、流程协调和 UI 已拆分为独立模块。"
+text = "隐藏的开发说明占位。"
 
 [node name="CurrentHeader" type="Label" parent="."]
 layout_mode = 2
@@ -35,9 +38,10 @@ theme_override_font_sizes/font_size = 18
 text = "当前状态"
 
 [node name="CurrentStateLabel" type="Label" parent="."]
+custom_minimum_size = Vector2(0, 44)
 layout_mode = 2
 autowrap_mode = 3
-text = "当前状态将在这里显示。"
+text = "这里会显示当前方块状态。"
 
 [node name="StatsHeader" type="Label" parent="."]
 layout_mode = 2
@@ -45,20 +49,75 @@ theme_override_font_sizes/font_size = 18
 text = "分数 / 等级"
 
 [node name="StatsLabel" type="Label" parent="."]
+custom_minimum_size = Vector2(0, 44)
 layout_mode = 2
 autowrap_mode = 3
-text = "分数和等级将在这里显示。"
+text = "这里会显示分数和等级。"
+
+[node name="RogueHeader" type="Label" parent="."]
+visible = false
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Rogue"
+
+[node name="RogueStatusLabel" type="Label" parent="."]
+visible = false
+custom_minimum_size = Vector2(0, 64)
+layout_mode = 2
+autowrap_mode = 3
+text = "这里会显示 Rogue 摘要。"
+
+[node name="RogueEffectsLabel" type="Label" parent="."]
+visible = false
+custom_minimum_size = Vector2(0, 72)
+layout_mode = 2
+autowrap_mode = 3
+text = "这里会显示 Rogue 强化效果。"
+
+[node name="RogueChoicePanel" type="VBoxContainer" parent="."]
+visible = false
+custom_minimum_size = Vector2(0, 176)
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="RogueChoiceTitle" type="Label" parent="RogueChoicePanel"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Rogue 选择"
+
+[node name="RogueChoiceHint" type="Label" parent="RogueChoicePanel"]
+custom_minimum_size = Vector2(0, 44)
+layout_mode = 2
+autowrap_mode = 3
+text = "这里会显示当前待选强化。"
+
+[node name="RogueChoiceButtons" type="VBoxContainer" parent="RogueChoicePanel"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="HardDropBonusButton" type="Button" parent="RogueChoicePanel/RogueChoiceButtons"]
+layout_mode = 2
+text = "硬降奖励：+1 分"
+
+[node name="LineClearBonusButton" type="Button" parent="RogueChoicePanel/RogueChoiceButtons"]
+layout_mode = 2
+text = "消行奖励：每行 +1 分"
+
+[node name="SpawnProtectionButton" type="Button" parent="RogueChoicePanel/RogueChoiceButtons"]
+layout_mode = 2
+text = "出生保护：+1 次"
 
 [node name="PreviewHeader" type="Label" parent="."]
 layout_mode = 2
 theme_override_font_sizes/font_size = 18
-text = "Next / Hold"
+text = "预览"
 
-[node name="PreviewRow" type="HBoxContainer" parent="."]
+[node name="PreviewRow" type="BoxContainer" parent="."]
 layout_mode = 2
 theme_override_constants/separation = 12
 
 [node name="NextPanel" type="VBoxContainer" parent="PreviewRow"]
+custom_minimum_size = Vector2(112, 0)
 layout_mode = 2
 size_flags_horizontal = 3
 
@@ -72,10 +131,12 @@ layout_mode = 2
 script = ExtResource("2_w6vse")
 
 [node name="NextPieceLabel" type="Label" parent="PreviewRow/NextPanel"]
+custom_minimum_size = Vector2(96, 0)
 layout_mode = 2
-text = "形状：-"
+text = "形状：--"
 
 [node name="HoldPanel" type="VBoxContainer" parent="PreviewRow"]
+custom_minimum_size = Vector2(112, 0)
 layout_mode = 2
 size_flags_horizontal = 3
 
@@ -89,30 +150,67 @@ layout_mode = 2
 script = ExtResource("2_w6vse")
 
 [node name="HoldPieceLabel" type="Label" parent="PreviewRow/HoldPanel"]
+custom_minimum_size = Vector2(96, 0)
 layout_mode = 2
-text = "形状：-"
+text = "形状：--"
 
 [node name="HintHeader" type="Label" parent="."]
+visible = false
 layout_mode = 2
 theme_override_font_sizes/font_size = 18
-text = "操作 / 状态提示"
+text = "操作提示"
 
 [node name="HintLabel" type="Label" parent="."]
+visible = false
+custom_minimum_size = Vector2(0, 36)
 layout_mode = 2
 autowrap_mode = 3
-text = "操作提示将在这里显示。"
+text = "这里会显示操作提示。"
 
 [node name="SystemLabel" type="Label" parent="."]
+custom_minimum_size = Vector2(0, 40)
 layout_mode = 2
 autowrap_mode = 3
-text = "系统状态将在这里显示。"
+text = "这里会显示系统状态。"
+
+[node name="SessionButtons" type="BoxContainer" parent="."]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="PauseButton" type="Button" parent="SessionButtons"]
+layout_mode = 2
+text = "Pause"
+
+[node name="MenuButton" type="Button" parent="SessionButtons"]
+layout_mode = 2
+text = "Main Menu"
+
+[node name="HelpButton" type="Button" parent="SessionButtons"]
+layout_mode = 2
+text = "Help"
 
 [node name="RestartButton" type="Button" parent="."]
 layout_mode = 2
-disabled = true
 text = "Restart"
 
-[node name="NoteLabel" type="Label" parent="."]
+[node name="HelpPanel" type="VBoxContainer" parent="."]
+visible = false
+custom_minimum_size = Vector2(0, 156)
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="HelpTitle" type="Label" parent="HelpPanel"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "帮助"
+
+[node name="HelpText" type="Label" parent="HelpPanel"]
 layout_mode = 2
 autowrap_mode = 3
-text = "游戏结束后可用 Restart 重新开始。"
+text = "详细帮助会显示在这里。"
+
+[node name="NoteLabel" type="Label" parent="."]
+visible = false
+layout_mode = 2
+autowrap_mode = 3
+text = "Use Restart after game over."
