@@ -1,18 +1,22 @@
 extends Control
 
 const STACK_LAYOUT_BREAKPOINT_WIDTH: float = 920.0
+const ULTRA_NARROW_COMPACT_MAX_WIDTH: float = 360.0
 const ANDROID_PORTRAIT_MAX_WIDTH: float = 430.0
 const NARROW_ANDROID_PORTRAIT_MAX_WIDTH: float = 400.0
 const ANDROID_PORTRAIT_MIN_HEIGHT: float = 800.0
 const DESKTOP_LAYOUT_MIN_SIZE := Vector2(704, 672)
 const STACK_LAYOUT_MIN_SIZE := Vector2(400, 1080)
+const ULTRA_NARROW_STACK_LAYOUT_MIN_SIZE := Vector2(280, 760)
 const PORTRAIT_STACK_LAYOUT_MIN_SIZE := Vector2(320, 860)
 const NARROW_PORTRAIT_STACK_LAYOUT_MIN_SIZE := Vector2(300, 820)
 const PLAYFIELD_PANEL_MIN_SIZE := Vector2(400, 672)
+const ULTRA_NARROW_PLAYFIELD_PANEL_MIN_SIZE := Vector2(248, 432)
 const PORTRAIT_PLAYFIELD_PANEL_MIN_SIZE := Vector2(304, 520)
 const NARROW_PORTRAIT_PLAYFIELD_PANEL_MIN_SIZE := Vector2(284, 484)
 const SIDEBAR_PANEL_MIN_WIDTH := 280.0
 const DEFAULT_BOARD_CELL_SIZE := 32
+const ULTRA_NARROW_BOARD_CELL_SIZE := 18
 const PORTRAIT_BOARD_CELL_SIZE := 24
 const NARROW_PORTRAIT_BOARD_CELL_SIZE := 22
 const DEFAULT_PLAYFIELD_MARGIN_LEFT := 24
@@ -54,26 +58,29 @@ func _apply_responsive_layout() -> void:
 		return
 
 	var is_compact := size.x < STACK_LAYOUT_BREAKPOINT_WIDTH
+	var is_ultra_narrow_compact := is_compact and size.x <= ULTRA_NARROW_COMPACT_MAX_WIDTH
 	var is_android_portrait := is_compact and size.x <= ANDROID_PORTRAIT_MAX_WIDTH and size.y >= ANDROID_PORTRAIT_MIN_HEIGHT
 	var is_narrow_android_portrait := is_android_portrait and size.x <= NARROW_ANDROID_PORTRAIT_MAX_WIDTH
 	layout.vertical = is_compact
-	layout.custom_minimum_size = NARROW_PORTRAIT_STACK_LAYOUT_MIN_SIZE if is_narrow_android_portrait else (PORTRAIT_STACK_LAYOUT_MIN_SIZE if is_android_portrait else (STACK_LAYOUT_MIN_SIZE if is_compact else DESKTOP_LAYOUT_MIN_SIZE))
-	playfield_panel.custom_minimum_size = NARROW_PORTRAIT_PLAYFIELD_PANEL_MIN_SIZE if is_narrow_android_portrait else (PORTRAIT_PLAYFIELD_PANEL_MIN_SIZE if is_android_portrait else PLAYFIELD_PANEL_MIN_SIZE)
+	layout.custom_minimum_size = ULTRA_NARROW_STACK_LAYOUT_MIN_SIZE if is_ultra_narrow_compact else (NARROW_PORTRAIT_STACK_LAYOUT_MIN_SIZE if is_narrow_android_portrait else (PORTRAIT_STACK_LAYOUT_MIN_SIZE if is_android_portrait else (STACK_LAYOUT_MIN_SIZE if is_compact else DESKTOP_LAYOUT_MIN_SIZE)))
+	playfield_panel.custom_minimum_size = ULTRA_NARROW_PLAYFIELD_PANEL_MIN_SIZE if is_ultra_narrow_compact else (NARROW_PORTRAIT_PLAYFIELD_PANEL_MIN_SIZE if is_narrow_android_portrait else (PORTRAIT_PLAYFIELD_PANEL_MIN_SIZE if is_android_portrait else PLAYFIELD_PANEL_MIN_SIZE))
 	sidebar_panel.custom_minimum_size = Vector2(SIDEBAR_PANEL_MIN_WIDTH, 0)
-	_apply_playfield_density(is_android_portrait, is_narrow_android_portrait)
+	_apply_playfield_density(is_ultra_narrow_compact, is_android_portrait, is_narrow_android_portrait)
 
 	if game_ui != null and game_ui.has_method("set_compact_layout"):
-		game_ui.call("set_compact_layout", is_compact, is_android_portrait)
+		game_ui.call("set_compact_layout", is_compact, is_android_portrait, is_ultra_narrow_compact)
 
 
-func _apply_playfield_density(is_android_portrait: bool, is_narrow_android_portrait: bool) -> void:
-	_set_playfield_margin(is_android_portrait)
+func _apply_playfield_density(is_ultra_narrow_compact: bool, is_android_portrait: bool, is_narrow_android_portrait: bool) -> void:
+	_set_playfield_margin(is_android_portrait or is_ultra_narrow_compact)
 	var board_cell_size := DEFAULT_BOARD_CELL_SIZE
-	if is_android_portrait:
+	if is_ultra_narrow_compact:
+		board_cell_size = ULTRA_NARROW_BOARD_CELL_SIZE
+	elif is_android_portrait:
 		board_cell_size = NARROW_PORTRAIT_BOARD_CELL_SIZE if is_narrow_android_portrait else PORTRAIT_BOARD_CELL_SIZE
 	_set_playfield_cell_size(board_cell_size)
 	if playfield != null:
-		playfield.position = PORTRAIT_PLAYFIELD_OFFSET if is_android_portrait else DEFAULT_PLAYFIELD_OFFSET
+		playfield.position = PORTRAIT_PLAYFIELD_OFFSET if (is_android_portrait or is_ultra_narrow_compact) else DEFAULT_PLAYFIELD_OFFSET
 
 
 func _set_playfield_margin(is_android_portrait: bool) -> void:
