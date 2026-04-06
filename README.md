@@ -133,6 +133,10 @@ D:\Development\Godot\Godot_v4.6.1-stable_win64_console.exe --headless --path D:\
   - 小尺寸下看起来更顺
   - 正文字号仍可读
   - Help / 会话按钮 / Rogue 选择按钮保持可点
+- 当前复验结论：
+  - `360 x 640`：经典模式、Rogue 模式、Help 继续保持可用，且比上一轮更稳
+  - `393 x 852`：经典模式、Rogue 模式、Help 继续保持可用
+  - `412 x 915`：顺带复验未发现回退
 
 ## 极窄尺寸当前收敛方式
 
