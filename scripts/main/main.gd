@@ -1,6 +1,7 @@
 extends Control
 
 const GAME_ROOT_SCENE := preload("res://scenes/game/game_root.tscn")
+const ULTRA_NARROW_MENU_MAX_WIDTH := 360.0
 const MENU_PANEL_MIN_WIDTH := 320.0
 const MENU_PANEL_COMFORTABLE_WIDTH := 420.0
 const MENU_OUTER_MARGIN := 16.0
@@ -8,14 +9,21 @@ const MENU_OUTER_MARGIN := 16.0
 @onready var menu_overlay: Control = $MenuOverlay
 @onready var mode_host: Control = $ModeHost
 @onready var menu_panel: PanelContainer = $MenuOverlay/MenuScroll/MenuCenter/MenuPanel
+@onready var menu_margin: MarginContainer = $MenuOverlay/MenuScroll/MenuCenter/MenuPanel/MenuMargin
+@onready var menu_content: VBoxContainer = $MenuOverlay/MenuScroll/MenuCenter/MenuPanel/MenuMargin/MenuContent
+@onready var title_label: Label = $MenuOverlay/MenuScroll/MenuCenter/MenuPanel/MenuMargin/MenuContent/TitleLabel
+@onready var subtitle_label: Label = $MenuOverlay/MenuScroll/MenuCenter/MenuPanel/MenuMargin/MenuContent/SubtitleLabel
 @onready var mode_select_group: VBoxContainer = $MenuOverlay/MenuScroll/MenuCenter/MenuPanel/MenuMargin/MenuContent/ModeSelectGroup
 @onready var rogue_select_group: VBoxContainer = $MenuOverlay/MenuScroll/MenuCenter/MenuPanel/MenuMargin/MenuContent/RogueSelectGroup
+@onready var rogue_select_title: Label = $MenuOverlay/MenuScroll/MenuCenter/MenuPanel/MenuMargin/MenuContent/RogueSelectGroup/RogueSelectTitle
+@onready var rogue_select_hint: Label = $MenuOverlay/MenuScroll/MenuCenter/MenuPanel/MenuMargin/MenuContent/RogueSelectGroup/RogueSelectHint
 @onready var classic_button: Button = $MenuOverlay/MenuScroll/MenuCenter/MenuPanel/MenuMargin/MenuContent/ModeSelectGroup/ClassicButton
 @onready var rogue_button: Button = $MenuOverlay/MenuScroll/MenuCenter/MenuPanel/MenuMargin/MenuContent/ModeSelectGroup/RogueButton
 @onready var hard_drop_bonus_button: Button = $MenuOverlay/MenuScroll/MenuCenter/MenuPanel/MenuMargin/MenuContent/RogueSelectGroup/HardDropBonusButton
 @onready var line_clear_bonus_button: Button = $MenuOverlay/MenuScroll/MenuCenter/MenuPanel/MenuMargin/MenuContent/RogueSelectGroup/LineClearBonusButton
 @onready var spawn_protection_button: Button = $MenuOverlay/MenuScroll/MenuCenter/MenuPanel/MenuMargin/MenuContent/RogueSelectGroup/SpawnProtectionButton
 @onready var back_button: Button = $MenuOverlay/MenuScroll/MenuCenter/MenuPanel/MenuMargin/MenuContent/RogueSelectGroup/BackButton
+@onready var note_label: Label = $MenuOverlay/MenuScroll/MenuCenter/MenuPanel/MenuMargin/MenuContent/NoteLabel
 
 
 func _ready() -> void:
@@ -108,6 +116,7 @@ func _apply_menu_layout() -> void:
 	if menu_panel == null:
 		return
 
+	var is_ultra_narrow := size.x <= ULTRA_NARROW_MENU_MAX_WIDTH
 	var available_width := maxf(size.x - MENU_OUTER_MARGIN * 2.0, 0.0)
 	var target_width := clampf(
 		available_width,
@@ -115,3 +124,41 @@ func _apply_menu_layout() -> void:
 		MENU_PANEL_COMFORTABLE_WIDTH
 	)
 	menu_panel.custom_minimum_size.x = target_width
+
+	if menu_margin != null:
+		var side_margin := 16 if is_ultra_narrow else 24
+		var vertical_margin := 16 if is_ultra_narrow else 24
+		menu_margin.add_theme_constant_override("margin_left", side_margin)
+		menu_margin.add_theme_constant_override("margin_top", vertical_margin)
+		menu_margin.add_theme_constant_override("margin_right", side_margin)
+		menu_margin.add_theme_constant_override("margin_bottom", vertical_margin)
+
+	if menu_content != null:
+		menu_content.add_theme_constant_override("separation", 12 if is_ultra_narrow else 16)
+
+	if title_label != null:
+		title_label.add_theme_font_size_override("font_size", 24 if is_ultra_narrow else 28)
+
+	if rogue_select_title != null:
+		rogue_select_title.add_theme_font_size_override("font_size", 18 if is_ultra_narrow else 20)
+
+	if subtitle_label != null:
+		subtitle_label.text = "请选择进入方式。经典模式保持标准体验；Rogue 模式继续承接实验内容。" if is_ultra_narrow else "请选择进入方式。经典模式保持当前标准俄罗斯方块体验，Rogue 模式继续承载实验内容。"
+
+	if rogue_select_hint != null:
+		rogue_select_hint.text = "当前是最小强化入口；经典模式不受影响，Rogue 每局开局前先选 1 项。" if is_ultra_narrow else "当前只落第一批最小强化入口。经典模式不受影响，Rogue 模式每局开始前先选一项。"
+
+	if note_label != null:
+		note_label.text = "当前 Rogue 不改经典主循环，只先落最小强化入口。" if is_ultra_narrow else "当前 Rogue 模式不会改写经典模式主循环，只先落最小可用强化入口。"
+
+	for button in [
+		classic_button,
+		rogue_button,
+		hard_drop_bonus_button,
+		line_clear_bonus_button,
+		spawn_protection_button,
+		back_button,
+	]:
+		if button == null:
+			continue
+		button.custom_minimum_size.y = 44.0 if is_ultra_narrow else 0.0

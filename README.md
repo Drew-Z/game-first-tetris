@@ -128,6 +128,8 @@ D:\Development\Godot\Godot_v4.6.1-stable_win64_console.exe --headless --path D:\
 - 当前进入超窄紧凑态后，会继续做这些收敛：
   - 棋盘再缩一档
   - Playfield 最小高度再压低
+  - 主菜单改用更短文案
+  - 主菜单和 Help / 会话按钮提升最小点击高度
   - HUD 改用更小的间距和预览尺寸
   - Help 使用更短的首屏帮助文案
 - 当前目标已经达到：

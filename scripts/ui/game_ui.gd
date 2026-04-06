@@ -38,6 +38,8 @@ signal help_visibility_changed(is_visible: bool)
 @onready var system_label: Label = $SystemLabel
 @onready var preview_row: BoxContainer = $PreviewRow
 @onready var session_buttons: BoxContainer = $SessionButtons
+@onready var next_label: Label = $PreviewRow/NextPanel/NextLabel
+@onready var hold_label: Label = $PreviewRow/HoldPanel/HoldLabel
 
 var current_mode_id: StringName = &"classic"
 var current_mode_display_name: String = "经典模式"
@@ -84,8 +86,8 @@ func show_structure_mode(
 	current_mode_display_name = mode_display_name
 	stage_label.text = mode_display_name
 	status_label.text = "%d x %d 棋盘" % [columns, rows]
-	current_state_label.text = "当前方块：--\n状态：等待开始\nHold：可用"
-	stats_label.text = "等级：1  分数：0\n已锁定：0"
+	current_state_label.text = "方块：--\n状态：等待\nHold：可用" if is_ultra_narrow_layout else "当前方块：--\n状态：等待开始\nHold：可用"
+	stats_label.text = "等级：1  分：0\n锁定：0" if is_ultra_narrow_layout else "等级：1  分数：0\n已锁定：0"
 	_update_rogue_status(
 		mode_id,
 		rogue_upgrade_display_name,
@@ -142,12 +144,12 @@ func show_piece_runtime_summary(
 	_show_preview(hold_preview, hold_piece_id)
 	_set_preview_meta(next_piece_label, next_piece_id)
 	_set_preview_meta(hold_piece_label, hold_piece_id)
-	current_state_label.text = "当前方块：%s\n状态：%s\nHold：%s" % [
+	current_state_label.text = ("方块：%s\n状态：%s\nHold：%s" if is_ultra_narrow_layout else "当前方块：%s\n状态：%s\nHold：%s") % [
 		piece_id,
 		fall_status,
 		hold_status,
 	]
-	stats_label.text = "等级：%d  分数：%d\n已锁定：%d" % [
+	stats_label.text = ("等级：%d  分：%d\n锁定：%d" if is_ultra_narrow_layout else "等级：%d  分数：%d\n已锁定：%d") % [
 		level,
 		score,
 		locked_count,
@@ -192,8 +194,8 @@ func show_game_over_summary(
 		hold_preview.call("clear_preview")
 	_set_preview_meta(next_piece_label, &"")
 	_set_preview_meta(hold_piece_label, &"")
-	current_state_label.text = "当前方块：--\n状态：游戏结束\nHold：不可用"
-	stats_label.text = "等级：%d  分数：%d\n已锁定：%d" % [level, score, locked_count]
+	current_state_label.text = "方块：--\n状态：结束\nHold：不可用" if is_ultra_narrow_layout else "当前方块：--\n状态：游戏结束\nHold：不可用"
+	stats_label.text = ("等级：%d  分：%d\n锁定：%d" if is_ultra_narrow_layout else "等级：%d  分数：%d\n已锁定：%d") % [level, score, locked_count]
 	_update_rogue_status(
 		mode_id,
 		rogue_upgrade_display_name,
@@ -324,6 +326,11 @@ func set_compact_layout(is_compact: bool, is_android_portrait: bool = false, is_
 	add_theme_constant_override("separation", 6 if is_ultra_narrow else (8 if is_android_portrait else 12))
 
 	stage_label.custom_minimum_size.y = 0.0
+	_set_header_font_size(current_header, 16 if is_ultra_narrow else 18)
+	_set_header_font_size(stats_header, 16 if is_ultra_narrow else 18)
+	_set_header_font_size(preview_header, 16 if is_ultra_narrow else 18)
+	_set_header_font_size(rogue_header, 16 if is_ultra_narrow else 18)
+	_set_header_font_size(help_title, 16 if is_ultra_narrow else 18)
 	status_label.custom_minimum_size.y = 24.0 if is_ultra_narrow else (28.0 if is_android_portrait else 36.0)
 	current_state_label.custom_minimum_size.y = 32.0 if is_ultra_narrow else (36.0 if is_android_portrait else 44.0)
 	stats_label.custom_minimum_size.y = 32.0 if is_ultra_narrow else (36.0 if is_android_portrait else 44.0)
@@ -340,6 +347,14 @@ func set_compact_layout(is_compact: bool, is_android_portrait: bool = false, is_
 
 	if rogue_choice_panel != null:
 		rogue_choice_panel.custom_minimum_size.y = 108.0 if is_ultra_narrow else (120.0 if is_android_portrait else (144.0 if is_compact else 176.0))
+
+	_set_button_min_height(pause_button, 42.0 if is_ultra_narrow else 0.0)
+	_set_button_min_height(menu_button, 42.0 if is_ultra_narrow else 0.0)
+	_set_button_min_height(help_button, 42.0 if is_ultra_narrow else 0.0)
+	_set_button_min_height(restart_button, 42.0 if is_ultra_narrow else 0.0)
+	_set_button_min_height(rogue_hard_drop_button, 42.0 if is_ultra_narrow else 0.0)
+	_set_button_min_height(rogue_line_clear_button, 42.0 if is_ultra_narrow else 0.0)
+	_set_button_min_height(rogue_spawn_protection_button, 42.0 if is_ultra_narrow else 0.0)
 
 	_set_preview_layout_density(is_android_portrait, is_ultra_narrow)
 	_refresh_section_visibility()
@@ -589,3 +604,19 @@ func _set_preview_layout_density(is_android_portrait: bool, is_ultra_narrow: boo
 	hold_piece_label.custom_minimum_size.x = preview_meta_min_width
 	$PreviewRow/NextPanel.custom_minimum_size.x = preview_panel_min_width
 	$PreviewRow/HoldPanel.custom_minimum_size.x = preview_panel_min_width
+	next_label.text = "下个" if is_ultra_narrow else "Next"
+	hold_label.text = "暂存" if is_ultra_narrow else "Hold"
+
+
+func _set_button_min_height(button: Button, min_height: float) -> void:
+	if button == null:
+		return
+
+	button.custom_minimum_size.y = min_height
+
+
+func _set_header_font_size(label: Label, font_size: int) -> void:
+	if label == null:
+		return
+
+	label.add_theme_font_size_override("font_size", font_size)
