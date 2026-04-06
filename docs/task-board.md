@@ -2,12 +2,16 @@
 
 ## 当前分支定位
 
-- 当前分支：`feature/rogue-prototype`
+- 当前分支：`feature/cross-platform-layout-polish`
 - `main`：稳定经典主线
 - 当前分支继续承接：
-  - Rogue 原型迭代
-  - 试玩反馈修复
   - 多端最小适配整理
+  - 跨平台布局打磨
+  - HUD / Help 结构收敛
+- 已在上一条分支保留：
+  - `feature/rogue-prototype`：Rogue 原型节点
+  - Rogue 三轮实验链路
+  - Rogue 原型试玩修复结果
 
 ## 当前已完成
 

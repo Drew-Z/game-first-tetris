@@ -4,7 +4,7 @@
 - 稳定经典主线
 - Rogue 原型实验线
 
-当前工作分支是 `feature/rogue-prototype`，用于继续推进 Rogue 原型验证；`main` 应继续代表更稳定的经典主线。
+当前工作分支是 `feature/cross-platform-layout-polish`，当前只继续推进跨平台布局与界面结构收敛；`main` 应继续代表更稳定的经典主线。上一条 Rogue 原型节点已经保留在 `feature/rogue-prototype`。
 
 ## 当前状态
 

@@ -12,8 +12,8 @@
 当前项目已经是一个：
 
 - 可试玩的经典模式基线
-- 可评估方向的 Rogue 原型
-- 正在向 Web / 安卓 / Windows 共用结构收敛的原型界面
+- 已保留节点的 Rogue 原型
+- 正在 `feature/cross-platform-layout-polish` 上继续收敛 Web / 安卓 / Windows 共用结构
 
 ## 多端最小适配当前结论
 
@@ -45,3 +45,9 @@
 - 摘要与效果分开显示，不再把强化结果和轮次提示混成一大段
 - 下一轮提示统一收敛为短句，例如 `下一选：第 2 轮 / 2 行后`
 - 生效结果统一收敛为短句，例如 `硬降：+1`、`消行：+1/行`、`保护：1`
+
+## 当前分支职责说明
+
+- `main`：继续承接更稳定的经典主线
+- `feature/rogue-prototype`：已保留 Rogue 原型节点，作为后续 Rogue 深化的基线
+- `feature/cross-platform-layout-polish`：当前只继续推进跨平台布局与界面结构收敛，不继续扩 Rogue 功能
