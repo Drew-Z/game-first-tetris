@@ -67,15 +67,7 @@ func _capture_help_panel(case_dir: String, viewport_size: Vector2i) -> void:
 		var game_ui: Node = game_root.get_node("ViewportScroll/Layout/SidebarPanel/GameUI")
 		if game_ui != null and game_ui.has_method("set_help_panel_open"):
 			game_ui.call("set_help_panel_open", true)
-			await _settle_frames(2)
-		var viewport_scroll := game_root.get_node("ViewportScroll")
-		if viewport_scroll is ScrollContainer:
-			var scroll_bar: ScrollBar = viewport_scroll.get_v_scroll_bar()
-			if scroll_bar != null:
-				viewport_scroll.scroll_vertical = int(scroll_bar.max_value)
-				await _settle_frames(2)
-				viewport_scroll.scroll_vertical = int(scroll_bar.max_value)
-				await _settle_frames(2)
+			await _settle_frames(4)
 
 	await _save_viewport_png("%s/help_panel.png" % case_dir)
 	_clear_scene(menu_scene)

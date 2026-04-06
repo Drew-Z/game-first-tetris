@@ -8,6 +8,9 @@ signal help_visibility_changed(is_visible: bool)
 
 @onready var stage_label: Label = $StageLabel
 @onready var status_label: Label = $StatusLabel
+@onready var help_panel: VBoxContainer = $HelpPanel
+@onready var help_title: Label = $HelpPanel/HelpTitle
+@onready var help_text: Label = $HelpPanel/HelpText
 @onready var current_state_label: Label = $CurrentStateLabel
 @onready var stats_label: Label = $StatsLabel
 @onready var rogue_header: Label = $RogueHeader
@@ -23,12 +26,13 @@ signal help_visibility_changed(is_visible: bool)
 @onready var restart_button: Button = $RestartButton
 @onready var menu_button: Button = $SessionButtons/MenuButton
 @onready var help_button: Button = $SessionButtons/HelpButton
-@onready var help_panel: VBoxContainer = $HelpPanel
-@onready var help_text: Label = $HelpPanel/HelpText
 @onready var next_preview: Control = $PreviewRow/NextPanel/NextPreview
 @onready var hold_preview: Control = $PreviewRow/HoldPanel/HoldPreview
 @onready var next_piece_label: Label = $PreviewRow/NextPanel/NextPieceLabel
 @onready var hold_piece_label: Label = $PreviewRow/HoldPanel/HoldPieceLabel
+@onready var current_header: Label = $CurrentHeader
+@onready var stats_header: Label = $StatsHeader
+@onready var preview_header: Label = $PreviewHeader
 @onready var hint_header: Label = $HintHeader
 @onready var hint_label: Label = $HintLabel
 @onready var system_label: Label = $SystemLabel
@@ -50,10 +54,12 @@ func _ready() -> void:
 	rogue_hard_drop_button.pressed.connect(_on_rogue_hard_drop_pressed)
 	rogue_line_clear_button.pressed.connect(_on_rogue_line_clear_pressed)
 	rogue_spawn_protection_button.pressed.connect(_on_rogue_spawn_protection_pressed)
+	move_child(help_panel, status_label.get_index() + 1)
 	_set_help_panel_visible(false)
 	set_rogue_choice_prompt(false)
 	set_compact_layout(false)
 	_update_focus_behavior(false, false, false)
+	_refresh_section_visibility()
 
 
 func show_structure_mode(
@@ -83,11 +89,17 @@ func show_structure_mode(
 		rogue_next_run_carry_over_upgrade_display_name
 	)
 	_set_help_visibility(false)
-	_set_help_panel_visible(false)
+	if help_panel.visible:
+		help_text.text = _get_help_panel_text()
+		help_title.text = "帮助（Esc 或 Close Help 关闭）"
+	else:
+		help_text.text = ""
+		help_title.text = "帮助"
 	system_label.text = ""
 	_set_preview_meta(next_piece_label, &"")
 	_set_preview_meta(hold_piece_label, &"")
 	set_rogue_choice_prompt(false)
+	_refresh_section_visibility()
 
 
 func show_piece_runtime_summary(
@@ -138,6 +150,7 @@ func show_piece_runtime_summary(
 	)
 	_set_help_visibility(false)
 	system_label.text = _get_runtime_system_text(is_falling, mode_note)
+	_refresh_section_visibility()
 
 
 func show_game_over_summary(
@@ -173,6 +186,7 @@ func show_game_over_summary(
 	)
 	_set_help_visibility(true, "Restart 重新开局\nMain Menu 返回菜单")
 	system_label.text = "游戏结束"
+	_refresh_section_visibility()
 
 
 func _on_restart_button_pressed() -> void:
@@ -218,6 +232,7 @@ func set_rogue_choice_prompt(is_visible: bool, title: String = "", hint: String 
 		rogue_choice_panel.visible = false
 		_set_help_visibility(false)
 		_update_focus_behavior(is_session_paused, is_session_game_over, false)
+		_refresh_section_visibility()
 		return
 
 	rogue_choice_panel.visible = true
@@ -229,6 +244,7 @@ func set_rogue_choice_prompt(is_visible: bool, title: String = "", hint: String 
 		_set_rogue_choice_buttons_visible(false)
 		_set_help_visibility(false)
 		_update_focus_behavior(is_session_paused, is_session_game_over, false)
+		_refresh_section_visibility()
 		return
 
 	if help_panel.visible:
@@ -240,6 +256,7 @@ func set_rogue_choice_prompt(is_visible: bool, title: String = "", hint: String 
 	_set_help_visibility(true, "↑ ↓ 选择强化\nEnter / Space 确认")
 	is_choice_prompt_open = true
 	_update_focus_behavior(is_session_paused, is_session_game_over, true)
+	_refresh_section_visibility()
 
 
 func set_session_controls(is_paused: bool, can_pause: bool, is_game_over: bool) -> void:
@@ -257,6 +274,10 @@ func set_session_controls(is_paused: bool, can_pause: bool, is_game_over: bool) 
 	elif is_paused:
 		_set_help_visibility(true, "Resume 继续\nRestart 重开\nMain Menu 返回菜单")
 		system_label.text = "已暂停"
+	else:
+		_set_help_visibility(false)
+
+	_refresh_section_visibility()
 
 
 func set_help_panel_open(is_visible: bool) -> void:
@@ -269,6 +290,9 @@ func set_compact_layout(is_compact: bool) -> void:
 
 	if session_buttons != null:
 		session_buttons.vertical = is_compact
+
+	if help_panel != null:
+		help_panel.custom_minimum_size.y = 220.0 if is_compact else 180.0
 
 
 func _show_preview(preview_node: Control, piece_id: StringName) -> void:
@@ -407,29 +431,37 @@ func _set_help_visibility(is_visible: bool, text: String = "") -> void:
 
 	if is_visible:
 		hint_label.text = text
+	else:
+		hint_label.text = ""
 
 
 func _set_help_panel_visible(is_visible: bool) -> void:
 	var did_change := help_panel.visible != is_visible
 	help_panel.visible = is_visible
+	help_button.text = "Close Help" if is_visible else "Help"
 	if not is_visible:
 		help_text.text = ""
+		help_title.text = "帮助"
 		if did_change:
 			help_visibility_changed.emit(false)
 		_update_focus_behavior(is_session_paused, is_session_game_over, is_choice_prompt_open)
+		_refresh_section_visibility()
 		return
 
 	help_text.text = _get_help_panel_text()
+	help_title.text = "帮助（Esc 或 Close Help 关闭）"
 	if did_change:
 		help_visibility_changed.emit(true)
 	if help_button.focus_mode != Control.FOCUS_NONE:
 		help_button.grab_focus()
 	_update_focus_behavior(is_session_paused, is_session_game_over, is_choice_prompt_open)
+	_refresh_section_visibility()
 
 
 func _get_help_panel_text() -> String:
 	var sections: Array[String] = [
-		"操作：← → 移动，↑ 旋转，↓ 软降，Space 硬降，C Hold，Esc 暂停。",
+		"操作：← → 移动，↑ 旋转，↓ 软降，Space 硬降，C Hold。",
+		"控制：Esc 暂停；Close Help 或 Esc 关闭帮助。",
 		"流程：方块下落、锁定、消行、继续生成；游戏结束后可 Restart 或返回主菜单。",
 	]
 
@@ -439,3 +471,23 @@ func _get_help_panel_text() -> String:
 		sections.append("经典模式：保持标准主循环，不包含 Rogue 强化与局间带入。")
 
 	return "\n\n".join(sections)
+
+
+func _refresh_section_visibility() -> void:
+	var help_open := help_panel.visible
+	var is_rogue_mode := current_mode_id == &"rogue"
+
+	current_header.visible = not help_open
+	current_state_label.visible = not help_open
+	stats_header.visible = not help_open
+	stats_label.visible = not help_open
+	preview_header.visible = not help_open
+	preview_row.visible = not help_open
+	system_label.visible = not help_open
+	hint_header.visible = not help_open and hint_label.text != ""
+	hint_label.visible = not help_open and hint_label.text != ""
+
+	rogue_header.visible = is_rogue_mode and not help_open
+	rogue_status_label.visible = is_rogue_mode and not help_open
+	rogue_effects_label.visible = is_rogue_mode and not help_open
+	rogue_choice_panel.visible = is_rogue_mode and not help_open
