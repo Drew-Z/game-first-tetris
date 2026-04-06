@@ -66,6 +66,7 @@ D:\Development\Godot\Godot_v4.6.1-stable_win64_console.exe --headless --path D:\
 - HUD / Help：
   - `< 920px`：进入更紧凑排列
   - 长说明进入 Help，不回主 HUD
+  - Rogue 信息区在紧凑态下压缩为“摘要层 + 效果层”
 
 ## 固定尺寸截图回归清单
 
@@ -89,6 +90,18 @@ D:\Development\Godot\Godot_v4.6.1-stable_win64_console.exe --headless --path D:\
 - 经典模式：`960 x 640` 及以上可用；更窄尺寸为勉强可用
 - Rogue 模式：`960 x 640` 及以上可用；更窄尺寸为勉强可用
 - Help 面板：6 个目标尺寸下都已达到最低可用线，打开后首屏可见标题、正文和关闭方式
+
+## 窄宽度下 Rogue 信息表达
+
+- 摘要层：
+  - `已选：...`
+  - `本局带入：...`
+  - `下局带入：...`
+  - `下一选：第 N 轮 / X 行后`
+- 效果层：
+  - `硬降：+N`
+  - `消行：+N/行`
+  - `保护：N`
 
 ## 文档入口
 

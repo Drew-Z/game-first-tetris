@@ -164,6 +164,9 @@ func _sync_ui() -> void:
 			runtime_result.rogue_upgrade_display_name,
 			runtime_result.remaining_spawn_protection_uses,
 			runtime_result.rogue_upgrade_effects_text,
+			runtime_result.rogue_compact_upgrade_summary,
+			runtime_result.rogue_compact_effects_text,
+			runtime_result.rogue_next_choice_summary,
 			runtime_result.rogue_active_carry_over_upgrade_display_name,
 			runtime_result.rogue_next_run_carry_over_upgrade_display_name
 		)
@@ -184,12 +187,15 @@ func _sync_ui() -> void:
 				runtime_result.current_level,
 				runtime_result.mode_id,
 				runtime_result.mode_display_name,
-			runtime_result.mode_note,
-			runtime_result.rogue_upgrade_display_name,
-			runtime_result.remaining_spawn_protection_uses,
-			runtime_result.rogue_upgrade_effects_text,
-			runtime_result.rogue_active_carry_over_upgrade_display_name,
-			runtime_result.rogue_next_run_carry_over_upgrade_display_name
+				runtime_result.mode_note,
+				runtime_result.rogue_upgrade_display_name,
+				runtime_result.remaining_spawn_protection_uses,
+				runtime_result.rogue_upgrade_effects_text,
+				runtime_result.rogue_compact_upgrade_summary,
+				runtime_result.rogue_compact_effects_text,
+				runtime_result.rogue_next_choice_summary,
+				runtime_result.rogue_active_carry_over_upgrade_display_name,
+				runtime_result.rogue_next_run_carry_over_upgrade_display_name
 			)
 		if game_ui.has_method("set_session_controls"):
 			game_ui.call(
@@ -229,6 +235,9 @@ func _sync_ui() -> void:
 			runtime_result.rogue_upgrade_display_name,
 			runtime_result.remaining_spawn_protection_uses,
 			runtime_result.rogue_upgrade_effects_text,
+			runtime_result.rogue_compact_upgrade_summary,
+			runtime_result.rogue_compact_effects_text,
+			runtime_result.rogue_next_choice_summary,
 			runtime_result.rogue_active_carry_over_upgrade_display_name,
 			runtime_result.rogue_next_run_carry_over_upgrade_display_name
 		)
@@ -578,6 +587,9 @@ func get_runtime_result() -> Dictionary:
 		"rogue_upgrade_display_name": _get_rogue_upgrade_summary(),
 		"remaining_spawn_protection_uses": remaining_spawn_protection_uses,
 		"rogue_upgrade_effects_text": _get_rogue_upgrade_effects_text(),
+		"rogue_compact_upgrade_summary": _get_rogue_compact_upgrade_summary(),
+		"rogue_compact_effects_text": _get_rogue_compact_effects_text(),
+		"rogue_next_choice_summary": _get_rogue_next_choice_summary(),
 		"rogue_active_carry_over_upgrade_display_name": _get_rogue_upgrade_display_name(rogue_active_run_carry_over_upgrade_id),
 		"rogue_next_run_carry_over_upgrade_display_name": _get_rogue_upgrade_display_name(rogue_next_run_carry_over_upgrade_id),
 		"is_rogue_choice_pending": is_rogue_choice_pending,
@@ -937,6 +949,67 @@ func _get_rogue_upgrade_effects_text() -> String:
 	return "\n".join(lines)
 
 
+func _get_rogue_compact_upgrade_summary() -> String:
+	if entry_mode != &"rogue":
+		return ""
+
+	var counts := _get_rogue_upgrade_counts()
+	if counts.is_empty():
+		return "已选：无"
+
+	var segments: Array[String] = []
+	for upgrade_id in GameModeState.get_rogue_upgrade_options():
+		var count := int(counts.get(upgrade_id, 0))
+		if count <= 0:
+			continue
+
+		match upgrade_id:
+			&"hard_drop_bonus":
+				segments.append("硬降x%d" % [count])
+			&"line_clear_bonus":
+				segments.append("消行x%d" % [count])
+			&"spawn_protection":
+				segments.append("保护x%d" % [count])
+
+	return "已选：%s" % [" / ".join(segments)]
+
+
+func _get_rogue_compact_effects_text() -> String:
+	if entry_mode != &"rogue":
+		return ""
+
+	var lines: Array[String] = []
+
+	if rogue_hard_drop_bonus_score > 0:
+		lines.append("硬降：+%d" % [rogue_hard_drop_bonus_score])
+
+	if rogue_line_clear_bonus_per_row > 0:
+		lines.append("消行：+%d/行" % [rogue_line_clear_bonus_per_row])
+
+	lines.append("保护：%d" % [remaining_spawn_protection_uses])
+
+	return "\n".join(lines)
+
+
+func _get_rogue_next_choice_summary() -> String:
+	if entry_mode != &"rogue":
+		return ""
+
+	if is_rogue_choice_pending:
+		return "待选：第 %d 轮" % [pending_rogue_choice_round]
+
+	for choice_config in _get_rogue_choice_round_configs():
+		var choice_round := int(choice_config["round"])
+		if _has_triggered_rogue_choice_round(choice_round):
+			continue
+
+		var required_lines := int(choice_config.get("required_cleared_lines", 0))
+		var remaining_lines := maxi(required_lines - cleared_line_count, 0)
+		return "下一选：第 %d 轮 / %d 行后" % [choice_round, remaining_lines]
+
+	return "下一选：无"
+
+
 func _get_rogue_choice_prompt_title() -> String:
 	if not is_rogue_choice_pending:
 		return ""
@@ -946,9 +1019,10 @@ func _get_rogue_choice_prompt_title() -> String:
 
 func _get_rogue_choice_prompt_hint() -> String:
 	if not is_rogue_choice_pending:
-		return ""
+		return _get_rogue_next_choice_summary()
 
-	return "当前按累计消除 %d 行触发。请选择一个新的本局强化，经典模式不受影响。" % [
+	return "第 %d 轮已触发（累计 %d 行）。请选择一个新的本局强化。" % [
+		pending_rogue_choice_round,
 		_get_rogue_choice_threshold_for_round(pending_rogue_choice_round),
 	]
 

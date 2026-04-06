@@ -44,6 +44,7 @@ var current_mode_display_name: String = "经典模式"
 var is_session_paused: bool = false
 var is_session_game_over: bool = false
 var is_choice_prompt_open: bool = false
+var is_compact_layout: bool = false
 
 
 func _ready() -> void:
@@ -71,6 +72,9 @@ func show_structure_mode(
 	rogue_upgrade_display_name: String = "",
 	remaining_spawn_protection_uses: int = 0,
 	rogue_upgrade_effects_text: String = "",
+	rogue_compact_upgrade_summary: String = "",
+	rogue_compact_effects_text: String = "",
+	rogue_next_choice_summary: String = "",
 	rogue_active_carry_over_upgrade_display_name: String = "",
 	rogue_next_run_carry_over_upgrade_display_name: String = ""
 ) -> void:
@@ -85,6 +89,9 @@ func show_structure_mode(
 		rogue_upgrade_display_name,
 		remaining_spawn_protection_uses,
 		rogue_upgrade_effects_text,
+		rogue_compact_upgrade_summary,
+		rogue_compact_effects_text,
+		rogue_next_choice_summary,
 		rogue_active_carry_over_upgrade_display_name,
 		rogue_next_run_carry_over_upgrade_display_name
 	)
@@ -119,6 +126,9 @@ func show_piece_runtime_summary(
 	rogue_upgrade_display_name: String = "",
 	remaining_spawn_protection_uses: int = 0,
 	rogue_upgrade_effects_text: String = "",
+	rogue_compact_upgrade_summary: String = "",
+	rogue_compact_effects_text: String = "",
+	rogue_next_choice_summary: String = "",
 	rogue_active_carry_over_upgrade_display_name: String = "",
 	rogue_next_run_carry_over_upgrade_display_name: String = ""
 ) -> void:
@@ -145,6 +155,9 @@ func show_piece_runtime_summary(
 		rogue_upgrade_display_name,
 		remaining_spawn_protection_uses,
 		rogue_upgrade_effects_text,
+		rogue_compact_upgrade_summary,
+		rogue_compact_effects_text,
+		rogue_next_choice_summary,
 		rogue_active_carry_over_upgrade_display_name,
 		rogue_next_run_carry_over_upgrade_display_name
 	)
@@ -163,6 +176,9 @@ func show_game_over_summary(
 	rogue_upgrade_display_name: String = "",
 	remaining_spawn_protection_uses: int = 0,
 	rogue_upgrade_effects_text: String = "",
+	rogue_compact_upgrade_summary: String = "",
+	rogue_compact_effects_text: String = "",
+	rogue_next_choice_summary: String = "",
 	rogue_active_carry_over_upgrade_display_name: String = "",
 	rogue_next_run_carry_over_upgrade_display_name: String = ""
 ) -> void:
@@ -181,6 +197,9 @@ func show_game_over_summary(
 		rogue_upgrade_display_name,
 		remaining_spawn_protection_uses,
 		rogue_upgrade_effects_text,
+		rogue_compact_upgrade_summary,
+		rogue_compact_effects_text,
+		rogue_next_choice_summary,
 		rogue_active_carry_over_upgrade_display_name,
 		rogue_next_run_carry_over_upgrade_display_name
 	)
@@ -239,8 +258,13 @@ func set_rogue_choice_prompt(is_visible: bool, title: String = "", hint: String 
 
 	if not is_visible:
 		is_choice_prompt_open = false
-		rogue_choice_title.text = "Rogue 选择进度"
-		rogue_choice_hint.text = "当前无待选强化。\n下一轮到达阈值后，会在这里出现 3 选 1。"
+		rogue_choice_title.text = "Rogue 选择"
+		if hint != "":
+			rogue_choice_hint.text = hint
+		elif is_compact_layout:
+			rogue_choice_hint.text = "当前无待选强化。"
+		else:
+			rogue_choice_hint.text = "当前无待选强化。\n下一轮到达阈值后，会在这里出现 3 选 1。"
 		_set_rogue_choice_buttons_visible(false)
 		_set_help_visibility(false)
 		_update_focus_behavior(is_session_paused, is_session_game_over, false)
@@ -285,6 +309,8 @@ func set_help_panel_open(is_visible: bool) -> void:
 
 
 func set_compact_layout(is_compact: bool) -> void:
+	is_compact_layout = is_compact
+
 	if preview_row != null:
 		preview_row.vertical = is_compact
 
@@ -293,6 +319,15 @@ func set_compact_layout(is_compact: bool) -> void:
 
 	if help_panel != null:
 		help_panel.custom_minimum_size.y = 220.0 if is_compact else 180.0
+
+	if rogue_status_label != null:
+		rogue_status_label.custom_minimum_size.y = 52.0 if is_compact else 64.0
+
+	if rogue_effects_label != null:
+		rogue_effects_label.custom_minimum_size.y = 48.0 if is_compact else 72.0
+
+	if rogue_choice_panel != null:
+		rogue_choice_panel.custom_minimum_size.y = 144.0 if is_compact else 176.0
 
 
 func _show_preview(preview_node: Control, piece_id: StringName) -> void:
@@ -318,6 +353,9 @@ func _update_rogue_status(
 	rogue_upgrade_display_name: String,
 	remaining_spawn_protection_uses: int,
 	rogue_upgrade_effects_text: String = "",
+	rogue_compact_upgrade_summary: String = "",
+	rogue_compact_effects_text: String = "",
+	rogue_next_choice_summary: String = "",
 	rogue_active_carry_over_upgrade_display_name: String = "",
 	rogue_next_run_carry_over_upgrade_display_name: String = ""
 ) -> void:
@@ -350,6 +388,20 @@ func _update_rogue_status(
 	var next_carry_text := "本局结束后生成"
 	if rogue_next_run_carry_over_upgrade_display_name != "":
 		next_carry_text = rogue_next_run_carry_over_upgrade_display_name
+
+	if is_compact_layout:
+		var compact_summary := rogue_compact_upgrade_summary if rogue_compact_upgrade_summary != "" else "已选：无"
+		var compact_effects := rogue_compact_effects_text if rogue_compact_effects_text != "" else "效果：无\n保护：%s" % [protection_text]
+		var compact_next_choice := rogue_next_choice_summary if rogue_next_choice_summary != "" else "下一选：待定"
+
+		rogue_status_label.text = "%s\n本局带入：%s\n下局带入：%s\n%s" % [
+			compact_summary,
+			active_carry_text,
+			next_carry_text,
+			compact_next_choice,
+		]
+		rogue_effects_label.text = compact_effects
+		return
 
 	rogue_status_label.text = "已选强化：%s\n本局带入：%s\n下一局带入：%s" % [
 		upgrade_summary,
