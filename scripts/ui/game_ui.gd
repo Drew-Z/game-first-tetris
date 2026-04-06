@@ -6,6 +6,9 @@ signal menu_requested
 signal rogue_upgrade_selected(rogue_upgrade_id: StringName)
 signal help_visibility_changed(is_visible: bool)
 
+const ULTRA_NARROW_LAYOUT_MAX_WIDTH := 360.0
+const SMALL_COMPACT_LAYOUT_MAX_WIDTH := 393.0
+
 @onready var stage_label: Label = $StageLabel
 @onready var status_label: Label = $StatusLabel
 @onready var help_panel: VBoxContainer = $HelpPanel
@@ -49,6 +52,7 @@ var is_choice_prompt_open: bool = false
 var is_compact_layout: bool = false
 var is_android_portrait_layout: bool = false
 var is_ultra_narrow_layout: bool = false
+var is_small_compact_layout: bool = false
 
 
 func _ready() -> void:
@@ -316,45 +320,68 @@ func set_compact_layout(is_compact: bool, is_android_portrait: bool = false, is_
 	is_compact_layout = is_compact
 	is_android_portrait_layout = is_android_portrait
 	is_ultra_narrow_layout = is_ultra_narrow
+	is_small_compact_layout = is_compact and size.x > ULTRA_NARROW_LAYOUT_MAX_WIDTH and size.x <= SMALL_COMPACT_LAYOUT_MAX_WIDTH
 
 	if preview_row != null:
 		preview_row.vertical = is_compact
+		preview_row.add_theme_constant_override("separation", 10 if is_ultra_narrow else (12 if is_small_compact_layout else 12))
 
 	if session_buttons != null:
 		session_buttons.vertical = is_compact
+		session_buttons.add_theme_constant_override("separation", 8 if is_ultra_narrow else (10 if is_small_compact_layout else 8))
 
-	add_theme_constant_override("separation", 6 if is_ultra_narrow else (8 if is_android_portrait else 12))
+	add_theme_constant_override("separation", 8 if is_ultra_narrow else (9 if is_small_compact_layout else (8 if is_android_portrait else 12)))
 
 	stage_label.custom_minimum_size.y = 0.0
-	_set_header_font_size(current_header, 16 if is_ultra_narrow else 18)
-	_set_header_font_size(stats_header, 16 if is_ultra_narrow else 18)
-	_set_header_font_size(preview_header, 16 if is_ultra_narrow else 18)
-	_set_header_font_size(rogue_header, 16 if is_ultra_narrow else 18)
-	_set_header_font_size(help_title, 16 if is_ultra_narrow else 18)
-	status_label.custom_minimum_size.y = 24.0 if is_ultra_narrow else (28.0 if is_android_portrait else 36.0)
-	current_state_label.custom_minimum_size.y = 32.0 if is_ultra_narrow else (36.0 if is_android_portrait else 44.0)
-	stats_label.custom_minimum_size.y = 32.0 if is_ultra_narrow else (36.0 if is_android_portrait else 44.0)
-	system_label.custom_minimum_size.y = 24.0 if is_ultra_narrow else (28.0 if is_android_portrait else 40.0)
+	_set_label_font_size(stage_label, 16 if is_ultra_narrow else (18 if is_small_compact_layout else 20))
+	_set_header_font_size(current_header, 15 if is_ultra_narrow else (16 if is_small_compact_layout else 18))
+	_set_header_font_size(stats_header, 15 if is_ultra_narrow else (16 if is_small_compact_layout else 18))
+	_set_header_font_size(preview_header, 15 if is_ultra_narrow else (16 if is_small_compact_layout else 18))
+	_set_header_font_size(rogue_header, 15 if is_ultra_narrow else (16 if is_small_compact_layout else 18))
+	_set_header_font_size(help_title, 15 if is_ultra_narrow else (16 if is_small_compact_layout else 18))
+	_set_label_font_size(status_label, 14 if is_ultra_narrow else (15 if is_small_compact_layout else 17))
+	_set_label_font_size(current_state_label, 14 if is_ultra_narrow else (15 if is_small_compact_layout else 17))
+	_set_label_font_size(stats_label, 14 if is_ultra_narrow else (15 if is_small_compact_layout else 17))
+	_set_label_font_size(rogue_status_label, 14 if is_ultra_narrow else (15 if is_small_compact_layout else 17))
+	_set_label_font_size(rogue_effects_label, 14 if is_ultra_narrow else (15 if is_small_compact_layout else 17))
+	_set_label_font_size(rogue_choice_hint, 14 if is_ultra_narrow else (15 if is_small_compact_layout else 17))
+	_set_label_font_size(next_piece_label, 13 if is_ultra_narrow else (14 if is_small_compact_layout else 16))
+	_set_label_font_size(hold_piece_label, 13 if is_ultra_narrow else (14 if is_small_compact_layout else 16))
+	_set_label_font_size(system_label, 14 if is_ultra_narrow else (15 if is_small_compact_layout else 16))
+	_set_label_font_size(help_text, 14 if is_ultra_narrow else (15 if is_small_compact_layout else 17))
+	_set_label_font_size(next_label, 14 if is_ultra_narrow else (15 if is_small_compact_layout else 16))
+	_set_label_font_size(hold_label, 14 if is_ultra_narrow else (15 if is_small_compact_layout else 16))
+	status_label.custom_minimum_size.y = 24.0 if is_ultra_narrow else (26.0 if is_small_compact_layout else (28.0 if is_android_portrait else 36.0))
+	current_state_label.custom_minimum_size.y = 34.0 if is_ultra_narrow else (38.0 if is_small_compact_layout else (36.0 if is_android_portrait else 44.0))
+	stats_label.custom_minimum_size.y = 34.0 if is_ultra_narrow else (38.0 if is_small_compact_layout else (36.0 if is_android_portrait else 44.0))
+	system_label.custom_minimum_size.y = 24.0 if is_ultra_narrow else (26.0 if is_small_compact_layout else (28.0 if is_android_portrait else 40.0))
 
 	if help_panel != null:
-		help_panel.custom_minimum_size.y = 156.0 if is_ultra_narrow else (180.0 if is_android_portrait else (220.0 if is_compact else 180.0))
+		help_panel.custom_minimum_size.y = 164.0 if is_ultra_narrow else (176.0 if is_small_compact_layout else (180.0 if is_android_portrait else (220.0 if is_compact else 180.0)))
 
 	if rogue_status_label != null:
-		rogue_status_label.custom_minimum_size.y = 36.0 if is_ultra_narrow else (44.0 if is_android_portrait else (52.0 if is_compact else 64.0))
+		rogue_status_label.custom_minimum_size.y = 38.0 if is_ultra_narrow else (44.0 if is_small_compact_layout else (44.0 if is_android_portrait else (52.0 if is_compact else 64.0)))
 
 	if rogue_effects_label != null:
-		rogue_effects_label.custom_minimum_size.y = 30.0 if is_ultra_narrow else (36.0 if is_android_portrait else (48.0 if is_compact else 72.0))
+		rogue_effects_label.custom_minimum_size.y = 32.0 if is_ultra_narrow else (36.0 if is_small_compact_layout else (36.0 if is_android_portrait else (48.0 if is_compact else 72.0)))
 
 	if rogue_choice_panel != null:
-		rogue_choice_panel.custom_minimum_size.y = 108.0 if is_ultra_narrow else (120.0 if is_android_portrait else (144.0 if is_compact else 176.0))
+		rogue_choice_panel.custom_minimum_size.y = 112.0 if is_ultra_narrow else (120.0 if is_small_compact_layout else (120.0 if is_android_portrait else (144.0 if is_compact else 176.0)))
 
-	_set_button_min_height(pause_button, 42.0 if is_ultra_narrow else 0.0)
-	_set_button_min_height(menu_button, 42.0 if is_ultra_narrow else 0.0)
-	_set_button_min_height(help_button, 42.0 if is_ultra_narrow else 0.0)
-	_set_button_min_height(restart_button, 42.0 if is_ultra_narrow else 0.0)
-	_set_button_min_height(rogue_hard_drop_button, 42.0 if is_ultra_narrow else 0.0)
-	_set_button_min_height(rogue_line_clear_button, 42.0 if is_ultra_narrow else 0.0)
-	_set_button_min_height(rogue_spawn_protection_button, 42.0 if is_ultra_narrow else 0.0)
+	_set_button_min_height(pause_button, 44.0 if is_ultra_narrow else (46.0 if is_small_compact_layout else 0.0))
+	_set_button_min_height(menu_button, 44.0 if is_ultra_narrow else (46.0 if is_small_compact_layout else 0.0))
+	_set_button_min_height(help_button, 44.0 if is_ultra_narrow else (46.0 if is_small_compact_layout else 0.0))
+	_set_button_min_height(restart_button, 44.0 if is_ultra_narrow else (46.0 if is_small_compact_layout else 0.0))
+	_set_button_min_height(rogue_hard_drop_button, 44.0 if is_ultra_narrow else (46.0 if is_small_compact_layout else 0.0))
+	_set_button_min_height(rogue_line_clear_button, 44.0 if is_ultra_narrow else (46.0 if is_small_compact_layout else 0.0))
+	_set_button_min_height(rogue_spawn_protection_button, 44.0 if is_ultra_narrow else (46.0 if is_small_compact_layout else 0.0))
+	_set_button_font_size(pause_button, 15 if is_ultra_narrow else (16 if is_small_compact_layout else 16))
+	_set_button_font_size(menu_button, 15 if is_ultra_narrow else (16 if is_small_compact_layout else 16))
+	_set_button_font_size(help_button, 15 if is_ultra_narrow else (16 if is_small_compact_layout else 16))
+	_set_button_font_size(restart_button, 15 if is_ultra_narrow else (16 if is_small_compact_layout else 16))
+	_set_button_font_size(rogue_hard_drop_button, 14 if is_ultra_narrow else (15 if is_small_compact_layout else 16))
+	_set_button_font_size(rogue_line_clear_button, 14 if is_ultra_narrow else (15 if is_small_compact_layout else 16))
+	_set_button_font_size(rogue_spawn_protection_button, 14 if is_ultra_narrow else (15 if is_small_compact_layout else 16))
 
 	_set_preview_layout_density(is_android_portrait, is_ultra_narrow)
 	_refresh_section_visibility()
@@ -613,6 +640,20 @@ func _set_button_min_height(button: Button, min_height: float) -> void:
 		return
 
 	button.custom_minimum_size.y = min_height
+
+
+func _set_button_font_size(button: Button, font_size: int) -> void:
+	if button == null:
+		return
+
+	button.add_theme_font_size_override("font_size", font_size)
+
+
+func _set_label_font_size(label: Label, font_size: int) -> void:
+	if label == null:
+		return
+
+	label.add_theme_font_size_override("font_size", font_size)
 
 
 func _set_header_font_size(label: Label, font_size: int) -> void:
