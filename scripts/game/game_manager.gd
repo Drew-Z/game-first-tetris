@@ -8,9 +8,9 @@ const SevenBagPieceSourceModel := preload("res://scripts/game/data/seven_bag_pie
 const TetrominoData := preload("res://scripts/game/data/tetromino_data.gd")
 const ROGUE_PRE_RUN_CHOICE_ROUND := 1
 
-@onready var board: Node2D = $"../Layout/PlayfieldPanel/PlayfieldMargin/Playfield/Board"
-@onready var active_piece: Node2D = $"../Layout/PlayfieldPanel/PlayfieldMargin/Playfield/ActivePiece"
-@onready var game_ui: VBoxContainer = $"../Layout/SidebarPanel/GameUI"
+@onready var board: Node2D = $"../ViewportScroll/Layout/PlayfieldPanel/PlayfieldMargin/Playfield/Board"
+@onready var active_piece: Node2D = $"../ViewportScroll/Layout/PlayfieldPanel/PlayfieldMargin/Playfield/ActivePiece"
+@onready var game_ui: VBoxContainer = $"../ViewportScroll/Layout/SidebarPanel/GameUI"
 @onready var game_audio: Node = $"../GameAudio"
 
 @export var entry_mode: StringName = &"classic"

@@ -38,32 +38,32 @@ custom_minimum_size = Vector2(704, 672)
 layout_mode = 2
 theme_override_constants/separation = 24
 
-[node name="PlayfieldPanel" type="PanelContainer" parent="Layout"]
+[node name="PlayfieldPanel" type="PanelContainer" parent="ViewportScroll/Layout"]
 custom_minimum_size = Vector2(400, 672)
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="PlayfieldMargin" type="MarginContainer" parent="Layout/PlayfieldPanel"]
+[node name="PlayfieldMargin" type="MarginContainer" parent="ViewportScroll/Layout/PlayfieldPanel"]
 layout_mode = 2
 theme_override_constants/margin_left = 24
 theme_override_constants/margin_top = 16
 theme_override_constants/margin_right = 24
 theme_override_constants/margin_bottom = 16
 
-[node name="Playfield" type="Node2D" parent="Layout/PlayfieldPanel/PlayfieldMargin"]
+[node name="Playfield" type="Node2D" parent="ViewportScroll/Layout/PlayfieldPanel/PlayfieldMargin"]
 position = Vector2(16, 16)
 
-[node name="Board" type="Node2D" parent="Layout/PlayfieldPanel/PlayfieldMargin/Playfield"]
+[node name="Board" type="Node2D" parent="ViewportScroll/Layout/PlayfieldPanel/PlayfieldMargin/Playfield"]
 script = ExtResource("2_0e3k2")
 
-[node name="ActivePiece" type="Node2D" parent="Layout/PlayfieldPanel/PlayfieldMargin/Playfield"]
+[node name="ActivePiece" type="Node2D" parent="ViewportScroll/Layout/PlayfieldPanel/PlayfieldMargin/Playfield"]
 script = ExtResource("3_fcc0d")
 
-[node name="SidebarPanel" type="PanelContainer" parent="Layout"]
+[node name="SidebarPanel" type="PanelContainer" parent="ViewportScroll/Layout"]
 custom_minimum_size = Vector2(280, 0)
 layout_mode = 2
 
-[node name="GameUI" parent="Layout/SidebarPanel" instance=ExtResource("4_8djlb")]
+[node name="GameUI" parent="ViewportScroll/Layout/SidebarPanel" instance=ExtResource("4_8djlb")]
 layout_mode = 2
 
 [node name="GameManager" type="Node" parent="."]

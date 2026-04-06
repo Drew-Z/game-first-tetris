@@ -1,7 +1,6 @@
-# Game First Tetris
+﻿# Game First Tetris
 
 一个基于 Godot 4 的俄罗斯方块原型项目，当前同时保留两条线：
-
 - 稳定经典主线
 - Rogue 原型实验线
 
@@ -10,13 +9,13 @@
 ## 当前状态
 
 当前版本已经达到“可试玩原型版”状态，主要包含：
-
 - 经典模式完整可玩闭环
 - Rogue 模式三轮固定触发选择原型
 - 最小局间承接壳层
 - 暂停 / 中途重开 / 返回主菜单
 - 最小声音反馈与消行闪烁
 - HUD 收敛、Help 入口、响应式兜底
+- 多端最小适配第一轮断点与截图回归
 
 ## 运行项目
 
@@ -25,7 +24,6 @@ D:\Development\Godot\godot.cmd --path D:\workspace4Codex\game-first-tetris
 ```
 
 无头验证：
-
 ```powershell
 D:\Development\Godot\Godot_v4.6.1-stable_win64_console.exe --headless --path D:\workspace4Codex\game-first-tetris --quit
 ```
@@ -42,14 +40,11 @@ D:\Development\Godot\Godot_v4.6.1-stable_win64_console.exe --headless --path D:\
 ## 模式说明
 
 ### 经典模式
-
 - 保持标准俄罗斯方块主循环
 - 不包含 Rogue 强化与局间带入
 
 ### Rogue 模式
-
 当前是低侵入原型，已落地：
-
 - 开局前第一次 `3 选 1`
 - 局内第二次、第三次固定触发选择
 - 三种最小强化：
@@ -61,10 +56,9 @@ D:\Development\Godot\Godot_v4.6.1-stable_win64_console.exe --headless --path D:\
 ## 多端最小适配约定
 
 ### 当前断点
-
 - 主菜单：
   - `>= 480px`：舒适区
-  - `360px - 479px`：可用区，依赖滚动和换行
+  - `360px - 479px`：可用区，依赖滚动
   - `< 360px`：暂不保证
 - 游戏界面：
   - `>= 920px`：棋盘 + HUD 左右布局
@@ -76,7 +70,6 @@ D:\Development\Godot\Godot_v4.6.1-stable_win64_console.exe --headless --path D:\
 ## 固定尺寸截图回归清单
 
 目标尺寸：
-
 - Web 小窗口：`360 x 640`
 - 安卓竖屏：`393 x 852`
 - 安卓竖屏：`412 x 915`
@@ -84,24 +77,21 @@ D:\Development\Godot\Godot_v4.6.1-stable_win64_console.exe --headless --path D:\
 - Windows：`1024 x 768`
 - Windows：`1280 x 720`
 
-每个尺寸都建议回归这 4 个画面：
-
+每个尺寸固定检查：
 - 主菜单
 - 游戏中经典模式
 - 游戏中 Rogue 模式
 - Help 面板
 
-判断标准：
+## 当前截图回归结论
 
-- 没有乱码
-- 没有明显截断
-- 没有明显重叠
-- 没有关键按钮不可访问
-- 当前布局符合该尺寸下的断点约定
+- 主菜单：全部目标尺寸下可用
+- 经典模式：`960 x 640` 及以上可用；更窄尺寸为勉强可用
+- Rogue 模式：`960 x 640` 及以上可用；更窄尺寸为勉强可用
+- Help 面板：当前是最明显薄弱项；窄尺寸不可用，桌面尺寸仅勉强可用
 
 ## 文档入口
 
 - `docs/task-board.md`：当前任务与阶段状态
 - `docs/roadmap.md`：路线图与下一阶段建议
 - `docs/test-checklist.md`：当前验证清单
-- `docs/setup.md`：本地环境与启动说明
