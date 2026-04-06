@@ -45,6 +45,7 @@ var is_session_paused: bool = false
 var is_session_game_over: bool = false
 var is_choice_prompt_open: bool = false
 var is_compact_layout: bool = false
+var is_android_portrait_layout: bool = false
 
 
 func _ready() -> void:
@@ -308,8 +309,9 @@ func set_help_panel_open(is_visible: bool) -> void:
 	_set_help_panel_visible(is_visible)
 
 
-func set_compact_layout(is_compact: bool) -> void:
+func set_compact_layout(is_compact: bool, is_android_portrait: bool = false) -> void:
 	is_compact_layout = is_compact
+	is_android_portrait_layout = is_android_portrait
 
 	if preview_row != null:
 		preview_row.vertical = is_compact
@@ -317,17 +319,28 @@ func set_compact_layout(is_compact: bool) -> void:
 	if session_buttons != null:
 		session_buttons.vertical = is_compact
 
+	add_theme_constant_override("separation", 8 if is_android_portrait else 12)
+
+	stage_label.custom_minimum_size.y = 0.0
+	status_label.custom_minimum_size.y = 28.0 if is_android_portrait else 36.0
+	current_state_label.custom_minimum_size.y = 36.0 if is_android_portrait else 44.0
+	stats_label.custom_minimum_size.y = 36.0 if is_android_portrait else 44.0
+	system_label.custom_minimum_size.y = 28.0 if is_android_portrait else 40.0
+
 	if help_panel != null:
-		help_panel.custom_minimum_size.y = 220.0 if is_compact else 180.0
+		help_panel.custom_minimum_size.y = 180.0 if is_android_portrait else (220.0 if is_compact else 180.0)
 
 	if rogue_status_label != null:
-		rogue_status_label.custom_minimum_size.y = 52.0 if is_compact else 64.0
+		rogue_status_label.custom_minimum_size.y = 44.0 if is_android_portrait else (52.0 if is_compact else 64.0)
 
 	if rogue_effects_label != null:
-		rogue_effects_label.custom_minimum_size.y = 48.0 if is_compact else 72.0
+		rogue_effects_label.custom_minimum_size.y = 36.0 if is_android_portrait else (48.0 if is_compact else 72.0)
 
 	if rogue_choice_panel != null:
-		rogue_choice_panel.custom_minimum_size.y = 144.0 if is_compact else 176.0
+		rogue_choice_panel.custom_minimum_size.y = 120.0 if is_android_portrait else (144.0 if is_compact else 176.0)
+
+	_set_preview_layout_density(is_android_portrait)
+	_refresh_section_visibility()
 
 
 func _show_preview(preview_node: Control, piece_id: StringName) -> void:
@@ -342,10 +355,10 @@ func _set_preview_meta(label_node: Label, piece_id: StringName) -> void:
 		return
 
 	if piece_id == &"":
-		label_node.text = "形状：--"
+		label_node.text = "形：--" if is_android_portrait_layout else "形状：--"
 		return
 
-	label_node.text = "形状：%s" % [piece_id]
+	label_node.text = "形：%s" % [piece_id] if is_android_portrait_layout else "形状：%s" % [piece_id]
 
 
 func _update_rogue_status(
@@ -394,12 +407,15 @@ func _update_rogue_status(
 		var compact_effects := rogue_compact_effects_text if rogue_compact_effects_text != "" else "效果：无\n保护：%s" % [protection_text]
 		var compact_next_choice := rogue_next_choice_summary if rogue_next_choice_summary != "" else "下一选：待定"
 
-		rogue_status_label.text = "%s\n本局带入：%s\n下局带入：%s\n%s" % [
-			compact_summary,
-			active_carry_text,
-			next_carry_text,
-			compact_next_choice,
-		]
+		if is_android_portrait_layout:
+			rogue_status_label.text = "%s\n带入：%s｜%s\n%s" % [compact_summary, active_carry_text, next_carry_text, compact_next_choice]
+		else:
+			rogue_status_label.text = "%s\n本局带入：%s\n下局带入：%s\n%s" % [
+				compact_summary,
+				active_carry_text,
+				next_carry_text,
+				compact_next_choice,
+			]
 		rogue_effects_label.text = compact_effects
 		return
 
@@ -514,8 +530,13 @@ func _get_help_panel_text() -> String:
 	var sections: Array[String] = [
 		"操作：← → 移动，↑ 旋转，↓ 软降，Space 硬降，C Hold。",
 		"控制：Esc 暂停；Close Help 或 Esc 关闭帮助。",
-		"流程：方块下落、锁定、消行、继续生成；游戏结束后可 Restart 或返回主菜单。",
 	]
+
+	if is_android_portrait_layout:
+		sections[0] = "操作：←→ 移动，↑ 旋转，↓ 软降，Space 硬降，C Hold。"
+		sections[1] = "控制：Esc 暂停；Esc / Close Help 关闭帮助。"
+	else:
+		sections.append("流程：方块下落、锁定、消行、继续生成；游戏结束后可 Restart 或返回主菜单。")
 
 	if current_mode_id == &"rogue":
 		sections.append("Rogue：开局前与局内会触发 3 选 1；已选强化与带入结果会显示在 Rogue 信息区。")
@@ -529,6 +550,7 @@ func _refresh_section_visibility() -> void:
 	var help_open := help_panel.visible
 	var is_rogue_mode := current_mode_id == &"rogue"
 
+	status_label.visible = not help_open
 	current_header.visible = not help_open
 	current_state_label.visible = not help_open
 	stats_header.visible = not help_open
@@ -543,3 +565,22 @@ func _refresh_section_visibility() -> void:
 	rogue_status_label.visible = is_rogue_mode and not help_open
 	rogue_effects_label.visible = is_rogue_mode and not help_open
 	rogue_choice_panel.visible = is_rogue_mode and not help_open
+
+
+func _set_preview_layout_density(is_android_portrait: bool) -> void:
+	var preview_cell_size := 16 if is_android_portrait else 20
+	var preview_meta_min_width := 72 if is_android_portrait else 96
+	var preview_panel_min_width := 92 if is_android_portrait else 112
+
+	for preview_node in [next_preview, hold_preview]:
+		if preview_node == null:
+			continue
+		preview_node.set("cell_size", preview_cell_size)
+		var preview_box_size: int = int(preview_node.get("preview_box_size"))
+		preview_node.custom_minimum_size = Vector2(preview_box_size * preview_cell_size, preview_box_size * preview_cell_size)
+		preview_node.queue_redraw()
+
+	next_piece_label.custom_minimum_size.x = preview_meta_min_width
+	hold_piece_label.custom_minimum_size.x = preview_meta_min_width
+	$PreviewRow/NextPanel.custom_minimum_size.x = preview_panel_min_width
+	$PreviewRow/HoldPanel.custom_minimum_size.x = preview_panel_min_width
