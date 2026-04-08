@@ -5,6 +5,7 @@ signal pause_requested
 signal menu_requested
 signal rogue_upgrade_selected(rogue_upgrade_id: StringName)
 signal help_visibility_changed(is_visible: bool)
+signal touch_controls_state_changed
 
 const ULTRA_NARROW_LAYOUT_MAX_WIDTH := 360.0
 const SMALL_COMPACT_LAYOUT_MAX_WIDTH := 393.0
@@ -261,6 +262,7 @@ func set_rogue_choice_prompt(is_visible: bool, title: String = "", hint: String 
 		_set_help_visibility(false)
 		_update_focus_behavior(is_session_paused, is_session_game_over, false)
 		_refresh_section_visibility()
+		_emit_touch_controls_state_changed()
 		return
 
 	rogue_choice_panel.visible = true
@@ -278,6 +280,7 @@ func set_rogue_choice_prompt(is_visible: bool, title: String = "", hint: String 
 		_set_help_visibility(false)
 		_update_focus_behavior(is_session_paused, is_session_game_over, false)
 		_refresh_section_visibility()
+		_emit_touch_controls_state_changed()
 		return
 
 	if help_panel.visible:
@@ -290,6 +293,7 @@ func set_rogue_choice_prompt(is_visible: bool, title: String = "", hint: String 
 	is_choice_prompt_open = true
 	_update_focus_behavior(is_session_paused, is_session_game_over, true)
 	_refresh_section_visibility()
+	_emit_touch_controls_state_changed()
 
 
 func set_session_controls(is_paused: bool, can_pause: bool, is_game_over: bool) -> void:
@@ -312,6 +316,7 @@ func set_session_controls(is_paused: bool, can_pause: bool, is_game_over: bool) 
 		_set_help_visibility(false)
 
 	_refresh_section_visibility()
+	_emit_touch_controls_state_changed()
 
 
 func set_help_panel_open(is_visible: bool) -> void:
@@ -562,6 +567,7 @@ func _set_help_panel_visible(is_visible: bool) -> void:
 			help_visibility_changed.emit(false)
 		_update_focus_behavior(is_session_paused, is_session_game_over, is_choice_prompt_open)
 		_refresh_section_visibility()
+		_emit_touch_controls_state_changed()
 		return
 
 	help_text.text = _get_help_panel_text()
@@ -572,6 +578,20 @@ func _set_help_panel_visible(is_visible: bool) -> void:
 		help_button.grab_focus()
 	_update_focus_behavior(is_session_paused, is_session_game_over, is_choice_prompt_open)
 	_refresh_section_visibility()
+	_emit_touch_controls_state_changed()
+
+
+func get_touch_controls_overlay_state() -> Dictionary:
+	return {
+		"is_help_open": help_panel.visible,
+		"is_paused": is_session_paused,
+		"is_game_over": is_session_game_over,
+		"is_choice_prompt_open": is_choice_prompt_open,
+	}
+
+
+func _emit_touch_controls_state_changed() -> void:
+	touch_controls_state_changed.emit()
 
 
 func _get_help_panel_text() -> String:

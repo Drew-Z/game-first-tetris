@@ -52,6 +52,10 @@ D:\Development\Godot\Godot_v4.6.1-stable_win64_console.exe --headless --path D:\
   - 场景里固定提供 `TouchControls` 控件层
   - 当前只在紧凑布局里显示，用来证明“屏幕控件 -> 桥接层 -> 动作层”已贯通
   - 当前已接入：左移、右移、软降、旋转、Hard Drop、Hold、暂停
+  - 当前显隐约定：
+    - 只在紧凑布局里显示
+    - 打开 Help、暂停、Rogue 选择、游戏结束时必须隐藏
+    - 进入这些阻断状态时，会主动释放触屏持续输入，避免残留
 - 后续如果接入触屏输入，优先复用这两个接入口：
   - `trigger_game_action(...)`
   - `set_game_action_pressed(...)`

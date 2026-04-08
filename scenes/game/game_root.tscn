@@ -7,7 +7,7 @@
 [ext_resource type="PackedScene" path="res://scenes/ui/game_ui.tscn" id="4_8djlb"]
 [ext_resource type="Script" path="res://scripts/game/game_audio.gd" id="5_f4d2b"]
 [ext_resource type="Script" path="res://scripts/game/touch_input_bridge.gd" id="6_y5ufr"]
-[ext_resource type="Script" path="res://scripts/ui/touch_controls_overlay.gd" id="7_om4v5"]
+[ext_resource type="Script" path="res://scripts/ui/touch_controls_runtime.gd" id="7_om4v5"]
 
 [node name="GameRoot" type="Control"]
 layout_mode = 3

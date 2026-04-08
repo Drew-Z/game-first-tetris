@@ -41,6 +41,8 @@
 - 紧凑布局下应能看到 `TouchControls` 占位控件层
 - `TouchControls` 的左移 / 右移 / 软降按钮应能驱动持续状态
 - `TouchControls` 的旋转 / Hard Drop / Hold / 暂停按钮应能触发瞬时动作
+- 打开 Help、暂停、Rogue 选择、游戏结束时，`TouchControls` 应自动隐藏
+- 从可交互游戏态切到上述阻断状态时，触屏持续输入不应残留到后续主循环
 
 ## 固定尺寸截图回归
 

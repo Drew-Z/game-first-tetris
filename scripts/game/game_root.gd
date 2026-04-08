@@ -46,6 +46,9 @@ func _ready() -> void:
 	if game_ui != null and game_ui.has_signal("help_visibility_changed"):
 		if not game_ui.is_connected("help_visibility_changed", Callable(self, "_on_help_visibility_changed")):
 			game_ui.connect("help_visibility_changed", Callable(self, "_on_help_visibility_changed"))
+	if game_ui != null and game_ui.has_signal("touch_controls_state_changed"):
+		if not game_ui.is_connected("touch_controls_state_changed", Callable(self, "_on_touch_controls_state_changed")):
+			game_ui.connect("touch_controls_state_changed", Callable(self, "_on_touch_controls_state_changed"))
 	_apply_responsive_layout()
 
 
@@ -70,8 +73,7 @@ func _apply_responsive_layout() -> void:
 
 	if game_ui != null and game_ui.has_method("set_compact_layout"):
 		game_ui.call("set_compact_layout", is_compact, is_android_portrait, is_ultra_narrow_compact)
-	if touch_controls != null and touch_controls.has_method("set_touch_controls_enabled"):
-		touch_controls.call("set_touch_controls_enabled", is_compact, is_ultra_narrow_compact)
+	_sync_touch_controls_overlay(is_compact, is_ultra_narrow_compact)
 
 
 func _apply_playfield_density(is_ultra_narrow_compact: bool, is_android_portrait: bool, is_narrow_android_portrait: bool) -> void:
@@ -137,3 +139,26 @@ func _scroll_to_help_context() -> void:
 		return
 
 	viewport_scroll.scroll_vertical = 0
+
+
+func _on_touch_controls_state_changed() -> void:
+	_sync_touch_controls_overlay(
+		layout != null and layout.vertical,
+		size.x <= ULTRA_NARROW_COMPACT_MAX_WIDTH
+	)
+
+
+func _sync_touch_controls_overlay(is_compact: bool, is_ultra_narrow_compact: bool) -> void:
+	if touch_controls == null or not touch_controls.has_method("sync_overlay_state"):
+		return
+
+	var overlay_state := {
+		"is_help_open": false,
+		"is_paused": false,
+		"is_game_over": false,
+		"is_choice_prompt_open": false,
+	}
+	if game_ui != null and game_ui.has_method("get_touch_controls_overlay_state"):
+		overlay_state = game_ui.call("get_touch_controls_overlay_state")
+
+	touch_controls.call("sync_overlay_state", is_compact, is_ultra_narrow_compact, overlay_state)
