@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://di2q7blio7k6k"]
 
-[ext_resource type="PackedScene" path="res://scenes/game/game_root.tscn" id="1_l40vb"]
+[ext_resource type="Script" path="res://scripts/main/main.gd" id="1_hq4d1"]
 
 [node name="Main" type="Control"]
 layout_mode = 3
@@ -9,11 +9,103 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+script = ExtResource("1_hq4d1")
 
-[node name="GameRoot" parent="." instance=ExtResource("1_l40vb")]
+[node name="ModeHost" type="Control" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+
+[node name="MenuOverlay" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
+
+[node name="MenuScroll" type="ScrollContainer" parent="MenuOverlay"]
+layout_mode = 2
+
+[node name="MenuCenter" type="CenterContainer" parent="MenuOverlay/MenuScroll"]
+layout_mode = 2
+
+[node name="MenuPanel" type="PanelContainer" parent="MenuOverlay/MenuScroll/MenuCenter"]
+custom_minimum_size = Vector2(320, 0)
+layout_mode = 2
+
+[node name="MenuMargin" type="MarginContainer" parent="MenuOverlay/MenuScroll/MenuCenter/MenuPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 24
+theme_override_constants/margin_right = 24
+theme_override_constants/margin_bottom = 24
+
+[node name="MenuContent" type="VBoxContainer" parent="MenuOverlay/MenuScroll/MenuCenter/MenuPanel/MenuMargin"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="TitleLabel" type="Label" parent="MenuOverlay/MenuScroll/MenuCenter/MenuPanel/MenuMargin/MenuContent"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 28
+text = "Game First Tetris"
+
+[node name="SubtitleLabel" type="Label" parent="MenuOverlay/MenuScroll/MenuCenter/MenuPanel/MenuMargin/MenuContent"]
+layout_mode = 2
+autowrap_mode = 3
+text = "请选择进入方式。经典模式保持当前标准俄罗斯方块体验，Rogue 模式继续承载实验内容。"
+
+[node name="ModeSelectGroup" type="VBoxContainer" parent="MenuOverlay/MenuScroll/MenuCenter/MenuPanel/MenuMargin/MenuContent"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="ClassicButton" type="Button" parent="MenuOverlay/MenuScroll/MenuCenter/MenuPanel/MenuMargin/MenuContent/ModeSelectGroup"]
+layout_mode = 2
+text = "进入经典模式"
+
+[node name="RogueButton" type="Button" parent="MenuOverlay/MenuScroll/MenuCenter/MenuPanel/MenuMargin/MenuContent/ModeSelectGroup"]
+layout_mode = 2
+text = "进入 Rogue 模式"
+
+[node name="RogueSelectGroup" type="VBoxContainer" parent="MenuOverlay/MenuScroll/MenuCenter/MenuPanel/MenuMargin/MenuContent"]
+visible = false
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="RogueSelectTitle" type="Label" parent="MenuOverlay/MenuScroll/MenuCenter/MenuPanel/MenuMargin/MenuContent/RogueSelectGroup"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "Rogue 模式：开局强化 3 选 1"
+
+[node name="RogueSelectHint" type="Label" parent="MenuOverlay/MenuScroll/MenuCenter/MenuPanel/MenuMargin/MenuContent/RogueSelectGroup"]
+layout_mode = 2
+autowrap_mode = 3
+text = "当前只落第一批最小强化入口。经典模式不受影响，Rogue 模式每局开始前先选一项。"
+
+[node name="HardDropBonusButton" type="Button" parent="MenuOverlay/MenuScroll/MenuCenter/MenuPanel/MenuMargin/MenuContent/RogueSelectGroup"]
+layout_mode = 2
+text = "硬降奖励：每次 Hard Drop 额外 +1 分"
+
+[node name="LineClearBonusButton" type="Button" parent="MenuOverlay/MenuScroll/MenuCenter/MenuPanel/MenuMargin/MenuContent/RogueSelectGroup"]
+layout_mode = 2
+text = "消行奖励：每清除 1 行额外 +1 分"
+
+[node name="SpawnProtectionButton" type="Button" parent="MenuOverlay/MenuScroll/MenuCenter/MenuPanel/MenuMargin/MenuContent/RogueSelectGroup"]
+layout_mode = 2
+text = "一次出生保护：出生被占用时可保 1 次"
+
+[node name="BackButton" type="Button" parent="MenuOverlay/MenuScroll/MenuCenter/MenuPanel/MenuMargin/MenuContent/RogueSelectGroup"]
+layout_mode = 2
+text = "返回模式选择"
+
+[node name="NoteLabel" type="Label" parent="MenuOverlay/MenuScroll/MenuCenter/MenuPanel/MenuMargin/MenuContent"]
+layout_mode = 2
+autowrap_mode = 3
+text = "当前 Rogue 模式不会改写经典模式主循环，只先落最小可用强化入口。"
