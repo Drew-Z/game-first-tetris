@@ -8,6 +8,7 @@ signal help_visibility_changed(is_visible: bool)
 
 const ULTRA_NARROW_LAYOUT_MAX_WIDTH := 360.0
 const SMALL_COMPACT_LAYOUT_MAX_WIDTH := 393.0
+const DESKTOP_NARROW_HELP_MAX_WIDTH := 960.0
 
 @onready var stage_label: Label = $StageLabel
 @onready var status_label: Label = $StatusLabel
@@ -298,6 +299,7 @@ func set_session_controls(is_paused: bool, can_pause: bool, is_game_over: bool) 
 	pause_button.disabled = not can_pause
 	restart_button.disabled = false
 	menu_button.disabled = false
+	_refresh_session_button_labels()
 	_update_focus_behavior(is_paused, is_game_over, is_choice_prompt_open)
 
 	if is_game_over:
@@ -321,6 +323,7 @@ func set_compact_layout(is_compact: bool, is_android_portrait: bool = false, is_
 	is_android_portrait_layout = is_android_portrait
 	is_ultra_narrow_layout = is_ultra_narrow
 	is_small_compact_layout = is_compact and size.x > ULTRA_NARROW_LAYOUT_MAX_WIDTH and size.x <= SMALL_COMPACT_LAYOUT_MAX_WIDTH
+	var is_desktop_narrow_help := _is_desktop_narrow_help_layout()
 
 	if preview_row != null:
 		preview_row.vertical = is_compact
@@ -328,7 +331,7 @@ func set_compact_layout(is_compact: bool, is_android_portrait: bool = false, is_
 
 	if session_buttons != null:
 		session_buttons.vertical = is_compact
-		session_buttons.add_theme_constant_override("separation", 8 if is_ultra_narrow else (10 if is_small_compact_layout else 8))
+		session_buttons.add_theme_constant_override("separation", 8 if is_ultra_narrow else (10 if is_small_compact_layout else (6 if is_desktop_narrow_help else 8)))
 
 	add_theme_constant_override("separation", 8 if is_ultra_narrow else (9 if is_small_compact_layout else (8 if is_android_portrait else 12)))
 
@@ -338,7 +341,7 @@ func set_compact_layout(is_compact: bool, is_android_portrait: bool = false, is_
 	_set_header_font_size(stats_header, 15 if is_ultra_narrow else (16 if is_small_compact_layout else 18))
 	_set_header_font_size(preview_header, 15 if is_ultra_narrow else (16 if is_small_compact_layout else 18))
 	_set_header_font_size(rogue_header, 15 if is_ultra_narrow else (16 if is_small_compact_layout else 18))
-	_set_header_font_size(help_title, 15 if is_ultra_narrow else (16 if is_small_compact_layout else 18))
+	_set_header_font_size(help_title, 15 if is_ultra_narrow else (16 if is_small_compact_layout else (17 if is_desktop_narrow_help else 18)))
 	_set_label_font_size(status_label, 14 if is_ultra_narrow else (15 if is_small_compact_layout else 17))
 	_set_label_font_size(current_state_label, 14 if is_ultra_narrow else (15 if is_small_compact_layout else 17))
 	_set_label_font_size(stats_label, 14 if is_ultra_narrow else (15 if is_small_compact_layout else 17))
@@ -348,7 +351,7 @@ func set_compact_layout(is_compact: bool, is_android_portrait: bool = false, is_
 	_set_label_font_size(next_piece_label, 13 if is_ultra_narrow else (14 if is_small_compact_layout else 16))
 	_set_label_font_size(hold_piece_label, 13 if is_ultra_narrow else (14 if is_small_compact_layout else 16))
 	_set_label_font_size(system_label, 14 if is_ultra_narrow else (15 if is_small_compact_layout else 16))
-	_set_label_font_size(help_text, 14 if is_ultra_narrow else (15 if is_small_compact_layout else 17))
+	_set_label_font_size(help_text, 14 if is_ultra_narrow else (15 if is_small_compact_layout else (16 if is_desktop_narrow_help else 17)))
 	_set_label_font_size(next_label, 14 if is_ultra_narrow else (15 if is_small_compact_layout else 16))
 	_set_label_font_size(hold_label, 14 if is_ultra_narrow else (15 if is_small_compact_layout else 16))
 	status_label.custom_minimum_size.y = 24.0 if is_ultra_narrow else (26.0 if is_small_compact_layout else (28.0 if is_android_portrait else 36.0))
@@ -368,22 +371,23 @@ func set_compact_layout(is_compact: bool, is_android_portrait: bool = false, is_
 	if rogue_choice_panel != null:
 		rogue_choice_panel.custom_minimum_size.y = 112.0 if is_ultra_narrow else (120.0 if is_small_compact_layout else (120.0 if is_android_portrait else (144.0 if is_compact else 176.0)))
 
-	_set_button_min_height(pause_button, 44.0 if is_ultra_narrow else (46.0 if is_small_compact_layout else 0.0))
-	_set_button_min_height(menu_button, 44.0 if is_ultra_narrow else (46.0 if is_small_compact_layout else 0.0))
-	_set_button_min_height(help_button, 44.0 if is_ultra_narrow else (46.0 if is_small_compact_layout else 0.0))
-	_set_button_min_height(restart_button, 44.0 if is_ultra_narrow else (46.0 if is_small_compact_layout else 0.0))
+	_set_button_min_height(pause_button, 44.0 if is_ultra_narrow else (46.0 if is_small_compact_layout else (36.0 if is_desktop_narrow_help else 0.0)))
+	_set_button_min_height(menu_button, 44.0 if is_ultra_narrow else (46.0 if is_small_compact_layout else (36.0 if is_desktop_narrow_help else 0.0)))
+	_set_button_min_height(help_button, 44.0 if is_ultra_narrow else (46.0 if is_small_compact_layout else (36.0 if is_desktop_narrow_help else 0.0)))
+	_set_button_min_height(restart_button, 44.0 if is_ultra_narrow else (46.0 if is_small_compact_layout else (36.0 if is_desktop_narrow_help else 0.0)))
 	_set_button_min_height(rogue_hard_drop_button, 44.0 if is_ultra_narrow else (46.0 if is_small_compact_layout else 0.0))
 	_set_button_min_height(rogue_line_clear_button, 44.0 if is_ultra_narrow else (46.0 if is_small_compact_layout else 0.0))
 	_set_button_min_height(rogue_spawn_protection_button, 44.0 if is_ultra_narrow else (46.0 if is_small_compact_layout else 0.0))
-	_set_button_font_size(pause_button, 15 if is_ultra_narrow else (16 if is_small_compact_layout else 16))
-	_set_button_font_size(menu_button, 15 if is_ultra_narrow else (16 if is_small_compact_layout else 16))
-	_set_button_font_size(help_button, 15 if is_ultra_narrow else (16 if is_small_compact_layout else 16))
-	_set_button_font_size(restart_button, 15 if is_ultra_narrow else (16 if is_small_compact_layout else 16))
+	_set_button_font_size(pause_button, 15 if is_ultra_narrow else (16 if is_small_compact_layout else (15 if is_desktop_narrow_help else 16)))
+	_set_button_font_size(menu_button, 15 if is_ultra_narrow else (16 if is_small_compact_layout else (15 if is_desktop_narrow_help else 16)))
+	_set_button_font_size(help_button, 15 if is_ultra_narrow else (16 if is_small_compact_layout else (15 if is_desktop_narrow_help else 16)))
+	_set_button_font_size(restart_button, 15 if is_ultra_narrow else (16 if is_small_compact_layout else (15 if is_desktop_narrow_help else 16)))
 	_set_button_font_size(rogue_hard_drop_button, 14 if is_ultra_narrow else (15 if is_small_compact_layout else 16))
 	_set_button_font_size(rogue_line_clear_button, 14 if is_ultra_narrow else (15 if is_small_compact_layout else 16))
 	_set_button_font_size(rogue_spawn_protection_button, 14 if is_ultra_narrow else (15 if is_small_compact_layout else 16))
 
 	_set_preview_layout_density(is_android_portrait, is_ultra_narrow)
+	_refresh_session_button_labels()
 	_refresh_section_visibility()
 
 
@@ -550,7 +554,7 @@ func _set_help_visibility(is_visible: bool, text: String = "") -> void:
 func _set_help_panel_visible(is_visible: bool) -> void:
 	var did_change := help_panel.visible != is_visible
 	help_panel.visible = is_visible
-	help_button.text = "Close Help" if is_visible else "Help"
+	_refresh_session_button_labels()
 	if not is_visible:
 		help_text.text = ""
 		help_title.text = "帮助"
@@ -582,6 +586,9 @@ func _get_help_panel_text() -> String:
 	elif is_android_portrait_layout:
 		sections[0] = "操作：←→ 移动，↑ 旋转，↓ 软降，Space 硬降，C Hold。"
 		sections[1] = "控制：Esc 暂停；Esc / Close Help 关闭帮助。"
+	elif _is_desktop_narrow_help_layout():
+		sections[0] = "操作：←→ 移动，↑ 旋转，↓ 软降，Space 硬降，C Hold。"
+		sections[1] = "控制：Esc 暂停；Close 或 Esc 关闭帮助。"
 	else:
 		sections.append("流程：方块下落、锁定、消行、继续生成；游戏结束后可 Restart 或返回主菜单。")
 
@@ -589,6 +596,12 @@ func _get_help_panel_text() -> String:
 		sections.append("Rogue：开局前与局内会触发 3 选 1；已选强化与带入结果会显示在 Rogue 信息区。")
 	else:
 		sections.append("经典模式：保持标准主循环，不包含 Rogue 强化与局间带入。")
+
+	if _is_desktop_narrow_help_layout():
+		if current_mode_id == &"rogue":
+			sections[2] = "Rogue：开局前和局内会触发 3 选 1；强化结果显示在 Rogue 区。"
+		else:
+			sections[2] = "经典：保持标准主循环。"
 
 	return "\n\n".join(sections)
 
@@ -661,3 +674,20 @@ func _set_header_font_size(label: Label, font_size: int) -> void:
 		return
 
 	label.add_theme_font_size_override("font_size", font_size)
+
+
+func _is_desktop_narrow_help_layout() -> bool:
+	return not is_compact_layout and size.x <= DESKTOP_NARROW_HELP_MAX_WIDTH
+
+
+func _refresh_session_button_labels() -> void:
+	if menu_button == null or help_button == null:
+		return
+
+	if _is_desktop_narrow_help_layout():
+		menu_button.text = "Menu"
+		help_button.text = "Close" if help_panel.visible else "Help"
+		return
+
+	menu_button.text = "Main Menu"
+	help_button.text = "Close Help" if help_panel.visible else "Help"

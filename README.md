@@ -114,7 +114,7 @@ D:\Development\Godot\Godot_v4.6.1-stable_win64_console.exe --headless --path D:\
   - `393 x 852` 的舒适度仍略低于 `412 x 915`
 - Windows 常见窗口（`960 x 640`、`1024 x 768`、`1280 x 720`）：
   - 主菜单、经典模式、Rogue 模式当前都可用
-  - Help 在 `960 x 640` 下仍是当前最弱项，暂定为勉强可用
+  - Help 在 `960 x 640` 下已提升到可用，首屏可直接看到正文与关闭方式
   - Help 在 `1024 x 768` 和 `1280 x 720` 下可用
 
 ## 窄宽度下 Rogue 信息表达
