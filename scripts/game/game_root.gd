@@ -29,6 +29,10 @@ const PORTRAIT_PLAYFIELD_MARGIN_RIGHT := 12
 const PORTRAIT_PLAYFIELD_MARGIN_BOTTOM := 12
 const DEFAULT_PLAYFIELD_OFFSET := Vector2(16, 16)
 const PORTRAIT_PLAYFIELD_OFFSET := Vector2(8, 8)
+const TOUCH_CONTROLS_SIDE_MARGIN := 12.0
+const TOUCH_CONTROLS_SIDE_MARGIN_COMPACT := 8.0
+const TOUCH_CONTROLS_BOTTOM_MARGIN := 12.0
+const TOUCH_CONTROLS_BOTTOM_MARGIN_COMPACT := 8.0
 
 @onready var layout: BoxContainer = $ViewportScroll/Layout
 @onready var viewport_scroll: ScrollContainer = $ViewportScroll
@@ -162,3 +166,24 @@ func _sync_touch_controls_overlay(is_compact: bool, is_ultra_narrow_compact: boo
 		overlay_state = game_ui.call("get_touch_controls_overlay_state")
 
 	touch_controls.call("sync_overlay_state", is_compact, is_ultra_narrow_compact, overlay_state)
+	call_deferred("_apply_touch_controls_frame", is_ultra_narrow_compact)
+
+
+func _apply_touch_controls_frame(is_ultra_narrow_compact: bool) -> void:
+	if touch_controls == null:
+		return
+
+	var side_margin := TOUCH_CONTROLS_SIDE_MARGIN_COMPACT if is_ultra_narrow_compact else TOUCH_CONTROLS_SIDE_MARGIN
+	var bottom_margin := TOUCH_CONTROLS_BOTTOM_MARGIN_COMPACT if is_ultra_narrow_compact else TOUCH_CONTROLS_BOTTOM_MARGIN
+
+	touch_controls.offset_left = side_margin
+	touch_controls.offset_right = -side_margin
+
+	if not touch_controls.visible:
+		touch_controls.offset_top = 0.0
+		touch_controls.offset_bottom = 0.0
+		return
+
+	var minimum_height := touch_controls.get_combined_minimum_size().y
+	touch_controls.offset_bottom = -bottom_margin
+	touch_controls.offset_top = -(minimum_height + bottom_margin)
