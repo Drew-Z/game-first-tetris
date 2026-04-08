@@ -48,6 +48,10 @@ D:\Development\Godot\Godot_v4.6.1-stable_win64_console.exe --headless --path D:\
   - 触屏来源可通过 `tap_action(...)` 触发瞬时动作
   - 触屏来源可通过 `set_touch_action_pressed(...)` 驱动持续状态
   - 如需收口触屏持续状态，可调用 `release_all_touch_actions()`
+- 当前已经补上极简触屏控件占位层：
+  - 场景里固定提供 `TouchControls` 控件层
+  - 当前只在紧凑布局里显示，用来证明“屏幕控件 -> 桥接层 -> 动作层”已贯通
+  - 当前已接入：左移、右移、软降、旋转、Hard Drop、Hold、暂停
 - 后续如果接入触屏输入，优先复用这两个接入口：
   - `trigger_game_action(...)`
   - `set_game_action_pressed(...)`

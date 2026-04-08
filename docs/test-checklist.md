@@ -38,6 +38,9 @@
 - `TouchInputBridge.tap_action(...)` 应能触发瞬时动作
 - `TouchInputBridge.set_touch_action_pressed(...)` 应能驱动持续状态
 - 键盘与触屏来源并存时，一个来源松手不应直接清掉另一个来源仍在保持的持续状态
+- 紧凑布局下应能看到 `TouchControls` 占位控件层
+- `TouchControls` 的左移 / 右移 / 软降按钮应能驱动持续状态
+- `TouchControls` 的旋转 / Hard Drop / Hold / 暂停按钮应能触发瞬时动作
 
 ## 固定尺寸截图回归
 

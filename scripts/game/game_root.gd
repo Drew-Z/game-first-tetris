@@ -39,6 +39,7 @@ const PORTRAIT_PLAYFIELD_OFFSET := Vector2(8, 8)
 @onready var active_piece: Node2D = $ViewportScroll/Layout/PlayfieldPanel/PlayfieldMargin/Playfield/ActivePiece
 @onready var sidebar_panel: PanelContainer = $ViewportScroll/Layout/SidebarPanel
 @onready var game_ui: VBoxContainer = $ViewportScroll/Layout/SidebarPanel/GameUI
+@onready var touch_controls: MarginContainer = $TouchControls
 
 
 func _ready() -> void:
@@ -69,6 +70,8 @@ func _apply_responsive_layout() -> void:
 
 	if game_ui != null and game_ui.has_method("set_compact_layout"):
 		game_ui.call("set_compact_layout", is_compact, is_android_portrait, is_ultra_narrow_compact)
+	if touch_controls != null and touch_controls.has_method("set_touch_controls_enabled"):
+		touch_controls.call("set_touch_controls_enabled", is_compact, is_ultra_narrow_compact)
 
 
 func _apply_playfield_density(is_ultra_narrow_compact: bool, is_android_portrait: bool, is_narrow_android_portrait: bool) -> void:

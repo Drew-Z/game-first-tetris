@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3 uid="uid://3avk0h3xihvc"]
+[gd_scene load_steps=9 format=3 uid="uid://3avk0h3xihvc"]
 
 [ext_resource type="Script" path="res://scripts/game/game_root.gd" id="1_3g7is"]
 [ext_resource type="Script" path="res://scripts/game/game_manager.gd" id="1_6g2us"]
@@ -7,6 +7,7 @@
 [ext_resource type="PackedScene" path="res://scenes/ui/game_ui.tscn" id="4_8djlb"]
 [ext_resource type="Script" path="res://scripts/game/game_audio.gd" id="5_f4d2b"]
 [ext_resource type="Script" path="res://scripts/game/touch_input_bridge.gd" id="6_y5ufr"]
+[ext_resource type="Script" path="res://scripts/ui/touch_controls_overlay.gd" id="7_om4v5"]
 
 [node name="GameRoot" type="Control"]
 layout_mode = 3
@@ -75,3 +76,82 @@ script = ExtResource("6_y5ufr")
 
 [node name="GameAudio" type="Node" parent="."]
 script = ExtResource("5_f4d2b")
+
+[node name="TouchControls" type="MarginContainer" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 12
+script = ExtResource("7_om4v5")
+
+[node name="TouchControlsPanel" type="PanelContainer" parent="TouchControls"]
+layout_mode = 2
+
+[node name="TouchControlsMargin" type="MarginContainer" parent="TouchControls/TouchControlsPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+
+[node name="TouchControlsLayout" type="VBoxContainer" parent="TouchControls/TouchControlsPanel/TouchControlsMargin"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="MoveRow" type="HBoxContainer" parent="TouchControls/TouchControlsPanel/TouchControlsMargin/TouchControlsLayout"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="LeftButton" type="Button" parent="TouchControls/TouchControlsPanel/TouchControlsMargin/TouchControlsLayout/MoveRow"]
+custom_minimum_size = Vector2(0, 52)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "左移"
+
+[node name="SoftDropButton" type="Button" parent="TouchControls/TouchControlsPanel/TouchControlsMargin/TouchControlsLayout/MoveRow"]
+custom_minimum_size = Vector2(0, 52)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "软降"
+
+[node name="RightButton" type="Button" parent="TouchControls/TouchControlsPanel/TouchControlsMargin/TouchControlsLayout/MoveRow"]
+custom_minimum_size = Vector2(0, 52)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "右移"
+
+[node name="ActionRow" type="HBoxContainer" parent="TouchControls/TouchControlsPanel/TouchControlsMargin/TouchControlsLayout"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="RotateButton" type="Button" parent="TouchControls/TouchControlsPanel/TouchControlsMargin/TouchControlsLayout/ActionRow"]
+custom_minimum_size = Vector2(0, 52)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "旋转"
+
+[node name="HardDropButton" type="Button" parent="TouchControls/TouchControlsPanel/TouchControlsMargin/TouchControlsLayout/ActionRow"]
+custom_minimum_size = Vector2(0, 52)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "硬降"
+
+[node name="HoldButton" type="Button" parent="TouchControls/TouchControlsPanel/TouchControlsMargin/TouchControlsLayout/ActionRow"]
+custom_minimum_size = Vector2(0, 52)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Hold"
+
+[node name="PauseButton" type="Button" parent="TouchControls/TouchControlsPanel/TouchControlsMargin/TouchControlsLayout/ActionRow"]
+custom_minimum_size = Vector2(0, 52)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "暂停"

@@ -87,6 +87,7 @@
 
 - 已完成第一步：输入结构拆分
 - 已完成第二步：最小触屏输入桥接层
+- 已完成第三步：极简触屏控件占位层
 - 当前输入层已明确区分：
   - 瞬时动作：旋转、Hard Drop、Hold、暂停 / 返回
   - 持续状态：左移、右移、软降
@@ -97,6 +98,10 @@
   - `TouchInputBridge.tap_action(...)`
   - `TouchInputBridge.set_touch_action_pressed(...)`
   - `TouchInputBridge.release_all_touch_actions()`
+- 当前紧凑布局里已固定提供：
+  - `TouchControls` 占位控件层
+  - 左移 / 右移 / 软降按钮走持续状态
+  - 旋转 / Hard Drop / Hold / 暂停按钮走瞬时动作
 - 当前键盘输入和触屏来源已能并存，持续状态会按输入来源分别汇总，不会互相覆盖
 
 ## 当前人工回归结论
