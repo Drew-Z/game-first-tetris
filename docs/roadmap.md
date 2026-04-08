@@ -13,7 +13,8 @@
 
 - 可试玩的经典模式基线
 - 已保留节点的 Rogue 原型
-- 正在 `feature/cross-platform-layout-polish` 上继续收敛 Web / 安卓 / Windows 共用结构
+- 已保留节点的跨平台布局打磨结果
+- 正在 `feature/device-size-manual-review` 上继续做真实设备尺寸 / 真实窗口体验回归
 
 ## 多端最小适配当前结论
 
@@ -43,13 +44,12 @@
 
 ## 当前分支阶段结论
 
-- `feature/cross-platform-layout-polish` 当前已经形成一个可保留的“跨平台布局打磨节点”。
-- 当前建议先收口，再决定下一条主线。
-- 收口后最推荐优先进入：
-  - 更真实设备尺寸人工回归
-- 原因：
-  - 当前结构级断点、紧凑态和 Help 可访问性已经形成第一轮稳定结论
-  - 下一步更值得先验证真实设备与真实窗口下的操作体验，而不是继续直接扩更多适配逻辑
+- `feature/cross-platform-layout-polish` 已经作为“跨平台布局打磨节点”保留。
+- 当前工作分支已经切换到 `feature/device-size-manual-review`。
+- 当前分支只负责：
+  - 真实设备尺寸人工回归
+  - 真实窗口体验确认
+  - 验证现有跨平台布局收敛在真实使用场景里是否成立
 
 ### 窄宽度 Rogue 信息表达约定
 - 摘要与效果分开显示，不再把强化结果和轮次提示混成一大段
@@ -93,4 +93,5 @@
 
 - `main`：继续承接更稳定的经典主线
 - `feature/rogue-prototype`：已保留 Rogue 原型节点，作为后续 Rogue 深化的基线
-- `feature/cross-platform-layout-polish`：当前只继续推进跨平台布局与界面结构收敛，不继续扩 Rogue 功能
+- `feature/cross-platform-layout-polish`：已保留为跨平台布局打磨节点
+- `feature/device-size-manual-review`：当前只继续推进真实设备尺寸 / 真实窗口体验回归，不继续扩 Rogue 功能

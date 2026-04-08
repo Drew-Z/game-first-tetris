@@ -4,7 +4,7 @@
 - 稳定经典主线
 - Rogue 原型实验线
 
-当前工作分支是 `feature/cross-platform-layout-polish`，当前只继续推进跨平台布局与界面结构收敛；`main` 应继续代表更稳定的经典主线。上一条 Rogue 原型节点已经保留在 `feature/rogue-prototype`。
+当前工作分支是 `feature/device-size-manual-review`，当前只继续推进真实设备尺寸 / 真实窗口体验回归；`main` 继续代表更稳定的经典主线。上一条 Rogue 原型节点已经保留在 `feature/rogue-prototype`，跨平台布局打磨节点已经保留在 `feature/cross-platform-layout-polish`。
 
 ## 当前状态
 
@@ -98,15 +98,11 @@ D:\Development\Godot\Godot_v4.6.1-stable_win64_console.exe --headless --path D:\
 
 ## 当前分支阶段结论
 
-- `feature/cross-platform-layout-polish` 当前已经达到“跨平台布局打磨节点”可收口状态。
-- 当前更适合作为节点保留的内容：
-  - 共用断点约定
-  - 固定尺寸截图回归清单与一轮实际回归结果
-  - Help 首屏可见性收口
-  - 安卓竖屏与极窄尺寸第一轮收敛
-  - 小尺寸字号 / 间距第一轮复验
-- 收口后最推荐优先进入的下一条主线：
-  - 更真实设备尺寸人工回归
+- `feature/cross-platform-layout-polish` 已作为“跨平台布局打磨节点”保留。
+- 当前 `feature/device-size-manual-review` 只继续负责：
+  - 真实设备尺寸人工回归
+  - 真实窗口体验确认
+  - 验证现有布局收敛结果在真实使用场景里是否成立
 
 ## 窄宽度下 Rogue 信息表达
 

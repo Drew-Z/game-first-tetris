@@ -2,16 +2,18 @@
 
 ## 当前分支定位
 
-- 当前分支：`feature/cross-platform-layout-polish`
+- 当前分支：`feature/device-size-manual-review`
 - `main`：稳定经典主线
 - 当前分支继续承接：
-  - 多端最小适配整理
-  - 跨平台布局打磨
-  - HUD / Help 结构收敛
+  - 真实设备尺寸 / 真实窗口体验回归
+  - 真实使用场景下的可读性与可操作性确认
+  - 现有跨平台布局收敛结果的人工复验
 - 已在上一条分支保留：
   - `feature/rogue-prototype`：Rogue 原型节点
   - Rogue 三轮实验链路
   - Rogue 原型试玩修复结果
+  - `feature/cross-platform-layout-polish`：跨平台布局打磨节点
+  - 多端最小适配第一轮断点与固定尺寸截图回归结果
 
 ## 当前已完成
 
