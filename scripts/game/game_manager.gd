@@ -7,6 +7,13 @@ const GameModeState := preload("res://scripts/game/game_mode_state.gd")
 const SevenBagPieceSourceModel := preload("res://scripts/game/data/seven_bag_piece_source.gd")
 const TetrominoData := preload("res://scripts/game/data/tetromino_data.gd")
 const ROGUE_PRE_RUN_CHOICE_ROUND := 1
+const INPUT_ACTION_MOVE_LEFT := &"move_left"
+const INPUT_ACTION_MOVE_RIGHT := &"move_right"
+const INPUT_ACTION_SOFT_DROP := &"soft_drop"
+const INPUT_ACTION_ROTATE := &"rotate"
+const INPUT_ACTION_HARD_DROP := &"hard_drop"
+const INPUT_ACTION_HOLD := &"hold"
+const INPUT_ACTION_PAUSE_BACK := &"pause_back"
 
 @onready var board: Node2D = $"../ViewportScroll/Layout/PlayfieldPanel/PlayfieldMargin/Playfield/Board"
 @onready var active_piece: Node2D = $"../ViewportScroll/Layout/PlayfieldPanel/PlayfieldMargin/Playfield/ActivePiece"
@@ -54,6 +61,9 @@ var held_horizontal_direction: int = 0
 var horizontal_repeat_timer: float = 0.0
 var is_help_overlay_open: bool = false
 var was_paused_before_help: bool = false
+var is_move_left_pressed: bool = false
+var is_move_right_pressed: bool = false
+var is_soft_drop_pressed: bool = false
 
 
 func _ready() -> void:
@@ -81,30 +91,17 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.echo:
 		return
 
+	if _try_handle_continuous_input_event(event):
+		return
+
 	if event.is_action_pressed("ui_cancel"):
-		if is_help_overlay_open:
-			_set_help_overlay_open(false)
-			return
-		_toggle_pause()
+		trigger_game_action(INPUT_ACTION_PAUSE_BACK)
 		return
 
-	if is_game_over or is_paused or is_help_overlay_open or is_rogue_choice_pending:
+	if _is_gameplay_input_blocked():
 		return
 
-	if event.is_action_pressed("ui_left"):
-		_begin_horizontal_repeat(-1)
-	elif event.is_action_pressed("ui_right"):
-		_begin_horizontal_repeat(1)
-	elif event.is_action_pressed("ui_up"):
-		_try_rotate_active_piece()
-	elif event.is_action_pressed("hard_drop"):
-		_try_hard_drop_active_piece()
-	elif event.is_action_pressed("hold"):
-		_try_hold_active_piece()
-	elif event.is_action_released("ui_left"):
-		_handle_horizontal_release(-1)
-	elif event.is_action_released("ui_right"):
-		_handle_horizontal_release(1)
+	_try_handle_instant_input_event(event)
 
 
 func start_game() -> void:
@@ -411,7 +408,7 @@ func _enter_game_over() -> void:
 	is_piece_falling = false
 	is_game_over = true
 	gravity_timer = 0.0
-	_stop_horizontal_repeat()
+	_clear_gameplay_input_states()
 	_capture_rogue_meta_progression_on_game_over()
 
 	if active_piece.has_method("clear_piece"):
@@ -435,7 +432,7 @@ func _on_pause_requested() -> void:
 func _on_menu_requested() -> void:
 	_set_help_overlay_open(false)
 	_clear_runtime_pause()
-	_stop_horizontal_repeat()
+	_clear_gameplay_input_states()
 	emit_signal("return_to_menu_requested")
 
 
@@ -454,7 +451,7 @@ func _prepare_runtime_for_restart() -> void:
 	triggered_rogue_choice_rounds.clear()
 	pending_rogue_choice_round = 0
 	rogue_active_run_carry_over_upgrade_id = &""
-	_stop_horizontal_repeat()
+	_clear_gameplay_input_states()
 	is_help_overlay_open = false
 	was_paused_before_help = false
 
@@ -466,7 +463,7 @@ func _prepare_runtime_for_restart() -> void:
 
 
 func _get_current_drop_step_seconds() -> float:
-	if Input.is_action_pressed("ui_down"):
+	if is_soft_drop_pressed:
 		return soft_drop_step_seconds
 
 	return _get_current_gravity_step_seconds()
@@ -729,7 +726,7 @@ func _begin_rogue_choice(choice_round: int) -> void:
 	is_paused = false
 	is_piece_falling = false
 	gravity_timer = 0.0
-	_stop_horizontal_repeat()
+	_clear_gameplay_input_states()
 
 
 func _on_rogue_upgrade_selected(selected_upgrade_id: StringName) -> void:
@@ -781,7 +778,7 @@ func _toggle_pause() -> void:
 
 	is_paused = not is_paused
 	if is_paused:
-		_stop_horizontal_repeat()
+		_clear_gameplay_input_states()
 	_sync_ui()
 
 
@@ -795,7 +792,7 @@ func _on_help_visibility_changed(is_visible: bool) -> void:
 	if is_visible:
 		was_paused_before_help = is_paused
 		is_paused = true
-		_stop_horizontal_repeat()
+		_clear_gameplay_input_states()
 	else:
 		if is_game_over or is_rogue_choice_pending:
 			is_paused = false
@@ -829,8 +826,7 @@ func _handle_horizontal_release(released_direction: int) -> void:
 		return
 
 	var opposite_direction := -released_direction
-	var opposite_action := _get_horizontal_action_name(opposite_direction)
-	if Input.is_action_pressed(opposite_action):
+	if _is_horizontal_direction_pressed(opposite_direction):
 		_begin_horizontal_repeat(opposite_direction)
 		return
 
@@ -841,11 +837,10 @@ func _update_horizontal_repeat(delta: float) -> void:
 	if held_horizontal_direction == 0:
 		return
 
-	if is_game_over or is_paused or is_rogue_choice_pending or active_piece_state == null or not is_piece_falling:
+	if _is_gameplay_input_blocked() or active_piece_state == null or not is_piece_falling:
 		return
 
-	var expected_action := _get_horizontal_action_name(held_horizontal_direction)
-	if not Input.is_action_pressed(expected_action):
+	if not _is_horizontal_direction_pressed(held_horizontal_direction):
 		_stop_horizontal_repeat()
 		return
 
@@ -862,12 +857,104 @@ func _stop_horizontal_repeat() -> void:
 	horizontal_repeat_timer = 0.0
 
 
+func trigger_game_action(action_id: StringName) -> void:
+	if action_id == INPUT_ACTION_PAUSE_BACK:
+		if is_help_overlay_open:
+			_set_help_overlay_open(false)
+			return
+		_toggle_pause()
+		return
+
+	if _is_gameplay_input_blocked():
+		return
+
+	match action_id:
+		INPUT_ACTION_ROTATE:
+			_try_rotate_active_piece()
+		INPUT_ACTION_HARD_DROP:
+			_try_hard_drop_active_piece()
+		INPUT_ACTION_HOLD:
+			_try_hold_active_piece()
+
+
+func set_game_action_pressed(action_id: StringName, is_pressed: bool) -> void:
+	match action_id:
+		INPUT_ACTION_MOVE_LEFT:
+			if is_pressed and _is_gameplay_input_blocked():
+				return
+			is_move_left_pressed = is_pressed
+			if is_pressed:
+				_begin_horizontal_repeat(-1)
+			else:
+				_handle_horizontal_release(-1)
+		INPUT_ACTION_MOVE_RIGHT:
+			if is_pressed and _is_gameplay_input_blocked():
+				return
+			is_move_right_pressed = is_pressed
+			if is_pressed:
+				_begin_horizontal_repeat(1)
+			else:
+				_handle_horizontal_release(1)
+		INPUT_ACTION_SOFT_DROP:
+			if is_pressed and _is_gameplay_input_blocked():
+				return
+			is_soft_drop_pressed = is_pressed
+
+
+func _try_handle_instant_input_event(event: InputEvent) -> bool:
+	if event.is_action_pressed("ui_up"):
+		trigger_game_action(INPUT_ACTION_ROTATE)
+		return true
+	if event.is_action_pressed("hard_drop"):
+		trigger_game_action(INPUT_ACTION_HARD_DROP)
+		return true
+	if event.is_action_pressed("hold"):
+		trigger_game_action(INPUT_ACTION_HOLD)
+		return true
+
+	return false
+
+
+func _try_handle_continuous_input_event(event: InputEvent) -> bool:
+	if event.is_action_pressed("ui_left"):
+		set_game_action_pressed(INPUT_ACTION_MOVE_LEFT, true)
+		return true
+	if event.is_action_pressed("ui_right"):
+		set_game_action_pressed(INPUT_ACTION_MOVE_RIGHT, true)
+		return true
+	if event.is_action_pressed("ui_down"):
+		set_game_action_pressed(INPUT_ACTION_SOFT_DROP, true)
+		return true
+	if event.is_action_released("ui_left"):
+		set_game_action_pressed(INPUT_ACTION_MOVE_LEFT, false)
+		return true
+	if event.is_action_released("ui_right"):
+		set_game_action_pressed(INPUT_ACTION_MOVE_RIGHT, false)
+		return true
+	if event.is_action_released("ui_down"):
+		set_game_action_pressed(INPUT_ACTION_SOFT_DROP, false)
+		return true
+
+	return false
+
+
+func _clear_gameplay_input_states() -> void:
+	is_move_left_pressed = false
+	is_move_right_pressed = false
+	is_soft_drop_pressed = false
+	_stop_horizontal_repeat()
+
+
+func _is_gameplay_input_blocked() -> bool:
+	return is_game_over or is_paused or is_help_overlay_open or is_rogue_choice_pending
+
+
+func _is_horizontal_direction_pressed(direction: int) -> bool:
+	return is_move_left_pressed if direction < 0 else is_move_right_pressed
+
+
 func _get_horizontal_offset(direction: int) -> Vector2i:
 	return Vector2i.LEFT if direction < 0 else Vector2i.RIGHT
-
-
-func _get_horizontal_action_name(direction: int) -> StringName:
-	return &"ui_left" if direction < 0 else &"ui_right"
 
 
 func _get_mode_note_for_ui() -> String:

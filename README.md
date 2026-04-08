@@ -37,6 +37,17 @@ D:\Development\Godot\Godot_v4.6.1-stable_win64_console.exe --headless --path D:\
 - `C`：Hold
 - `Esc`：暂停 / 关闭 Help
 
+## 当前输入结构约定
+
+- 当前输入层已经先按“动作类型”拆开：
+  - 瞬时动作：旋转、Hard Drop、Hold、暂停 / 返回
+  - 持续状态：左移、右移、软降
+- 当前键盘输入会先映射到动作层，再驱动游戏行为
+- 后续如果接入触屏输入，优先复用这两个接入口：
+  - `trigger_game_action(...)`
+  - `set_game_action_pressed(...)`
+- 这样做的目标是：未来接触屏输入时，不需要继续直接把逻辑堆进 `_unhandled_input()`
+
 ## 模式说明
 
 ### 经典模式
