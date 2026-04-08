@@ -14,7 +14,8 @@
 - 可试玩的经典模式基线
 - 已保留节点的 Rogue 原型
 - 已保留节点的跨平台布局打磨结果
-- 正在 `feature/device-size-manual-review` 上继续做真实设备尺寸 / 真实窗口体验回归
+- 已保留节点的真实设备尺寸人工回归结果
+- 正在 `feature/touch-input-prep` 上继续做触屏输入准备
 
 ## 多端最小适配当前结论
 
@@ -38,9 +39,9 @@
 
 ## 当前最值得继续收敛的方向
 
-- 优先：固定尺寸截图回归基线固化
-- 其次：更真实的设备级手工回归
-- 之后：更细的字号 / 间距断点策略
+- 优先：触屏输入准备
+- 其次：触屏输入与现有键盘输入的职责拆分
+- 之后：更完整的移动端输入方案
 
 ## 当前人工回归摘要
 
@@ -57,21 +58,21 @@
 
 ## 当前人工回归分支结论
 
-- `feature/device-size-manual-review` 当前已经达到“真实设备尺寸人工回归节点”可收口状态。
-- 当前这条分支已经完成了：
+- `feature/device-size-manual-review` 已经作为“真实设备尺寸人工回归节点”保留。
+- 当前真实设备尺寸人工回归节点已经完成了：
   - 三类真实使用场景的一轮人工回归
   - 关键画面的人工可用性判断
   - `960 x 640` Help 的最后一轮小收敛
-- 如果先收口，下一条更推荐的主线不是继续在这条分支上叠内容，而是先做分支 / PR / 合并策略整理，再决定是否进入触屏输入准备或多端正式适配继续深化。
 
 ## 当前分支阶段结论
 
 - `feature/cross-platform-layout-polish` 已经作为“跨平台布局打磨节点”保留。
-- 当前工作分支已经切换到 `feature/device-size-manual-review`。
+- `feature/device-size-manual-review` 已经作为“真实设备尺寸人工回归节点”保留。
+- 当前工作分支已经切换到 `feature/touch-input-prep`。
 - 当前分支只负责：
-  - 真实设备尺寸人工回归
-  - 真实窗口体验确认
-  - 验证现有跨平台布局收敛在真实使用场景里是否成立
+  - 触屏输入准备
+  - 为未来移动端输入做结构承接
+  - 不继续扩 Rogue 功能，也不修改经典 / Rogue 核心规则
 
 ### 窄宽度 Rogue 信息表达约定
 - 摘要与效果分开显示，不再把强化结果和轮次提示混成一大段
@@ -116,4 +117,5 @@
 - `main`：继续承接更稳定的经典主线
 - `feature/rogue-prototype`：已保留 Rogue 原型节点，作为后续 Rogue 深化的基线
 - `feature/cross-platform-layout-polish`：已保留为跨平台布局打磨节点
-- `feature/device-size-manual-review`：当前只继续推进真实设备尺寸 / 真实窗口体验回归，不继续扩 Rogue 功能
+- `feature/device-size-manual-review`：已保留为真实设备尺寸人工回归节点
+- `feature/touch-input-prep`：当前只继续推进触屏输入准备，不继续扩 Rogue 功能

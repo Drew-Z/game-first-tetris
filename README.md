@@ -4,7 +4,7 @@
 - 稳定经典主线
 - Rogue 原型实验线
 
-当前工作分支是 `feature/device-size-manual-review`，当前只继续推进真实设备尺寸 / 真实窗口体验回归；`main` 继续代表更稳定的经典主线。上一条 Rogue 原型节点已经保留在 `feature/rogue-prototype`，跨平台布局打磨节点已经保留在 `feature/cross-platform-layout-polish`。
+当前工作分支是 `feature/touch-input-prep`，当前只继续推进触屏输入准备；`main` 继续代表更稳定的经典主线。上一条 Rogue 原型节点已经保留在 `feature/rogue-prototype`，跨平台布局打磨节点已经保留在 `feature/cross-platform-layout-polish`，真实设备尺寸人工回归节点已经保留在 `feature/device-size-manual-review`。
 
 ## 当前状态
 
@@ -99,10 +99,11 @@ D:\Development\Godot\Godot_v4.6.1-stable_win64_console.exe --headless --path D:\
 ## 当前分支阶段结论
 
 - `feature/cross-platform-layout-polish` 已作为“跨平台布局打磨节点”保留。
-- 当前 `feature/device-size-manual-review` 只继续负责：
-  - 真实设备尺寸人工回归
-  - 真实窗口体验确认
-  - 验证现有布局收敛结果在真实使用场景里是否成立
+- `feature/device-size-manual-review` 已作为“真实设备尺寸人工回归节点”保留。
+- 当前 `feature/touch-input-prep` 只继续负责：
+  - 触屏输入准备
+  - 为未来移动端输入做结构承接
+  - 不继续扩 Rogue 功能，也不修改经典 / Rogue 核心规则
 
 ## 当前人工回归摘要
 
