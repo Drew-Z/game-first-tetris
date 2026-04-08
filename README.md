@@ -43,9 +43,15 @@ D:\Development\Godot\Godot_v4.6.1-stable_win64_console.exe --headless --path D:\
   - 瞬时动作：旋转、Hard Drop、Hold、暂停 / 返回
   - 持续状态：左移、右移、软降
 - 当前键盘输入会先映射到动作层，再驱动游戏行为
+- 当前已经补上最小触屏输入桥接层：
+  - 场景里固定提供 `TouchInputBridge` 节点
+  - 触屏来源可通过 `tap_action(...)` 触发瞬时动作
+  - 触屏来源可通过 `set_touch_action_pressed(...)` 驱动持续状态
+  - 如需收口触屏持续状态，可调用 `release_all_touch_actions()`
 - 后续如果接入触屏输入，优先复用这两个接入口：
   - `trigger_game_action(...)`
   - `set_game_action_pressed(...)`
+- 键盘和触屏来源会分别进入动作层，再汇总成当前生效状态
 - 这样做的目标是：未来接触屏输入时，不需要继续直接把逻辑堆进 `_unhandled_input()`
 
 ## 模式说明

@@ -35,6 +35,9 @@
 - 旋转 / Hard Drop / Hold / 暂停应按“瞬时动作”工作
 - 输入被阻断时（暂停 / Help / Rogue 选择 / 游戏结束），持续状态不应残留到后续主循环
 - 后续触屏输入应优先复用现有动作接口，而不是再直接耦合 `_unhandled_input()`
+- `TouchInputBridge.tap_action(...)` 应能触发瞬时动作
+- `TouchInputBridge.set_touch_action_pressed(...)` 应能驱动持续状态
+- 键盘与触屏来源并存时，一个来源松手不应直接清掉另一个来源仍在保持的持续状态
 
 ## 固定尺寸截图回归
 

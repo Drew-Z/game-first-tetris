@@ -14,6 +14,19 @@ const INPUT_ACTION_ROTATE := &"rotate"
 const INPUT_ACTION_HARD_DROP := &"hard_drop"
 const INPUT_ACTION_HOLD := &"hold"
 const INPUT_ACTION_PAUSE_BACK := &"pause_back"
+const INPUT_SOURCE_KEYBOARD := &"keyboard"
+const INPUT_SOURCE_TOUCH := &"touch"
+const CONTINUOUS_GAME_ACTIONS: Array[StringName] = [
+	INPUT_ACTION_MOVE_LEFT,
+	INPUT_ACTION_MOVE_RIGHT,
+	INPUT_ACTION_SOFT_DROP,
+]
+const INSTANT_GAME_ACTIONS: Array[StringName] = [
+	INPUT_ACTION_ROTATE,
+	INPUT_ACTION_HARD_DROP,
+	INPUT_ACTION_HOLD,
+	INPUT_ACTION_PAUSE_BACK,
+]
 
 @onready var board: Node2D = $"../ViewportScroll/Layout/PlayfieldPanel/PlayfieldMargin/Playfield/Board"
 @onready var active_piece: Node2D = $"../ViewportScroll/Layout/PlayfieldPanel/PlayfieldMargin/Playfield/ActivePiece"
@@ -64,6 +77,9 @@ var was_paused_before_help: bool = false
 var is_move_left_pressed: bool = false
 var is_move_right_pressed: bool = false
 var is_soft_drop_pressed: bool = false
+var move_left_input_sources: Dictionary = {}
+var move_right_input_sources: Dictionary = {}
+var soft_drop_input_sources: Dictionary = {}
 
 
 func _ready() -> void:
@@ -85,6 +101,14 @@ func _process(delta: float) -> void:
 	while gravity_timer >= current_drop_step and is_piece_falling:
 		gravity_timer -= current_drop_step
 		_try_auto_drop_active_piece()
+
+
+static func get_continuous_game_actions() -> Array[StringName]:
+	return CONTINUOUS_GAME_ACTIONS.duplicate()
+
+
+static func get_instant_game_actions() -> Array[StringName]:
+	return INSTANT_GAME_ACTIONS.duplicate()
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -857,7 +881,10 @@ func _stop_horizontal_repeat() -> void:
 	horizontal_repeat_timer = 0.0
 
 
-func trigger_game_action(action_id: StringName) -> void:
+func trigger_game_action(action_id: StringName, _input_source: StringName = INPUT_SOURCE_KEYBOARD) -> void:
+	if not _is_supported_instant_action(action_id):
+		return
+
 	if action_id == INPUT_ACTION_PAUSE_BACK:
 		if is_help_overlay_open:
 			_set_help_overlay_open(false)
@@ -877,39 +904,57 @@ func trigger_game_action(action_id: StringName) -> void:
 			_try_hold_active_piece()
 
 
-func set_game_action_pressed(action_id: StringName, is_pressed: bool) -> void:
+func set_game_action_pressed(
+	action_id: StringName,
+	is_pressed: bool,
+	input_source: StringName = INPUT_SOURCE_KEYBOARD
+) -> void:
+	if not _is_supported_continuous_action(action_id):
+		return
+
+	var source_store := _get_continuous_action_source_store(action_id)
+	var was_pressed := not source_store.is_empty()
+
 	match action_id:
 		INPUT_ACTION_MOVE_LEFT:
 			if is_pressed and _is_gameplay_input_blocked():
 				return
-			is_move_left_pressed = is_pressed
-			if is_pressed:
+			_set_continuous_action_source_pressed(source_store, input_source, is_pressed)
+			_refresh_continuous_action_state_cache()
+			if is_pressed and not was_pressed:
 				_begin_horizontal_repeat(-1)
-			else:
+			elif not is_pressed and was_pressed and source_store.is_empty():
 				_handle_horizontal_release(-1)
 		INPUT_ACTION_MOVE_RIGHT:
 			if is_pressed and _is_gameplay_input_blocked():
 				return
-			is_move_right_pressed = is_pressed
-			if is_pressed:
+			_set_continuous_action_source_pressed(source_store, input_source, is_pressed)
+			_refresh_continuous_action_state_cache()
+			if is_pressed and not was_pressed:
 				_begin_horizontal_repeat(1)
-			else:
+			elif not is_pressed and was_pressed and source_store.is_empty():
 				_handle_horizontal_release(1)
 		INPUT_ACTION_SOFT_DROP:
 			if is_pressed and _is_gameplay_input_blocked():
 				return
-			is_soft_drop_pressed = is_pressed
+			_set_continuous_action_source_pressed(source_store, input_source, is_pressed)
+			_refresh_continuous_action_state_cache()
+
+
+func clear_game_action_source_state(input_source: StringName) -> void:
+	for action_id in CONTINUOUS_GAME_ACTIONS:
+		set_game_action_pressed(action_id, false, input_source)
 
 
 func _try_handle_instant_input_event(event: InputEvent) -> bool:
 	if event.is_action_pressed("ui_up"):
-		trigger_game_action(INPUT_ACTION_ROTATE)
+		trigger_game_action(INPUT_ACTION_ROTATE, INPUT_SOURCE_KEYBOARD)
 		return true
 	if event.is_action_pressed("hard_drop"):
-		trigger_game_action(INPUT_ACTION_HARD_DROP)
+		trigger_game_action(INPUT_ACTION_HARD_DROP, INPUT_SOURCE_KEYBOARD)
 		return true
 	if event.is_action_pressed("hold"):
-		trigger_game_action(INPUT_ACTION_HOLD)
+		trigger_game_action(INPUT_ACTION_HOLD, INPUT_SOURCE_KEYBOARD)
 		return true
 
 	return false
@@ -917,32 +962,66 @@ func _try_handle_instant_input_event(event: InputEvent) -> bool:
 
 func _try_handle_continuous_input_event(event: InputEvent) -> bool:
 	if event.is_action_pressed("ui_left"):
-		set_game_action_pressed(INPUT_ACTION_MOVE_LEFT, true)
+		set_game_action_pressed(INPUT_ACTION_MOVE_LEFT, true, INPUT_SOURCE_KEYBOARD)
 		return true
 	if event.is_action_pressed("ui_right"):
-		set_game_action_pressed(INPUT_ACTION_MOVE_RIGHT, true)
+		set_game_action_pressed(INPUT_ACTION_MOVE_RIGHT, true, INPUT_SOURCE_KEYBOARD)
 		return true
 	if event.is_action_pressed("ui_down"):
-		set_game_action_pressed(INPUT_ACTION_SOFT_DROP, true)
+		set_game_action_pressed(INPUT_ACTION_SOFT_DROP, true, INPUT_SOURCE_KEYBOARD)
 		return true
 	if event.is_action_released("ui_left"):
-		set_game_action_pressed(INPUT_ACTION_MOVE_LEFT, false)
+		set_game_action_pressed(INPUT_ACTION_MOVE_LEFT, false, INPUT_SOURCE_KEYBOARD)
 		return true
 	if event.is_action_released("ui_right"):
-		set_game_action_pressed(INPUT_ACTION_MOVE_RIGHT, false)
+		set_game_action_pressed(INPUT_ACTION_MOVE_RIGHT, false, INPUT_SOURCE_KEYBOARD)
 		return true
 	if event.is_action_released("ui_down"):
-		set_game_action_pressed(INPUT_ACTION_SOFT_DROP, false)
+		set_game_action_pressed(INPUT_ACTION_SOFT_DROP, false, INPUT_SOURCE_KEYBOARD)
 		return true
 
 	return false
 
 
 func _clear_gameplay_input_states() -> void:
-	is_move_left_pressed = false
-	is_move_right_pressed = false
-	is_soft_drop_pressed = false
+	move_left_input_sources.clear()
+	move_right_input_sources.clear()
+	soft_drop_input_sources.clear()
+	_refresh_continuous_action_state_cache()
 	_stop_horizontal_repeat()
+
+
+func _refresh_continuous_action_state_cache() -> void:
+	is_move_left_pressed = not move_left_input_sources.is_empty()
+	is_move_right_pressed = not move_right_input_sources.is_empty()
+	is_soft_drop_pressed = not soft_drop_input_sources.is_empty()
+
+
+func _set_continuous_action_source_pressed(source_store: Dictionary, input_source: StringName, is_pressed: bool) -> void:
+	if is_pressed:
+		source_store[input_source] = true
+	else:
+		source_store.erase(input_source)
+
+
+func _get_continuous_action_source_store(action_id: StringName) -> Dictionary:
+	match action_id:
+		INPUT_ACTION_MOVE_LEFT:
+			return move_left_input_sources
+		INPUT_ACTION_MOVE_RIGHT:
+			return move_right_input_sources
+		INPUT_ACTION_SOFT_DROP:
+			return soft_drop_input_sources
+		_:
+			return {}
+
+
+func _is_supported_instant_action(action_id: StringName) -> bool:
+	return INSTANT_GAME_ACTIONS.has(action_id)
+
+
+func _is_supported_continuous_action(action_id: StringName) -> bool:
+	return CONTINUOUS_GAME_ACTIONS.has(action_id)
 
 
 func _is_gameplay_input_blocked() -> bool:

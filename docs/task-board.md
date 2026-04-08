@@ -86,12 +86,18 @@
 ## 当前触屏输入准备状态
 
 - 已完成第一步：输入结构拆分
+- 已完成第二步：最小触屏输入桥接层
 - 当前输入层已明确区分：
   - 瞬时动作：旋转、Hard Drop、Hold、暂停 / 返回
   - 持续状态：左移、右移、软降
 - 当前已经为后续触屏输入预留两个清晰接入口：
   - `trigger_game_action(...)`
   - `set_game_action_pressed(...)`
+- 当前场景里已固定提供：
+  - `TouchInputBridge.tap_action(...)`
+  - `TouchInputBridge.set_touch_action_pressed(...)`
+  - `TouchInputBridge.release_all_touch_actions()`
+- 当前键盘输入和触屏来源已能并存，持续状态会按输入来源分别汇总，不会互相覆盖
 
 ## 当前人工回归结论
 

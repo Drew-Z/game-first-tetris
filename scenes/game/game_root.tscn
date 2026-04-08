@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=3 uid="uid://3avk0h3xihvc"]
+[gd_scene load_steps=8 format=3 uid="uid://3avk0h3xihvc"]
 
 [ext_resource type="Script" path="res://scripts/game/game_root.gd" id="1_3g7is"]
 [ext_resource type="Script" path="res://scripts/game/game_manager.gd" id="1_6g2us"]
@@ -6,6 +6,7 @@
 [ext_resource type="Script" path="res://scripts/game/piece.gd" id="3_fcc0d"]
 [ext_resource type="PackedScene" path="res://scenes/ui/game_ui.tscn" id="4_8djlb"]
 [ext_resource type="Script" path="res://scripts/game/game_audio.gd" id="5_f4d2b"]
+[ext_resource type="Script" path="res://scripts/game/touch_input_bridge.gd" id="6_y5ufr"]
 
 [node name="GameRoot" type="Control"]
 layout_mode = 3
@@ -68,6 +69,9 @@ layout_mode = 2
 
 [node name="GameManager" type="Node" parent="."]
 script = ExtResource("1_6g2us")
+
+[node name="TouchInputBridge" type="Node" parent="."]
+script = ExtResource("6_y5ufr")
 
 [node name="GameAudio" type="Node" parent="."]
 script = ExtResource("5_f4d2b")
