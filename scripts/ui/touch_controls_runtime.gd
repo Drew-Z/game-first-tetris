@@ -7,6 +7,7 @@ const PRIMARY_BUTTON_HEIGHT_ULTRA_NARROW := 48.0
 const SECONDARY_BUTTON_HEIGHT := 46.0
 const SECONDARY_BUTTON_HEIGHT_COMPACT := 40.0
 const SECONDARY_BUTTON_HEIGHT_ULTRA_NARROW := 32.0
+const UTILITY_BUTTON_HEIGHT_ULTRA_NARROW := 28.0
 
 @onready var touch_controls_panel: PanelContainer = $TouchControlsPanel
 @onready var touch_controls_margin: MarginContainer = $TouchControlsPanel/TouchControlsMargin
@@ -59,6 +60,7 @@ func sync_overlay_state(is_compact_layout: bool, is_ultra_narrow: bool, overlay_
 	_refresh_button_labels(is_ultra_narrow)
 	_refresh_button_hints(is_ultra_narrow)
 	_apply_density(is_ultra_narrow)
+	_apply_action_layout(is_ultra_narrow)
 	_apply_visual_style(is_ultra_narrow)
 
 
@@ -200,6 +202,31 @@ func _apply_button_density(button: Button, font_size: int, button_height: float,
 	button.custom_minimum_size.x = min_width
 	button.custom_minimum_size.y = button_height
 	button.add_theme_font_size_override("font_size", font_size)
+
+
+func _apply_action_layout(is_ultra_narrow: bool) -> void:
+	if not is_ultra_narrow:
+		for button in [rotate_button, hard_drop_button, hold_button, pause_button]:
+			if button == null:
+				continue
+			button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			button.custom_minimum_size.x = 0.0
+		return
+
+	rotate_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	hard_drop_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	hold_button.size_flags_horizontal = Control.SIZE_FILL
+	pause_button.size_flags_horizontal = Control.SIZE_FILL
+
+	rotate_button.custom_minimum_size.x = 0.0
+	hard_drop_button.custom_minimum_size.x = 0.0
+	hold_button.custom_minimum_size.x = 36.0
+	pause_button.custom_minimum_size.x = 36.0
+
+	hold_button.custom_minimum_size.y = UTILITY_BUTTON_HEIGHT_ULTRA_NARROW
+	pause_button.custom_minimum_size.y = UTILITY_BUTTON_HEIGHT_ULTRA_NARROW
+	hold_button.add_theme_font_size_override("font_size", 10)
+	pause_button.add_theme_font_size_override("font_size", 10)
 
 
 func _apply_visual_style(is_ultra_narrow: bool) -> void:
