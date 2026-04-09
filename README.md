@@ -80,6 +80,7 @@ D:\Development\Godot\Godot_v4.6.1-stable_win64_console.exe --headless --path D:\
   - 当前 `360 x 640` 的再次交互复验结论：
     - 主按钮按住和状态切换恢复已基本稳定
     - 但次级动作区仍偏紧，因此当前结论继续保持“勉强可用”
+    - 如果当前分支准备收口，建议把它作为当前触屏原型的最低可运行线保留，而不是强行上调为“可用”
 - 后续如果接入触屏输入，优先复用这两个接入口：
   - `trigger_game_action(...)`
   - `set_game_action_pressed(...)`
