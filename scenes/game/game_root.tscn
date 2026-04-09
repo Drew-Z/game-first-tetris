@@ -1,10 +1,13 @@
-[gd_scene load_steps=6 format=3 uid="uid://3avk0h3xihvc"]
+[gd_scene load_steps=9 format=3 uid="uid://3avk0h3xihvc"]
 
+[ext_resource type="Script" path="res://scripts/game/game_root.gd" id="1_3g7is"]
 [ext_resource type="Script" path="res://scripts/game/game_manager.gd" id="1_6g2us"]
 [ext_resource type="Script" path="res://scripts/game/board.gd" id="2_0e3k2"]
 [ext_resource type="Script" path="res://scripts/game/piece.gd" id="3_fcc0d"]
 [ext_resource type="PackedScene" path="res://scenes/ui/game_ui.tscn" id="4_8djlb"]
 [ext_resource type="Script" path="res://scripts/game/game_audio.gd" id="5_f4d2b"]
+[ext_resource type="Script" path="res://scripts/game/touch_input_bridge.gd" id="6_y5ufr"]
+[ext_resource type="Script" path="res://scripts/ui/touch_controls_runtime.gd" id="7_om4v5"]
 
 [node name="GameRoot" type="Control"]
 layout_mode = 3
@@ -13,6 +16,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+script = ExtResource("1_3g7is")
 
 [node name="Background" type="ColorRect" parent="."]
 layout_mode = 1
@@ -23,49 +27,131 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0.0705882, 0.101961, 0.160784, 1)
 
-[node name="Layout" type="HBoxContainer" parent="."]
+[node name="ViewportScroll" type="ScrollContainer" parent="."]
 layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -360.0
-offset_top = -336.0
-offset_right = 360.0
-offset_bottom = 336.0
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Layout" type="BoxContainer" parent="ViewportScroll"]
+custom_minimum_size = Vector2(704, 672)
+layout_mode = 2
 theme_override_constants/separation = 24
 
-[node name="PlayfieldPanel" type="PanelContainer" parent="Layout"]
+[node name="PlayfieldPanel" type="PanelContainer" parent="ViewportScroll/Layout"]
 custom_minimum_size = Vector2(400, 672)
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="PlayfieldMargin" type="MarginContainer" parent="Layout/PlayfieldPanel"]
+[node name="PlayfieldMargin" type="MarginContainer" parent="ViewportScroll/Layout/PlayfieldPanel"]
 layout_mode = 2
 theme_override_constants/margin_left = 24
 theme_override_constants/margin_top = 16
 theme_override_constants/margin_right = 24
 theme_override_constants/margin_bottom = 16
 
-[node name="Playfield" type="Node2D" parent="Layout/PlayfieldPanel/PlayfieldMargin"]
+[node name="Playfield" type="Node2D" parent="ViewportScroll/Layout/PlayfieldPanel/PlayfieldMargin"]
 position = Vector2(16, 16)
 
-[node name="Board" type="Node2D" parent="Layout/PlayfieldPanel/PlayfieldMargin/Playfield"]
+[node name="Board" type="Node2D" parent="ViewportScroll/Layout/PlayfieldPanel/PlayfieldMargin/Playfield"]
 script = ExtResource("2_0e3k2")
 
-[node name="ActivePiece" type="Node2D" parent="Layout/PlayfieldPanel/PlayfieldMargin/Playfield"]
+[node name="ActivePiece" type="Node2D" parent="ViewportScroll/Layout/PlayfieldPanel/PlayfieldMargin/Playfield"]
 script = ExtResource("3_fcc0d")
 
-[node name="SidebarPanel" type="PanelContainer" parent="Layout"]
-custom_minimum_size = Vector2(280, 672)
+[node name="SidebarPanel" type="PanelContainer" parent="ViewportScroll/Layout"]
+custom_minimum_size = Vector2(280, 0)
 layout_mode = 2
 
-[node name="GameUI" parent="Layout/SidebarPanel" instance=ExtResource("4_8djlb")]
+[node name="GameUI" parent="ViewportScroll/Layout/SidebarPanel" instance=ExtResource("4_8djlb")]
 layout_mode = 2
 
 [node name="GameManager" type="Node" parent="."]
 script = ExtResource("1_6g2us")
 
+[node name="TouchInputBridge" type="Node" parent="."]
+script = ExtResource("6_y5ufr")
+
 [node name="GameAudio" type="Node" parent="."]
 script = ExtResource("5_f4d2b")
+
+[node name="TouchControls" type="MarginContainer" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 12
+script = ExtResource("7_om4v5")
+
+[node name="TouchControlsPanel" type="PanelContainer" parent="TouchControls"]
+layout_mode = 2
+
+[node name="TouchControlsMargin" type="MarginContainer" parent="TouchControls/TouchControlsPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+
+[node name="TouchControlsLayout" type="VBoxContainer" parent="TouchControls/TouchControlsPanel/TouchControlsMargin"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="MoveRow" type="HBoxContainer" parent="TouchControls/TouchControlsPanel/TouchControlsMargin/TouchControlsLayout"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="LeftButton" type="Button" parent="TouchControls/TouchControlsPanel/TouchControlsMargin/TouchControlsLayout/MoveRow"]
+custom_minimum_size = Vector2(0, 52)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "左移"
+
+[node name="SoftDropButton" type="Button" parent="TouchControls/TouchControlsPanel/TouchControlsMargin/TouchControlsLayout/MoveRow"]
+custom_minimum_size = Vector2(0, 52)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "软降"
+
+[node name="RightButton" type="Button" parent="TouchControls/TouchControlsPanel/TouchControlsMargin/TouchControlsLayout/MoveRow"]
+custom_minimum_size = Vector2(0, 52)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "右移"
+
+[node name="ActionRow" type="HBoxContainer" parent="TouchControls/TouchControlsPanel/TouchControlsMargin/TouchControlsLayout"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="RotateButton" type="Button" parent="TouchControls/TouchControlsPanel/TouchControlsMargin/TouchControlsLayout/ActionRow"]
+custom_minimum_size = Vector2(0, 52)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "旋转"
+
+[node name="HardDropButton" type="Button" parent="TouchControls/TouchControlsPanel/TouchControlsMargin/TouchControlsLayout/ActionRow"]
+custom_minimum_size = Vector2(0, 52)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "硬降"
+
+[node name="HoldButton" type="Button" parent="TouchControls/TouchControlsPanel/TouchControlsMargin/TouchControlsLayout/ActionRow"]
+custom_minimum_size = Vector2(0, 52)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Hold"
+
+[node name="PauseButton" type="Button" parent="TouchControls/TouchControlsPanel/TouchControlsMargin/TouchControlsLayout/ActionRow"]
+custom_minimum_size = Vector2(0, 52)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "暂停"

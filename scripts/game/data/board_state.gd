@@ -68,12 +68,18 @@ func are_cells_placeable(cells_to_check: Array[Vector2i]) -> bool:
 
 
 func clear_full_rows() -> int:
+	return clear_full_rows_detailed()["count"]
+
+
+func clear_full_rows_detailed() -> Dictionary:
 	var remaining_rows: Array[Array] = []
 	var cleared_row_count := 0
+	var cleared_rows: Array[int] = []
 
 	for row in range(rows):
 		if _is_row_full(row):
 			cleared_row_count += 1
+			cleared_rows.append(row)
 			continue
 
 		remaining_rows.append(cells[row].duplicate())
@@ -82,7 +88,10 @@ func clear_full_rows() -> int:
 		remaining_rows.push_front(_create_empty_row())
 
 	cells = remaining_rows
-	return cleared_row_count
+	return {
+		"count": cleared_row_count,
+		"rows": cleared_rows,
+	}
 
 
 func get_spawn_origin(spawn_box_size: int = 4, spawn_row: int = 0) -> Vector2i:

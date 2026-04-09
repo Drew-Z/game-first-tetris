@@ -8,3 +8,6 @@ export_presets.cfg
 
 Thumbs.db
 desktop.ini
+
+# Local regression outputs
+artifacts/
