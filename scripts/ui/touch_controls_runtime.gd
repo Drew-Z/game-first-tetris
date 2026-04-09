@@ -8,6 +8,7 @@ const SECONDARY_BUTTON_HEIGHT := 46.0
 const SECONDARY_BUTTON_HEIGHT_COMPACT := 40.0
 const SECONDARY_BUTTON_HEIGHT_ULTRA_NARROW := 32.0
 const UTILITY_BUTTON_HEIGHT_ULTRA_NARROW := 28.0
+const UTILITY_BUTTON_WIDTH_ULTRA_NARROW := 44.0
 
 @onready var touch_controls_panel: PanelContainer = $TouchControlsPanel
 @onready var touch_controls_margin: MarginContainer = $TouchControlsPanel/TouchControlsMargin
@@ -24,11 +25,13 @@ const UTILITY_BUTTON_HEIGHT_ULTRA_NARROW := 28.0
 @onready var pause_button: Button = $TouchControlsPanel/TouchControlsMargin/TouchControlsLayout/ActionRow/PauseButton
 
 var is_overlay_enabled: bool = false
+var utility_row: HBoxContainer
 
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	visible = false
+	_ensure_utility_row()
 	_bind_continuous_button(left_button, GameManagerScript.INPUT_ACTION_MOVE_LEFT)
 	_bind_continuous_button(soft_drop_button, GameManagerScript.INPUT_ACTION_SOFT_DROP)
 	_bind_continuous_button(right_button, GameManagerScript.INPUT_ACTION_MOVE_RIGHT)
@@ -185,6 +188,8 @@ func _apply_density(is_ultra_narrow: bool) -> void:
 	touch_controls_layout.add_theme_constant_override("separation", layout_separation)
 	move_row.add_theme_constant_override("separation", move_row_separation)
 	action_row.add_theme_constant_override("separation", action_row_separation)
+	if utility_row != null:
+		utility_row.add_theme_constant_override("separation", 4 if is_ultra_narrow else 6)
 
 	_apply_button_density(left_button, primary_font_size, primary_button_height, 0.0 if is_ultra_narrow else 6.0)
 	_apply_button_density(soft_drop_button, primary_font_size, primary_button_height, 0.0 if is_ultra_narrow else 6.0)
@@ -206,12 +211,21 @@ func _apply_button_density(button: Button, font_size: int, button_height: float,
 
 func _apply_action_layout(is_ultra_narrow: bool) -> void:
 	if not is_ultra_narrow:
+		_reparent_to_action_row(hold_button)
+		_reparent_to_action_row(pause_button)
+		if utility_row != null:
+			utility_row.visible = false
 		for button in [rotate_button, hard_drop_button, hold_button, pause_button]:
 			if button == null:
 				continue
 			button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 			button.custom_minimum_size.x = 0.0
 		return
+
+	_reparent_to_utility_row(hold_button)
+	_reparent_to_utility_row(pause_button)
+	if utility_row != null:
+		utility_row.visible = true
 
 	rotate_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	hard_drop_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -220,13 +234,51 @@ func _apply_action_layout(is_ultra_narrow: bool) -> void:
 
 	rotate_button.custom_minimum_size.x = 0.0
 	hard_drop_button.custom_minimum_size.x = 0.0
-	hold_button.custom_minimum_size.x = 36.0
-	pause_button.custom_minimum_size.x = 36.0
+	hold_button.custom_minimum_size.x = UTILITY_BUTTON_WIDTH_ULTRA_NARROW
+	pause_button.custom_minimum_size.x = UTILITY_BUTTON_WIDTH_ULTRA_NARROW
 
 	hold_button.custom_minimum_size.y = UTILITY_BUTTON_HEIGHT_ULTRA_NARROW
 	pause_button.custom_minimum_size.y = UTILITY_BUTTON_HEIGHT_ULTRA_NARROW
 	hold_button.add_theme_font_size_override("font_size", 10)
 	pause_button.add_theme_font_size_override("font_size", 10)
+
+
+func _ensure_utility_row() -> void:
+	if utility_row != null:
+		return
+
+	utility_row = HBoxContainer.new()
+	utility_row.name = "UtilityRow"
+	utility_row.alignment = BoxContainer.ALIGNMENT_END
+	utility_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	utility_row.visible = false
+	touch_controls_layout.add_child(utility_row)
+
+
+func _reparent_to_action_row(button: Button) -> void:
+	if button == null or action_row == null:
+		return
+	if button.get_parent() == action_row:
+		return
+
+	var parent := button.get_parent()
+	if parent != null:
+		parent.remove_child(button)
+	action_row.add_child(button)
+
+
+func _reparent_to_utility_row(button: Button) -> void:
+	if button == null:
+		return
+
+	_ensure_utility_row()
+	if button.get_parent() == utility_row:
+		return
+
+	var parent := button.get_parent()
+	if parent != null:
+		parent.remove_child(button)
+	utility_row.add_child(button)
 
 
 func _apply_visual_style(is_ultra_narrow: bool) -> void:

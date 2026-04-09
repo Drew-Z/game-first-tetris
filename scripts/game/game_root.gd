@@ -33,7 +33,7 @@ const TOUCH_CONTROLS_SIDE_MARGIN := 12.0
 const TOUCH_CONTROLS_SIDE_MARGIN_COMPACT := 8.0
 const TOUCH_CONTROLS_BOTTOM_MARGIN := 12.0
 const TOUCH_CONTROLS_BOTTOM_MARGIN_COMPACT := 8.0
-const TOUCH_CONTROLS_BOTTOM_MARGIN_ULTRA_NARROW := 2.0
+const TOUCH_CONTROLS_BOTTOM_MARGIN_ULTRA_NARROW := 1.0
 
 @onready var layout: BoxContainer = $ViewportScroll/Layout
 @onready var viewport_scroll: ScrollContainer = $ViewportScroll
