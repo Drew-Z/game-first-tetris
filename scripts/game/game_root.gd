@@ -33,6 +33,7 @@ const TOUCH_CONTROLS_SIDE_MARGIN := 12.0
 const TOUCH_CONTROLS_SIDE_MARGIN_COMPACT := 8.0
 const TOUCH_CONTROLS_BOTTOM_MARGIN := 12.0
 const TOUCH_CONTROLS_BOTTOM_MARGIN_COMPACT := 8.0
+const TOUCH_CONTROLS_BOTTOM_MARGIN_ULTRA_NARROW := 4.0
 
 @onready var layout: BoxContainer = $ViewportScroll/Layout
 @onready var viewport_scroll: ScrollContainer = $ViewportScroll
@@ -174,7 +175,7 @@ func _apply_touch_controls_frame(is_ultra_narrow_compact: bool) -> void:
 		return
 
 	var side_margin := TOUCH_CONTROLS_SIDE_MARGIN_COMPACT if is_ultra_narrow_compact else TOUCH_CONTROLS_SIDE_MARGIN
-	var bottom_margin := TOUCH_CONTROLS_BOTTOM_MARGIN_COMPACT if is_ultra_narrow_compact else TOUCH_CONTROLS_BOTTOM_MARGIN
+	var bottom_margin := TOUCH_CONTROLS_BOTTOM_MARGIN_ULTRA_NARROW if is_ultra_narrow_compact else TOUCH_CONTROLS_BOTTOM_MARGIN
 
 	touch_controls.offset_left = side_margin
 	touch_controls.offset_right = -side_margin

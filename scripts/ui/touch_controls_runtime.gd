@@ -6,7 +6,7 @@ const PRIMARY_BUTTON_HEIGHT_COMPACT := 52.0
 const PRIMARY_BUTTON_HEIGHT_ULTRA_NARROW := 48.0
 const SECONDARY_BUTTON_HEIGHT := 46.0
 const SECONDARY_BUTTON_HEIGHT_COMPACT := 40.0
-const SECONDARY_BUTTON_HEIGHT_ULTRA_NARROW := 34.0
+const SECONDARY_BUTTON_HEIGHT_ULTRA_NARROW := 32.0
 
 @onready var touch_controls_panel: PanelContainer = $TouchControlsPanel
 @onready var touch_controls_margin: MarginContainer = $TouchControlsPanel/TouchControlsMargin
@@ -159,17 +159,17 @@ func _refresh_button_hints(is_ultra_narrow: bool) -> void:
 
 func _apply_density(is_ultra_narrow: bool) -> void:
 	var primary_font_size := 18 if is_ultra_narrow else 24
-	var secondary_font_size := 12 if is_ultra_narrow else 15
+	var secondary_font_size := 11 if is_ultra_narrow else 15
 	var primary_button_height := PRIMARY_BUTTON_HEIGHT_ULTRA_NARROW if is_ultra_narrow else PRIMARY_BUTTON_HEIGHT
 	var secondary_button_height := SECONDARY_BUTTON_HEIGHT_ULTRA_NARROW if is_ultra_narrow else SECONDARY_BUTTON_HEIGHT
-	var layout_separation := 4 if is_ultra_narrow else 8
+	var layout_separation := 3 if is_ultra_narrow else 8
 	var move_row_separation := 6 if is_ultra_narrow else 8
-	var action_row_separation := 4 if is_ultra_narrow else 8
-	var side_margin := 6 if is_ultra_narrow else 12
-	var bottom_margin := 6 if is_ultra_narrow else 12
-	var panel_padding_side := 6 if is_ultra_narrow else 10
-	var panel_padding_top := 6 if is_ultra_narrow else 10
-	var panel_padding_bottom := 4 if is_ultra_narrow else 10
+	var action_row_separation := 3 if is_ultra_narrow else 8
+	var side_margin := 5 if is_ultra_narrow else 12
+	var bottom_margin := 4 if is_ultra_narrow else 12
+	var panel_padding_side := 5 if is_ultra_narrow else 10
+	var panel_padding_top := 5 if is_ultra_narrow else 10
+	var panel_padding_bottom := 2 if is_ultra_narrow else 10
 
 	add_theme_constant_override("margin_left", side_margin)
 	add_theme_constant_override("margin_right", side_margin)
@@ -210,16 +210,16 @@ func _apply_visual_style(is_ultra_narrow: bool) -> void:
 	panel_style.set_corner_radius_all(18 if not is_ultra_narrow else 14)
 	touch_controls_panel.add_theme_stylebox_override("panel", panel_style)
 
-	_apply_button_style(left_button, Color(0.13, 0.27, 0.47, 0.96), Color(0.19, 0.37, 0.63, 1.0), true)
-	_apply_button_style(soft_drop_button, Color(0.10, 0.33, 0.35, 0.96), Color(0.16, 0.48, 0.50, 1.0), true)
-	_apply_button_style(right_button, Color(0.13, 0.27, 0.47, 0.96), Color(0.19, 0.37, 0.63, 1.0), true)
-	_apply_button_style(rotate_button, Color(0.17, 0.24, 0.36, 0.96), Color(0.27, 0.39, 0.56, 1.0), false)
-	_apply_button_style(hard_drop_button, Color(0.42, 0.22, 0.08, 0.97), Color(0.74, 0.40, 0.13, 1.0), false)
-	_apply_button_style(hold_button, Color(0.18, 0.21, 0.26, 0.96), Color(0.34, 0.39, 0.47, 1.0), false)
-	_apply_button_style(pause_button, Color(0.25, 0.18, 0.14, 0.96), Color(0.48, 0.32, 0.25, 1.0), false)
+	_apply_button_style(left_button, Color(0.13, 0.27, 0.47, 0.96), Color(0.19, 0.37, 0.63, 1.0), true, false)
+	_apply_button_style(soft_drop_button, Color(0.10, 0.33, 0.35, 0.96), Color(0.16, 0.48, 0.50, 1.0), true, false)
+	_apply_button_style(right_button, Color(0.13, 0.27, 0.47, 0.96), Color(0.19, 0.37, 0.63, 1.0), true, false)
+	_apply_button_style(rotate_button, Color(0.17, 0.24, 0.36, 0.96), Color(0.27, 0.39, 0.56, 1.0), false, is_ultra_narrow)
+	_apply_button_style(hard_drop_button, Color(0.42, 0.22, 0.08, 0.97), Color(0.74, 0.40, 0.13, 1.0), false, is_ultra_narrow)
+	_apply_button_style(hold_button, Color(0.18, 0.21, 0.26, 0.96), Color(0.34, 0.39, 0.47, 1.0), false, is_ultra_narrow)
+	_apply_button_style(pause_button, Color(0.25, 0.18, 0.14, 0.96), Color(0.48, 0.32, 0.25, 1.0), false, is_ultra_narrow)
 
 
-func _apply_button_style(button: Button, base_color: Color, border_color: Color, is_primary: bool) -> void:
+func _apply_button_style(button: Button, base_color: Color, border_color: Color, is_primary: bool, is_ultra_narrow_secondary: bool) -> void:
 	if button == null:
 		return
 
@@ -227,11 +227,11 @@ func _apply_button_style(button: Button, base_color: Color, border_color: Color,
 	normal.bg_color = base_color
 	normal.border_color = border_color
 	normal.set_border_width_all(1)
-	normal.set_corner_radius_all(18 if is_primary else 14)
-	normal.content_margin_left = 8
-	normal.content_margin_top = 6
-	normal.content_margin_right = 8
-	normal.content_margin_bottom = 6
+	normal.set_corner_radius_all(18 if is_primary else (10 if is_ultra_narrow_secondary else 14))
+	normal.content_margin_left = 8 if is_primary else (4 if is_ultra_narrow_secondary else 8)
+	normal.content_margin_top = 6 if is_primary else (3 if is_ultra_narrow_secondary else 6)
+	normal.content_margin_right = 8 if is_primary else (4 if is_ultra_narrow_secondary else 8)
+	normal.content_margin_bottom = 6 if is_primary else (3 if is_ultra_narrow_secondary else 6)
 
 	var hover: StyleBoxFlat = normal.duplicate()
 	hover.bg_color = base_color.lightened(0.06)
