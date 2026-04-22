@@ -11,3 +11,4 @@ desktop.ini
 
 # Local regression outputs
 artifacts/
+*.uid
