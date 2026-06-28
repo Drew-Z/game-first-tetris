@@ -622,6 +622,8 @@ func _get_help_panel_text() -> String:
 			sections[2] = "Rogue：开局前和局内会触发 3 选 1；强化结果显示在 Rogue 区。"
 		else:
 			sections[2] = "经典：保持标准主循环。"
+	else:
+		sections.append("计分：软降 +1/格，硬降 +2/格；连续消行和连续 Tetris 会给额外奖励。")
 
 	return "\n\n".join(sections)
 

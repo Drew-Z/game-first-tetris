@@ -57,6 +57,10 @@ var locked_piece_count: int = 0
 var score: int = 0
 var cleared_line_count: int = 0
 var current_level: int = 1
+var combo_count: int = -1
+var back_to_back_tetris: bool = false
+var last_clear_feedback: String = ""
+var pending_drop_bonus_score: int = 0
 var can_hold_current_piece: bool = true
 var piece_source = null
 var mode_state: Dictionary = {}
@@ -80,15 +84,21 @@ var is_soft_drop_pressed: bool = false
 var move_left_input_sources: Dictionary = {}
 var move_right_input_sources: Dictionary = {}
 var soft_drop_input_sources: Dictionary = {}
+var autoplay_enabled: bool = false
+var autoplay_timer: float = 0.0
+var autoplay_step: int = 0
 
 
 func _ready() -> void:
+	autoplay_enabled = OS.get_cmdline_user_args().has("--autoplay")
 	_setup_mode_state()
 	_ensure_piece_source()
 	start_game()
 
 
 func _process(delta: float) -> void:
+	if autoplay_enabled:
+		_update_autoplay(delta)
 	_update_horizontal_repeat(delta)
 
 	if is_game_over or is_paused or is_help_overlay_open or is_rogue_choice_pending or active_piece_state == null or not is_piece_falling:
@@ -137,6 +147,10 @@ func start_game() -> void:
 	score = 0
 	cleared_line_count = 0
 	current_level = 1
+	combo_count = -1
+	back_to_back_tetris = false
+	last_clear_feedback = ""
+	pending_drop_bonus_score = 0
 	_prepare_rogue_run_state()
 	next_piece_id = _draw_next_piece_id()
 	_spawn_new_active_piece()
@@ -311,6 +325,9 @@ func _try_auto_drop_active_piece() -> void:
 			return
 
 	active_piece_state.move_by(Vector2i.DOWN)
+	if is_soft_drop_pressed:
+		score += 1
+		pending_drop_bonus_score += 1
 
 	if active_piece.has_method("spawn_piece"):
 		active_piece.call("spawn_piece", active_piece_state)
@@ -343,6 +360,7 @@ func _try_hard_drop_active_piece() -> void:
 
 	_stop_horizontal_repeat()
 
+	var hard_drop_distance := 0
 	while true:
 		var target_origin: Vector2i = active_piece_state.origin + Vector2i.DOWN
 		var target_cells: Array[Vector2i] = TetrominoData.get_global_cells(
@@ -356,8 +374,11 @@ func _try_hard_drop_active_piece() -> void:
 				break
 
 		active_piece_state.move_by(Vector2i.DOWN)
+		hard_drop_distance += 1
 
-	score += rogue_hard_drop_bonus_score
+	var hard_drop_score := hard_drop_distance * 2 + rogue_hard_drop_bonus_score
+	score += hard_drop_score
+	pending_drop_bonus_score += hard_drop_score
 	_play_audio_event("play_hard_drop")
 	_lock_active_piece()
 
@@ -405,10 +426,18 @@ func _lock_active_piece() -> void:
 		var cleared_row_count: int = board.call("clear_full_rows")
 		if cleared_row_count > 0:
 			cleared_line_count += cleared_row_count
-			score += cleared_row_count
+			var clear_score := _score_line_clear(cleared_row_count)
+			score += clear_score
 			score += cleared_row_count * rogue_line_clear_bonus_per_row
 			_update_level_from_cleared_lines()
+			last_clear_feedback = _build_line_clear_feedback(cleared_row_count, clear_score)
+			if pending_drop_bonus_score > 0:
+				last_clear_feedback = "%s / Drop +%d" % [last_clear_feedback, pending_drop_bonus_score]
 			_play_audio_event("play_line_clear", [cleared_row_count])
+		else:
+			combo_count = -1
+			last_clear_feedback = "Drop +%d" % pending_drop_bonus_score if pending_drop_bonus_score > 0 else ""
+		pending_drop_bonus_score = 0
 
 	if active_piece.has_method("clear_piece"):
 		active_piece.call("clear_piece")
@@ -536,6 +565,7 @@ func _spawn_piece_from_id(
 	if should_refresh_next_queue:
 		next_piece_id = queued_next_piece_id
 
+	pending_drop_bonus_score = 0
 	gravity_timer = 0.0
 	is_piece_falling = true
 	can_hold_current_piece = allow_hold_after_spawn
@@ -548,6 +578,53 @@ func _update_level_from_cleared_lines() -> void:
 	var rule_config := get_rule_config()
 	var normalized_lines_per_level := maxi(int(rule_config.lines_per_level), 1)
 	current_level = int(floori(float(cleared_line_count) / float(normalized_lines_per_level))) + 1
+
+
+func _score_line_clear(cleared_row_count: int) -> int:
+	var base_score := 0
+	match cleared_row_count:
+		1:
+			base_score = 100
+		2:
+			base_score = 300
+		3:
+			base_score = 500
+		_:
+			base_score = 800
+
+	var level_score := base_score * current_level
+	combo_count += 1
+	if combo_count > 0:
+		level_score += combo_count * 50 * current_level
+
+	if cleared_row_count >= 4:
+		if back_to_back_tetris:
+			level_score += 400 * current_level
+		back_to_back_tetris = true
+	else:
+		back_to_back_tetris = false
+
+	return level_score
+
+
+func _build_line_clear_feedback(cleared_row_count: int, clear_score: int) -> String:
+	var clear_name := "Single"
+	match cleared_row_count:
+		2:
+			clear_name = "Double"
+		3:
+			clear_name = "Triple"
+		4:
+			clear_name = "Tetris"
+		_:
+			clear_name = "Single"
+
+	var parts: Array[String] = ["%s +%d" % [clear_name, clear_score]]
+	if combo_count > 0:
+		parts.append("Combo x%d" % [combo_count])
+	if cleared_row_count >= 4 and back_to_back_tetris:
+		parts.append("Back-to-back ready")
+	return " / ".join(parts)
 
 
 func _get_current_gravity_step_seconds() -> float:
@@ -1028,6 +1105,32 @@ func _is_gameplay_input_blocked() -> bool:
 	return is_game_over or is_paused or is_help_overlay_open or is_rogue_choice_pending
 
 
+func _update_autoplay(delta: float) -> void:
+	if _is_gameplay_input_blocked() or active_piece_state == null or not is_piece_falling:
+		return
+	autoplay_timer += delta
+	if autoplay_timer < 0.22:
+		return
+	autoplay_timer = 0.0
+	match autoplay_step % 6:
+		0:
+			trigger_game_action(INPUT_ACTION_ROTATE)
+		1:
+			set_game_action_pressed(INPUT_ACTION_MOVE_LEFT, true)
+			set_game_action_pressed(INPUT_ACTION_MOVE_LEFT, false)
+		2:
+			set_game_action_pressed(INPUT_ACTION_MOVE_RIGHT, true)
+			set_game_action_pressed(INPUT_ACTION_MOVE_RIGHT, false)
+		3:
+			trigger_game_action(INPUT_ACTION_ROTATE)
+		4:
+			set_game_action_pressed(INPUT_ACTION_SOFT_DROP, true)
+			set_game_action_pressed(INPUT_ACTION_SOFT_DROP, false)
+		_:
+			trigger_game_action(INPUT_ACTION_HARD_DROP)
+	autoplay_step += 1
+
+
 func _is_horizontal_direction_pressed(direction: int) -> bool:
 	return is_move_left_pressed if direction < 0 else is_move_right_pressed
 
@@ -1038,6 +1141,8 @@ func _get_horizontal_offset(direction: int) -> Vector2i:
 
 func _get_mode_note_for_ui() -> String:
 	var note := String(mode_state.get("mode_note", ""))
+	if not last_clear_feedback.is_empty():
+		note = "%s｜%s" % [note, last_clear_feedback]
 
 	if entry_mode != &"rogue":
 		return note
